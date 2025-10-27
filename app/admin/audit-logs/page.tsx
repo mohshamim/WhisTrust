@@ -16,14 +16,14 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
-  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/input";
+} from "@/components/ui/select";
 import { History, RefreshCw, Search, Filter, Clock } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { AuditLog } from "@/lib/types/database";
