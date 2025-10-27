@@ -180,12 +180,12 @@ function CasesPageContent() {
 
   const handleAssign = async (adminId: string) => {
     if (!selectedCase) return;
-    
+
     setLoadingAssignment(true);
     try {
       const { assignCase } = await import("@/lib/services/reports");
       const result = await assignCase(selectedCase.id, adminId);
-      
+
       if (result.success) {
         await loadCases();
         setSelectedCase({ ...selectedCase, assigned_to: adminId });
@@ -200,15 +200,15 @@ function CasesPageContent() {
 
   const handleAddLabel = async (label: string, color: string) => {
     if (!selectedCase) return;
-    
+
     try {
       const { addLabel } = await import("@/lib/services/labels");
-      const result = await addLabel({ 
-        report_id: selectedCase.id, 
-        label, 
-        color 
+      const result = await addLabel({
+        report_id: selectedCase.id,
+        label,
+        color,
       });
-      
+
       if (result.success) {
         await loadLabels();
       }
@@ -221,7 +221,7 @@ function CasesPageContent() {
     try {
       const { removeLabel } = await import("@/lib/services/labels");
       const result = await removeLabel(labelId);
-      
+
       if (result.success) {
         await loadLabels();
       }
@@ -493,7 +493,9 @@ function CasesPageContent() {
                     <CardContent>
                       <PriorityBadge priority={selectedCase.priority} />
                       <p className="text-xs text-muted-foreground mt-2">
-                        {selectedCase.priority ? "Current priority level" : "No priority set"}
+                        {selectedCase.priority
+                          ? "Current priority level"
+                          : "No priority set"}
                       </p>
                     </CardContent>
                   </Card>
@@ -577,7 +579,13 @@ function CasesPageContent() {
 
 export default function CasesPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-screen">
+          Loading...
+        </div>
+      }
+    >
       <CasesPageContent />
     </Suspense>
   );
