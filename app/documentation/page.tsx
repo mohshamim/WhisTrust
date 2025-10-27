@@ -326,6 +326,53 @@ export default function DocumentationPage() {
           </CardContent>
         </Card>
 
+        {/* Additional Resources */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Additional Resources</CardTitle>
+            <CardDescription>
+              For detailed guides, testing instructions, and technical documentation
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                <h4 className="font-semibold mb-2">📖 Visitor Testing Guide</h4>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Step-by-step guide for end-users to test reporting and tracking workflows.
+                </p>
+                <Badge variant="secondary">New</Badge>
+              </div>
+              <div className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                <h4 className="font-semibold mb-2">🔧 Setup Guides</h4>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Quick Start, Supabase Setup, RBAC & Audit, and Deployment guides available in project
+                  files.
+                </p>
+                <Badge variant="secondary">Technical</Badge>
+              </div>
+              <div className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                <h4 className="font-semibold mb-2">📊 Implementation Reports</h4>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Comprehensive reports on features, architecture, and Phase 3 implementation status.
+                </p>
+                <Badge variant="secondary">Documentation</Badge>
+              </div>
+              <div className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                <h4 className="font-semibold mb-2">✅ Verification Documents</h4>
+                <p className="text-sm text-muted-foreground mb-2">
+                  Testing checklists, verification results, and status reports for all workflows.
+                </p>
+                <Badge variant="secondary">Testing</Badge>
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mt-4">
+              All detailed documentation files are available in the project repository under root
+              directory.
+            </p>
+          </CardContent>
+        </Card>
+
         {/* Demo Credentials */}
         <Card className="mb-8">
           <CardHeader>
