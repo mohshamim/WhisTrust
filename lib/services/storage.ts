@@ -33,19 +33,19 @@ export async function uploadFile({
     const filePath = `reports/${reportId}/attachments/${timestamp}_${sanitizedFileName}`;
 
     // Upload file to private bucket
+    // Note: onUploadProgress is not supported by Supabase Storage
+    // Progress tracking would need to be implemented differently if required
     const { data, error } = await supabase.storage
       .from("report-attachments")
       .upload(filePath, file, {
         contentType: file.type,
         upsert: false,
-        onUploadProgress: (progress) => {
-          if (onProgress) {
-            const percentComplete =
-              (progress.loaded / progress.total) * 100;
-            onProgress(percentComplete);
-          }
-        },
       });
+
+    // Simulate progress completion after upload
+    if (onProgress) {
+      onProgress(100);
+    }
 
     if (error) {
       console.error("Upload error:", error);
