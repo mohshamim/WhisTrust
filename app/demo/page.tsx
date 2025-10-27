@@ -49,9 +49,14 @@ export default function DemoPage() {
             <Shield className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold">WhisTrust</span>
           </Link>
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/">Back to Home</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/documentation">Documentation</Link>
+            </Button>
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/">Back to Home</Link>
+            </Button>
+          </div>
         </div>
       </nav>
 
