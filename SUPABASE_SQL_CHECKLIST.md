@@ -11,9 +11,11 @@
 Run SQL files in this **exact sequence**:
 
 ### Step 1: Base Schema ✅
+
 **File:** `supabase/schema.sql` (212 lines)
 
 **What it creates:**
+
 - ✅ `reports` table (basic fields)
 - ✅ `messages` table
 - ✅ `admin_profiles` table (basic)
@@ -22,18 +24,21 @@ Run SQL files in this **exact sequence**:
 - ✅ RLS policies (basic)
 
 **Check if already run:**
+
 ```sql
-SELECT table_name FROM information_schema.tables 
-WHERE table_schema = 'public' 
+SELECT table_name FROM information_schema.tables
+WHERE table_schema = 'public'
 AND table_name IN ('reports', 'messages', 'admin_profiles', 'report_attachments');
 ```
 
 ---
 
 ### Step 2: RBAC & Audit Schema ✅
+
 **File:** `supabase/schema-rbac-audit.sql` (321 lines)
 
 **What it creates:**
+
 - ✅ `audit_logs` table
 - ✅ Enhanced `admin_profiles` with roles and permissions
 - ✅ `notifications` table
@@ -46,9 +51,10 @@ AND table_name IN ('reports', 'messages', 'admin_profiles', 'report_attachments'
 - ✅ Enhanced RLS policies
 
 **Check if already run:**
+
 ```sql
-SELECT table_name FROM information_schema.tables 
-WHERE table_schema = 'public' 
+SELECT table_name FROM information_schema.tables
+WHERE table_schema = 'public'
 AND table_name IN ('audit_logs', 'notifications');
 
 SELECT routine_name FROM information_schema.routines
@@ -57,18 +63,21 @@ AND routine_name IN ('log_audit_event', 'audit_report_changes', 'has_permission'
 ```
 
 **Views to check:**
+
 ```sql
-SELECT table_name FROM information_schema.views 
-WHERE table_schema = 'public' 
+SELECT table_name FROM information_schema.views
+WHERE table_schema = 'public'
 AND table_name LIKE '%statistics%' OR table_name LIKE '%timeline%';
 ```
 
 ---
 
 ### Step 3: Phase 3 Schema ⚠️ **CRITICAL - MUST RUN**
+
 **File:** `supabase/schema-phase3.sql` (194 lines)
 
 **What it creates:**
+
 - ✅ Adds `assigned_to` column to `reports`
 - ✅ Adds `assigned_at` column to `reports`
 - ✅ Adds `priority` column to `reports` (low/medium/high)
@@ -84,15 +93,16 @@ AND table_name LIKE '%statistics%' OR table_name LIKE '%timeline%';
 - ✅ Creates `notifications_enriched` view
 
 **Check if already run:**
+
 ```sql
 -- Check if Phase 3 columns exist
-SELECT column_name FROM information_schema.columns 
-WHERE table_name = 'reports' 
+SELECT column_name FROM information_schema.columns
+WHERE table_name = 'reports'
 AND column_name IN ('assigned_to', 'priority', 'source', 'submitted_by');
 
 -- Check if report_labels table exists
-SELECT table_name FROM information_schema.tables 
-WHERE table_schema = 'public' 
+SELECT table_name FROM information_schema.tables
+WHERE table_schema = 'public'
 AND table_name = 'report_labels';
 
 -- Check if log_assignment_change function exists
@@ -113,6 +123,7 @@ AND trigger_name = 'trigger_report_assignment_change';
 After running all migrations, you should have these tables:
 
 ### Core Tables
+
 1. ✅ `reports` - Main report table
 2. ✅ `messages` - Message threads
 3. ✅ `admin_profiles` - Admin user profiles
@@ -122,6 +133,7 @@ After running all migrations, you should have these tables:
 7. ✅ `report_labels` - Custom labels (Phase 3)
 
 ### Views
+
 1. ✅ `report_statistics` - Aggregate statistics
 2. ✅ `category_statistics` - Category breakdown
 3. ✅ `activity_timeline` - Recent activity
@@ -134,9 +146,9 @@ After running all migrations, you should have these tables:
 ### Check All Tables Exist
 
 ```sql
-SELECT table_name, table_type 
-FROM information_schema.tables 
-WHERE table_schema = 'public' 
+SELECT table_name, table_type
+FROM information_schema.tables
+WHERE table_schema = 'public'
 AND table_type = 'BASE TABLE'
 ORDER BY table_name;
 ```
@@ -155,6 +167,7 @@ ORDER BY routine_name;
 ```
 
 **Expected functions:**
+
 1. `audit_report_changes()`
 2. `gen_random_uuid()` (built-in)
 3. `get_user_role()`
@@ -175,6 +188,7 @@ ORDER BY event_object_table, trigger_name;
 ```
 
 **Expected triggers:**
+
 1. `audit_reports_trigger` on `reports`
 2. `trigger_report_assignment_change` on `reports` (Phase 3)
 3. `update_admin_profiles_updated_at` on `admin_profiles`
@@ -185,13 +199,14 @@ ORDER BY event_object_table, trigger_name;
 ### Check All Views Exist
 
 ```sql
-SELECT table_name 
-FROM information_schema.views 
+SELECT table_name
+FROM information_schema.views
 WHERE table_schema = 'public'
 ORDER BY table_name;
 ```
 
 **Expected views:**
+
 1. `activity_timeline`
 2. `category_statistics`
 3. `notifications_enriched` (Phase 3)
@@ -215,7 +230,7 @@ ORDER BY tablename;
 ### Check Indexes Exist
 
 ```sql
-SELECT 
+SELECT
     tablename,
     indexname,
     indexdef
@@ -225,6 +240,7 @@ ORDER BY tablename, indexname;
 ```
 
 **Expected indexes:**
+
 - On `reports`: `idx_reports_tracking_code`, `idx_reports_status`, `idx_reports_created_at`, `idx_reports_assigned_to` (Phase 3), `idx_reports_priority` (Phase 3)
 - On `messages`: `idx_messages_report_id`, `idx_messages_created_at`
 - On `admin_profiles`: `idx_admin_profiles_role`
@@ -244,6 +260,7 @@ If you get: `policy "Admins can view assigned reports" for relation "reports" al
 **Fix:** The Phase 3 migration includes `DROP POLICY IF EXISTS` statements. This should work in PostgreSQL 9.5+.
 
 **If still failing:** Run manually:
+
 ```sql
 DROP POLICY IF EXISTS "Admins can view assigned reports" ON reports;
 ```
@@ -255,10 +272,11 @@ DROP POLICY IF EXISTS "Admins can view assigned reports" ON reports;
 If Phase 3 migration errors about notifications table:
 
 **Check:** Run this first:
+
 ```sql
 -- Check if notifications table exists
-SELECT table_name FROM information_schema.tables 
-WHERE table_schema = 'public' 
+SELECT table_name FROM information_schema.tables
+WHERE table_schema = 'public'
 AND table_name = 'notifications';
 
 -- If exists but missing columns, add them:
@@ -276,6 +294,7 @@ If you get: `trigger "trigger_report_assignment_change" for relation "reports" a
 **Fix:** The Phase 3 migration includes `DROP TRIGGER IF EXISTS`. This should work.
 
 **If still failing:** Run manually:
+
 ```sql
 DROP TRIGGER IF EXISTS trigger_report_assignment_change ON reports;
 ```
@@ -287,6 +306,7 @@ DROP TRIGGER IF EXISTS trigger_report_assignment_change ON reports;
 After running all migrations, test with these queries:
 
 ### Test 1: Can Insert Reports?
+
 ```sql
 INSERT INTO reports (tracking_code, category, description, status)
 VALUES ('TEST001', 'Test Category', 'Test Description', 'pending')
@@ -298,23 +318,33 @@ Should return: `priority = NULL`, `source = 'online'`
 ---
 
 ### Test 2: Can Insert Labels?
+
 ```sql
--- First get a report ID
+-- Get a real report ID first
 SELECT id FROM reports LIMIT 1;
 
--- Then insert label
+-- Copy the UUID from above and use it here
+-- Then insert label with actual UUID (replace 'PASTE_UUID_HERE')
 INSERT INTO report_labels (report_id, label, color)
 VALUES (
-  'YOUR_REPORT_ID_HERE',
+  'PASTE_UUID_HERE',  -- Replace with actual UUID from above query
   'Test Label',
   '#3b82f6'
 )
+RETURNING *;
+
+-- OR use a subquery to do it all at once:
+INSERT INTO report_labels (report_id, label, color)
+SELECT id, 'Test Label', '#3b82f6'
+FROM reports
+LIMIT 1
 RETURNING *;
 ```
 
 ---
 
 ### Test 3: Can Query Statistics?
+
 ```sql
 SELECT * FROM report_statistics;
 ```
@@ -324,6 +354,7 @@ Should return: Statistics about reports
 ---
 
 ### Test 4: Can Check Permissions?
+
 ```sql
 SELECT has_permission('view_all_reports');
 ```
@@ -336,21 +367,25 @@ Should return: `true` or `false` based on your role
 
 Keep track of what you've run:
 
-### Date: ___________
+### Date: \***\*\_\_\_\*\***
 
-| SQL File | Status | Notes |
-|----------|--------|-------|
-| `supabase/schema.sql` | ⬜ Not Run / ✅ Run | |
-| `supabase/schema-rbac-audit.sql` | ⬜ Not Run / ✅ Run | |
-| `supabase/schema-phase3.sql` | ⬜ Not Run / ✅ Run | |
+| SQL File                         | Status              | Notes |
+| -------------------------------- | ------------------- | ----- |
+| `supabase/schema.sql`            | ⬜ Not Run / ✅ Run |       |
+| `supabase/schema-rbac-audit.sql` | ⬜ Not Run / ✅ Run |       |
+| `supabase/schema-phase3.sql`     | ⬜ Not Run / ✅ Run |       |
 
 **Issues Encountered:**
-_______________________________________________________________________
-_______________________________________________________________________
+
+---
+
+---
 
 **Fix Applied:**
-_______________________________________________________________________
-_______________________________________________________________________
+
+---
+
+---
 
 ---
 
