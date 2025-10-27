@@ -45,7 +45,7 @@ function TrackPageContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-    // Scroll to bottom helper
+  // Scroll to bottom helper
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -56,7 +56,7 @@ function TrackPageContent() {
   const handleNewMessage = useCallback((message: Message) => {
     setCaseData((prev) => {
       if (!prev) return prev;
-      
+
       // Check if message already exists (prevent duplicates)
       const messageExists = prev.messages.some((m) => m.id === message.id);
       if (messageExists) return prev;
@@ -281,7 +281,9 @@ function TrackPageContent() {
                     return (
                       <div
                         key={message.id}
-                        className={`flex gap-3 ${isReporter ? "justify-start" : "justify-end"}`}
+                        className={`flex gap-3 ${
+                          isReporter ? "justify-start" : "justify-end"
+                        }`}
                       >
                         <div
                           className={`max-w-[70%] rounded-lg p-4 ${
@@ -299,7 +301,9 @@ function TrackPageContent() {
                               {message.timestamp}
                             </span>
                           </div>
-                          <p className="text-sm whitespace-pre-wrap break-words">{message.text}</p>
+                          <p className="text-sm whitespace-pre-wrap break-words">
+                            {message.text}
+                          </p>
                         </div>
                       </div>
                     );
@@ -344,7 +348,13 @@ function TrackPageContent() {
 
 export default function TrackPage() {
   return (
-    <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center h-screen">
+          Loading...
+        </div>
+      }
+    >
       <TrackPageContent />
     </Suspense>
   );
