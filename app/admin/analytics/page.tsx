@@ -91,7 +91,7 @@ export default function AnalyticsPage() {
         }))
       ];
 
-      const csvContent = exportAnalyticsToCSV(exportData);
+      const csvContent = await exportAnalyticsToCSV(exportData);
 
       // Create download link
       const blob = new Blob([csvContent], { type: "text/csv" });
