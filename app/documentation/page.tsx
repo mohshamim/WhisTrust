@@ -1,9 +1,27 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CheckCircle, Shield, MessageSquare, FileText, Users, Lock, BarChart3, Bell, Upload, Search, Filter } from "lucide-react";
+import {
+  CheckCircle,
+  Shield,
+  MessageSquare,
+  FileText,
+  Users,
+  Lock,
+  BarChart3,
+  Bell,
+  Upload,
+  Search,
+  Filter,
+} from "lucide-react";
 import Link from "next/link";
 
 export default function DocumentationPage() {
@@ -15,8 +33,8 @@ export default function DocumentationPage() {
           <Link href="/" className="text-2xl font-bold text-primary">
             WhisTrust
           </Link>
-          <Link 
-            href="/demo" 
+          <Link
+            href="/demo"
             className="text-sm text-muted-foreground hover:text-primary transition-colors"
           >
             Back to Demo →
@@ -32,7 +50,8 @@ export default function DocumentationPage() {
             <h1 className="text-4xl font-bold">WhisTrust Documentation</h1>
           </div>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Complete guide to using WhisTrust - your secure digital whistleblowing system
+            Complete guide to using WhisTrust - your secure digital
+            whistleblowing system
           </p>
         </div>
 
@@ -46,8 +65,10 @@ export default function DocumentationPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <p className="text-muted-foreground">
-              <strong>WhisTrust</strong> is a secure, confidential digital whistleblowing system designed for organizations 
-              to receive and manage anonymous reports of misconduct, fraud, safety concerns, and policy violations.
+              <strong>WhisTrust</strong> is a secure, confidential digital
+              whistleblowing system designed for organizations to receive and
+              manage anonymous reports of misconduct, fraud, safety concerns,
+              and policy violations.
             </p>
             <div className="grid md:grid-cols-2 gap-4">
               <div className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg">
@@ -55,7 +76,8 @@ export default function DocumentationPage() {
                 <div>
                   <h4 className="font-semibold mb-1">Purpose</h4>
                   <p className="text-sm text-muted-foreground">
-                    Enable confidential reporting, secure communication, and transparent case resolution
+                    Enable confidential reporting, secure communication, and
+                    transparent case resolution
                   </p>
                 </div>
               </div>
@@ -64,7 +86,8 @@ export default function DocumentationPage() {
                 <div>
                   <h4 className="font-semibold mb-1">Security First</h4>
                   <p className="text-sm text-muted-foreground">
-                    End-to-end encryption, metadata cleaning, and compliance-ready data handling
+                    End-to-end encryption, metadata cleaning, and
+                    compliance-ready data handling
                   </p>
                 </div>
               </div>
@@ -82,15 +105,28 @@ export default function DocumentationPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <h3 className="font-semibold mb-2">For Reporters (Anonymous Users)</h3>
+              <h3 className="font-semibold mb-2">
+                For Reporters (Anonymous Users)
+              </h3>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">1</Badge>
-                  <span>Visit the <Link href="/report" className="text-primary hover:underline">Report Portal</Link></span>
+                  <span>
+                    Visit the{" "}
+                    <Link
+                      href="/report"
+                      className="text-primary hover:underline"
+                    >
+                      Report Portal
+                    </Link>
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">2</Badge>
-                  <span>Fill in report details (category, description, optional contact info)</span>
+                  <span>
+                    Fill in report details (category, description, optional
+                    contact info)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">3</Badge>
@@ -98,27 +134,41 @@ export default function DocumentationPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">4</Badge>
-                  <span>Receive a unique tracking code to monitor your case</span>
+                  <span>
+                    Receive a unique tracking code to monitor your case
+                  </span>
                 </div>
               </div>
             </div>
-            
+
             <Separator />
-            
+
             <div>
               <h3 className="font-semibold mb-2">For Admin Users</h3>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">1</Badge>
-                  <span>Visit the <Link href="/admin/login" className="text-primary hover:underline">Admin Portal</Link></span>
+                  <span>
+                    Visit the{" "}
+                    <Link
+                      href="/admin/login"
+                      className="text-primary hover:underline"
+                    >
+                      Admin Portal
+                    </Link>
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">2</Badge>
-                  <span>Login with your credentials (e.g., admin@whistrust.com)</span>
+                  <span>
+                    Login with your credentials (e.g., admin@whistrust.com)
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">3</Badge>
-                  <span>Access Dashboard, Cases, Analytics, and Audit Logs</span>
+                  <span>
+                    Access Dashboard, Cases, Analytics, and Audit Logs
+                  </span>
                 </div>
               </div>
             </div>
@@ -127,7 +177,9 @@ export default function DocumentationPage() {
 
         {/* System Workflows */}
         <div className="space-y-8 mb-8">
-          <h2 className="text-3xl font-bold text-center mb-8">System Workflows</h2>
+          <h2 className="text-3xl font-bold text-center mb-8">
+            System Workflows
+          </h2>
 
           {/* Workflow 1 */}
           <Card>
@@ -144,18 +196,26 @@ export default function DocumentationPage() {
               <div className="bg-muted/50 p-4 rounded-lg">
                 <h4 className="font-semibold mb-2">What This Does</h4>
                 <p className="text-sm text-muted-foreground">
-                  Allows users to submit reports of misconduct, fraud, or policy violations securely and anonymously. 
-                  Each submission receives a unique tracking code for follow-up.
+                  Allows users to submit reports of misconduct, fraud, or policy
+                  violations securely and anonymously. Each submission receives
+                  a unique tracking code for follow-up.
                 </p>
               </div>
-              
+
               <div>
-                <h4 className="font-semibold mb-2">Step-by-Step Instructions</h4>
+                <h4 className="font-semibold mb-2">
+                  Step-by-Step Instructions
+                </h4>
                 <ol className="list-decimal list-inside space-y-2 text-sm">
                   <li>Navigate to the Report Portal</li>
-                  <li>Select report category (fraud, harassment, safety, etc.)</li>
+                  <li>
+                    Select report category (fraud, harassment, safety, etc.)
+                  </li>
                   <li>Enter detailed description of the incident</li>
-                  <li>Optionally provide name and email (not required for anonymity)</li>
+                  <li>
+                    Optionally provide name and email (not required for
+                    anonymity)
+                  </li>
                   <li>Attach supporting documents or evidence (optional)</li>
                   <li>Click "Submit Report"</li>
                   <li>Save your unique tracking code for case monitoring</li>
@@ -193,13 +253,16 @@ export default function DocumentationPage() {
               <div className="bg-muted/50 p-4 rounded-lg">
                 <h4 className="font-semibold mb-2">What This Does</h4>
                 <p className="text-sm text-muted-foreground">
-                  Enables encrypted two-way communication between reporters and administrators. Messages are 
-                  encrypted before storage and decrypted on display to ensure maximum privacy.
+                  Enables encrypted two-way communication between reporters and
+                  administrators. Messages are encrypted before storage and
+                  decrypted on display to ensure maximum privacy.
                 </p>
               </div>
-              
+
               <div>
-                <h4 className="font-semibold mb-2">Step-by-Step Instructions</h4>
+                <h4 className="font-semibold mb-2">
+                  Step-by-Step Instructions
+                </h4>
                 <ol className="list-decimal list-inside space-y-2 text-sm">
                   <li>Enter your tracking code on the Track Your Case page</li>
                   <li>View case status and timeline</li>
@@ -219,7 +282,9 @@ export default function DocumentationPage() {
                   <li>Track a case using valid tracking code</li>
                   <li>Send a test message from reporter view</li>
                   <li>Verify message appears in admin panel</li>
-                  <li>Send reply from admin and confirm it appears to reporter</li>
+                  <li>
+                    Send reply from admin and confirm it appears to reporter
+                  </li>
                   <li>Check encryption/decryption works correctly</li>
                 </ul>
               </div>
@@ -241,20 +306,39 @@ export default function DocumentationPage() {
               <div className="bg-muted/50 p-4 rounded-lg">
                 <h4 className="font-semibold mb-2">What This Does</h4>
                 <p className="text-sm text-muted-foreground">
-                  Provides administrators with a complete case management interface including case assignment, 
-                  status updates, priority management, custom labels, and file access.
+                  Provides administrators with a complete case management
+                  interface including case assignment, status updates, priority
+                  management, custom labels, and file access.
                 </p>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-2">Key Features</h4>
                 <ul className="list-disc list-inside space-y-2 text-sm">
-                  <li><strong>Case Overview:</strong> View all reports with filtering and search</li>
-                  <li><strong>Case Details:</strong> Side drawer with full case information, messages, and attachments</li>
-                  <li><strong>Assignment:</strong> Assign cases to specific administrators or investigators</li>
-                  <li><strong>Status Management:</strong> Update case status (Pending → In Review → In Progress → Resolved)</li>
-                  <li><strong>Priority & Labels:</strong> Set priority levels (Low/Medium/High) and add custom labels</li>
-                  <li><strong>Two-Way Messaging:</strong> Communicate with reporters securely</li>
+                  <li>
+                    <strong>Case Overview:</strong> View all reports with
+                    filtering and search
+                  </li>
+                  <li>
+                    <strong>Case Details:</strong> Side drawer with full case
+                    information, messages, and attachments
+                  </li>
+                  <li>
+                    <strong>Assignment:</strong> Assign cases to specific
+                    administrators or investigators
+                  </li>
+                  <li>
+                    <strong>Status Management:</strong> Update case status
+                    (Pending → In Review → In Progress → Resolved)
+                  </li>
+                  <li>
+                    <strong>Priority & Labels:</strong> Set priority levels
+                    (Low/Medium/High) and add custom labels
+                  </li>
+                  <li>
+                    <strong>Two-Way Messaging:</strong> Communicate with
+                    reporters securely
+                  </li>
                 </ul>
               </div>
 
@@ -290,15 +374,19 @@ export default function DocumentationPage() {
               <div className="bg-muted/50 p-4 rounded-lg">
                 <h4 className="font-semibold mb-2">What This Does</h4>
                 <p className="text-sm text-muted-foreground">
-                  Ensures all uploaded files are stored securely with metadata stripped to prevent identity exposure. 
-                  Files are accessible only to authorized administrators via signed URLs.
+                  Ensures all uploaded files are stored securely with metadata
+                  stripped to prevent identity exposure. Files are accessible
+                  only to authorized administrators via signed URLs.
                 </p>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-2">Security Features</h4>
                 <ul className="list-disc list-inside space-y-2 text-sm">
-                  <li>Automatic metadata cleaning (removes EXIF, author info, timestamps)</li>
+                  <li>
+                    Automatic metadata cleaning (removes EXIF, author info,
+                    timestamps)
+                  </li>
                   <li>Secure storage in Supabase with access control</li>
                   <li>Signed URLs for temporary file access</li>
                   <li>File type validation and size limits</li>
@@ -337,11 +425,12 @@ export default function DocumentationPage() {
               <div className="bg-muted/50 p-4 rounded-lg">
                 <h4 className="font-semibold mb-2">What This Does</h4>
                 <p className="text-sm text-muted-foreground">
-                  Enables authorized administrators to submit reports on behalf of individuals who cannot 
-                  access the system directly. Source marked as "proxy" or "offline".
+                  Enables authorized administrators to submit reports on behalf
+                  of individuals who cannot access the system directly. Source
+                  marked as "proxy" or "offline".
                 </p>
               </div>
-              
+
               <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 p-4 rounded-lg">
                 <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center gap-2">
                   <CheckCircle className="h-4 w-4" />
@@ -372,11 +461,12 @@ export default function DocumentationPage() {
               <div className="bg-muted/50 p-4 rounded-lg">
                 <h4 className="font-semibold mb-2">What This Does</h4>
                 <p className="text-sm text-muted-foreground">
-                  Comprehensive audit trail of all system actions (report creation, status changes, assignments, messages) 
-                  and real-time notification system for admins.
+                  Comprehensive audit trail of all system actions (report
+                  creation, status changes, assignments, messages) and real-time
+                  notification system for admins.
                 </p>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-2">Audit Log Features</h4>
                 <ul className="list-disc list-inside space-y-2 text-sm">
@@ -391,7 +481,9 @@ export default function DocumentationPage() {
                 <h4 className="font-semibold mb-2">Notification Features</h4>
                 <ul className="list-disc list-inside space-y-2 text-sm">
                   <li>Real-time bell notifications for new reports</li>
-                  <li>Notifications for case assignments and message replies</li>
+                  <li>
+                    Notifications for case assignments and message replies
+                  </li>
                   <li>Badge showing unread count</li>
                   <li>Mark notifications as read</li>
                 </ul>
@@ -428,20 +520,39 @@ export default function DocumentationPage() {
               <div className="bg-muted/50 p-4 rounded-lg">
                 <h4 className="font-semibold mb-2">What This Does</h4>
                 <p className="text-sm text-muted-foreground">
-                  Implements multiple security layers including client-side message encryption, metadata cleaning, 
-                  role-based access control, and secure authentication.
+                  Implements multiple security layers including client-side
+                  message encryption, metadata cleaning, role-based access
+                  control, and secure authentication.
                 </p>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-2">Security Layers</h4>
                 <ul className="list-disc list-inside space-y-2 text-sm">
-                  <li><strong>Message Encryption:</strong> AES encryption for all messages</li>
-                  <li><strong>File Metadata Cleaning:</strong> Automatic removal of identifying information</li>
-                  <li><strong>Row-Level Security (RLS):</strong> Database-level access control</li>
-                  <li><strong>Role-Based Access:</strong> Admin, Manager, Investigator roles with different permissions</li>
-                  <li><strong>Secure Authentication:</strong> Supabase Auth with session management</li>
-                  <li><strong>HTTPS Only:</strong> All connections encrypted in transit</li>
+                  <li>
+                    <strong>Message Encryption:</strong> AES encryption for all
+                    messages
+                  </li>
+                  <li>
+                    <strong>File Metadata Cleaning:</strong> Automatic removal
+                    of identifying information
+                  </li>
+                  <li>
+                    <strong>Row-Level Security (RLS):</strong> Database-level
+                    access control
+                  </li>
+                  <li>
+                    <strong>Role-Based Access:</strong> Admin, Manager,
+                    Investigator roles with different permissions
+                  </li>
+                  <li>
+                    <strong>Secure Authentication:</strong> Supabase Auth with
+                    session management
+                  </li>
+                  <li>
+                    <strong>HTTPS Only:</strong> All connections encrypted in
+                    transit
+                  </li>
                 </ul>
               </div>
             </CardContent>
@@ -462,11 +573,11 @@ export default function DocumentationPage() {
               <div className="bg-muted/50 p-4 rounded-lg">
                 <h4 className="font-semibold mb-2">What This Does</h4>
                 <p className="text-sm text-muted-foreground">
-                  Allows administrators to set case priorities (Low/Medium/High) and add custom labels 
-                  for better organization and filtering.
+                  Allows administrators to set case priorities (Low/Medium/High)
+                  and add custom labels for better organization and filtering.
                 </p>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-2">Features</h4>
                 <ul className="list-disc list-inside space-y-2 text-sm">
@@ -508,11 +619,12 @@ export default function DocumentationPage() {
               <div className="bg-muted/50 p-4 rounded-lg">
                 <h4 className="font-semibold mb-2">What This Does</h4>
                 <p className="text-sm text-muted-foreground">
-                  Provides administrators with key metrics, category breakdowns, trend analysis, 
-                  and exportable reports for compliance and management purposes.
+                  Provides administrators with key metrics, category breakdowns,
+                  trend analysis, and exportable reports for compliance and
+                  management purposes.
                 </p>
               </div>
-              
+
               <div>
                 <h4 className="font-semibold mb-2">Analytics Features</h4>
                 <ul className="list-disc list-inside space-y-2 text-sm">
@@ -566,7 +678,9 @@ export default function DocumentationPage() {
                   </p>
                 </div>
                 <div className="p-4 border rounded-lg">
-                  <h4 className="font-semibold text-sm mb-2">Compliance Officer</h4>
+                  <h4 className="font-semibold text-sm mb-2">
+                    Compliance Officer
+                  </h4>
                   <p className="text-xs text-muted-foreground">
                     Manager role with case management access.
                   </p>
@@ -579,10 +693,20 @@ export default function DocumentationPage() {
             <div>
               <h3 className="font-semibold mb-2">Sample Test Data</h3>
               <div className="bg-muted/50 p-4 rounded-lg text-sm">
-                <p className="mb-2"><strong>Sample Tracking Code:</strong> ABC1234</p>
-                <p className="mb-2"><strong>Test Categories:</strong> Fraud, Harassment, Safety, Ethical Violations</p>
-                <p className="mb-2"><strong>Test File Types:</strong> PDF, JPG, PNG, DOCX (max 10MB each)</p>
-                <p><strong>Admin Login:</strong> admin@whistrust.com / Admin@123</p>
+                <p className="mb-2">
+                  <strong>Sample Tracking Code:</strong> ABC1234
+                </p>
+                <p className="mb-2">
+                  <strong>Test Categories:</strong> Fraud, Harassment, Safety,
+                  Ethical Violations
+                </p>
+                <p className="mb-2">
+                  <strong>Test File Types:</strong> PDF, JPG, PNG, DOCX (max
+                  10MB each)
+                </p>
+                <p>
+                  <strong>Admin Login:</strong> admin@whistrust.com / Admin@123
+                </p>
               </div>
             </div>
           </CardContent>
@@ -601,25 +725,29 @@ export default function DocumentationPage() {
               <div className="space-y-2">
                 <h4 className="font-semibold">Encryption</h4>
                 <p className="text-sm text-muted-foreground">
-                  All messages are encrypted using AES encryption before storage. Files are encrypted in transit and at rest.
+                  All messages are encrypted using AES encryption before
+                  storage. Files are encrypted in transit and at rest.
                 </p>
               </div>
               <div className="space-y-2">
                 <h4 className="font-semibold">Metadata Cleaning</h4>
                 <p className="text-sm text-muted-foreground">
-                  Automatic removal of EXIF data, author information, and timestamps from uploaded files to prevent identity exposure.
+                  Automatic removal of EXIF data, author information, and
+                  timestamps from uploaded files to prevent identity exposure.
                 </p>
               </div>
               <div className="space-y-2">
                 <h4 className="font-semibold">Access Control</h4>
                 <p className="text-sm text-muted-foreground">
-                  Role-based permissions with database-level security. Only authorized admins can access specific cases.
+                  Role-based permissions with database-level security. Only
+                  authorized admins can access specific cases.
                 </p>
               </div>
               <div className="space-y-2">
                 <h4 className="font-semibold">Data Storage</h4>
                 <p className="text-sm text-muted-foreground">
-                  Secure cloud storage with signed URLs for temporary file access. Full audit trail maintained for compliance.
+                  Secure cloud storage with signed URLs for temporary file
+                  access. Full audit trail maintained for compliance.
                 </p>
               </div>
             </div>
@@ -630,8 +758,9 @@ export default function DocumentationPage() {
                 Compliance Ready
               </h4>
               <p className="text-sm text-blue-900 dark:text-blue-100">
-                WhisTrust is designed to meet data localization requirements and compliance standards. 
-                All data handling follows security best practices and can be hosted in compliant jurisdictions.
+                WhisTrust is designed to meet data localization requirements and
+                compliance standards. All data handling follows security best
+                practices and can be hosted in compliant jurisdictions.
               </p>
             </div>
           </CardContent>
@@ -648,30 +777,39 @@ export default function DocumentationPage() {
           <CardContent className="space-y-4">
             <div className="space-y-4">
               <div>
-                <h4 className="font-semibold mb-1">Why can't I see my messages?</h4>
+                <h4 className="font-semibold mb-1">
+                  Why can't I see my messages?
+                </h4>
                 <p className="text-sm text-muted-foreground">
-                  Make sure you're using the correct tracking code. Messages may take a moment to sync. 
-                  Try refreshing the page or checking your tracking code.
-                </p>
-              </div>
-              
-              <Separator />
-
-              <div>
-                <h4 className="font-semibold mb-1">File upload failed. What should I do?</h4>
-                <p className="text-sm text-muted-foreground">
-                  Check file size (max 10MB per file), file type is supported (PDF, images, docs), 
-                  and your internet connection is stable. Try uploading one file at a time.
+                  Make sure you're using the correct tracking code. Messages may
+                  take a moment to sync. Try refreshing the page or checking
+                  your tracking code.
                 </p>
               </div>
 
               <Separator />
 
               <div>
-                <h4 className="font-semibold mb-1">I forgot my tracking code. Can I get it back?</h4>
+                <h4 className="font-semibold mb-1">
+                  File upload failed. What should I do?
+                </h4>
                 <p className="text-sm text-muted-foreground">
-                  If you provided an email during submission, you should have received the tracking code. 
-                  For security, we cannot retrieve tracking codes without authentication.
+                  Check file size (max 10MB per file), file type is supported
+                  (PDF, images, docs), and your internet connection is stable.
+                  Try uploading one file at a time.
+                </p>
+              </div>
+
+              <Separator />
+
+              <div>
+                <h4 className="font-semibold mb-1">
+                  I forgot my tracking code. Can I get it back?
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  If you provided an email during submission, you should have
+                  received the tracking code. For security, we cannot retrieve
+                  tracking codes without authentication.
                 </p>
               </div>
 
@@ -680,8 +818,9 @@ export default function DocumentationPage() {
               <div>
                 <h4 className="font-semibold mb-1">How secure is my data?</h4>
                 <p className="text-sm text-muted-foreground">
-                  All data is encrypted in transit (HTTPS) and at rest. Messages use client-side encryption, 
-                  and files have metadata removed. Only authorized admins can access case data.
+                  All data is encrypted in transit (HTTPS) and at rest. Messages
+                  use client-side encryption, and files have metadata removed.
+                  Only authorized admins can access case data.
                 </p>
               </div>
             </div>
@@ -689,8 +828,9 @@ export default function DocumentationPage() {
             <div className="bg-muted/50 p-4 rounded-lg">
               <h4 className="font-semibold mb-2">Need More Help?</h4>
               <p className="text-sm text-muted-foreground">
-                For additional support, please contact your organization's compliance team or system administrator. 
-                Technical issues can be reported through your organization's IT support channels.
+                For additional support, please contact your organization's
+                compliance team or system administrator. Technical issues can be
+                reported through your organization's IT support channels.
               </p>
             </div>
           </CardContent>
@@ -698,7 +838,10 @@ export default function DocumentationPage() {
 
         {/* Footer */}
         <div className="text-center text-sm text-muted-foreground mt-12 pb-8">
-          <p>WhisTrust Documentation v1.0 | Last Updated: {new Date().toLocaleDateString()}</p>
+          <p>
+            WhisTrust Documentation v1.0 | Last Updated:{" "}
+            {new Date().toLocaleDateString()}
+          </p>
           <div className="flex items-center justify-center gap-4 mt-4">
             <Link href="/demo" className="text-primary hover:underline">
               Try Demo
