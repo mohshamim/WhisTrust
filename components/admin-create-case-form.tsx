@@ -49,13 +49,13 @@ export function CreateCaseForm({ onSuccess }: { onSuccess?: () => void }) {
 
     try {
       const { createAdminReport } = await import("@/lib/services/reports");
-      
+
       const result = await createAdminReport({
         category: formData.category,
         description: formData.description,
         source: formData.source,
         priority: formData.priority,
-        submitted_by: 'admin',
+        submitted_by: "admin",
         reporter_name: formData.reporter_name || undefined,
         reporter_email: formData.reporter_email || undefined,
       });
@@ -70,14 +70,14 @@ export function CreateCaseForm({ onSuccess }: { onSuccess?: () => void }) {
           reporter_name: "",
           reporter_email: "",
         });
-        
+
         setOpen(false);
-        
+
         // Notify parent to refresh
         if (onSuccess) {
           onSuccess();
         }
-        
+
         // Show success toast (could use sonner or similar)
         alert("Offline case created successfully!");
       } else {

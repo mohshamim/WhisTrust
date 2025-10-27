@@ -33,6 +33,8 @@ export async function submitReport(data: NewReport): Promise<{ success: boolean;
         reporter_name: data.reporter_name || null,
         reporter_email: data.reporter_email || null,
         status: "pending",
+        source: "online",
+        submitted_by: "anonymous",
       })
       .select()
       .single();
