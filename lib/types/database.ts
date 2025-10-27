@@ -14,6 +14,10 @@ export interface Report {
   reporter_email: string | null;
   status: "pending" | "in_review" | "in_progress" | "resolved" | "closed";
   assigned_to: string | null;
+  assigned_at: string | null; // BRD Phase 3
+  priority: "low" | "medium" | "high" | null; // BRD Phase 3
+  source: "online" | "offline" | "phone" | "email" | null; // BRD Phase 3
+  submitted_by: "anonymous" | "admin" | null; // BRD Phase 3
   created_at: string;
   updated_at: string;
 }
@@ -23,7 +27,7 @@ export interface Message {
   report_id: string;
   sender_type: "reporter" | "admin";
   sender_id: string | null; // admin user id if sender_type is admin
-  content: string;
+  content: string; // BRD Phase 3: This content should be encrypted at rest
   created_at: string;
 }
 
@@ -45,6 +49,15 @@ export interface ReportAttachment {
   file_path: string;
   file_size: number;
   mime_type: string;
+  created_at: string;
+}
+
+// BRD Phase 3: Report labels for custom tagging
+export interface ReportLabel {
+  id: string;
+  report_id: string;
+  label: string;
+  color: string;
   created_at: string;
 }
 
@@ -123,4 +136,14 @@ export interface UpdateReport {
   status?: string;
   assigned_to?: string;
   description?: string;
+  // BRD Phase 3
+  priority?: "low" | "medium" | "high";
+  source?: "online" | "offline" | "phone" | "email";
+}
+
+// BRD Phase 3: For creating offline/admin-submitted reports
+export interface NewAdminReport extends NewReport {
+  source: "offline" | "phone" | "email";
+  submitted_by: "admin";
+  priority?: "low" | "medium" | "high";
 }

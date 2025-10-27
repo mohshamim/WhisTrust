@@ -6,7 +6,7 @@
  */
 
 import { createClient } from "@/lib/supabase/client";
-import type { Report, NewReport, UpdateReport } from "@/lib/types/database";
+import type { Report, NewReport, UpdateReport, NewAdminReport, AdminUser } from "@/lib/types/database";
 
 /**
  * Generate a unique tracking code
@@ -167,5 +167,103 @@ export async function getReportStats(): Promise<{
   } catch (error) {
     console.error("Error in getReportStats:", error);
     return { success: false, error: "Failed to fetch statistics" };
+  }
+}
+
+// ============================================================================
+// BRD Phase 3: Enhanced Report Management Functions
+// ============================================================================
+
+/**
+ * BRD Phase 3: Assign a case to an admin user
+ */
+export async function assignCase(
+  reportId: string,
+  adminId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    const supabase = createClient();
+    
+    const { error } = await supabase
+      .from("reports")
+      .update({ 
+        assigned_to: adminId, 
+        assigned_at: new Date().toISOString() 
+      })
+      .eq("id", reportId);
+
+    if (error) {
+      console.error("Error assigning case:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error("Error in assignCase:", error);
+    return { success: false, error: "Failed to assign case" };
+  }
+}
+
+/**
+ * BRD Phase 3: Get list of admin users for assignment dropdown
+ */
+export async function getAdminUsers(): Promise<AdminUser[]> {
+  try {
+    const supabase = createClient();
+    const { data, error } = await supabase
+      .from("admin_profiles")
+      .select("*")
+      .eq("is_active", true)
+      .order("full_name", { ascending: true });
+    
+    if (error) {
+      console.error("Error fetching admin users:", error);
+      return [];
+    }
+    
+    return data || [];
+  } catch (error) {
+    console.error("Error in getAdminUsers:", error);
+    return [];
+  }
+}
+
+/**
+ * BRD Phase 3: Create a report manually submitted by admin
+ * Used for offline, phone, or email submissions
+ */
+export async function createAdminReport(
+  data: NewAdminReport
+): Promise<{ success: boolean; report?: Report; error?: string }> {
+  try {
+    const supabase = createClient();
+    
+    const trackingCode = generateTrackingCode();
+    
+    const { data: report, error } = await supabase
+      .from("reports")
+      .insert({
+        tracking_code: trackingCode,
+        category: data.category,
+        description: data.description,
+        reporter_name: data.reporter_name || null,
+        reporter_email: data.reporter_email || null,
+        submitted_by: 'admin',
+        source: data.source,
+        priority: data.priority || 'medium',
+        status: 'pending',
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error("Error creating admin report:", error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, report };
+  } catch (error) {
+    console.error("Error in createAdminReport:", error);
+    return { success: false, error: "Failed to create report" };
   }
 }
