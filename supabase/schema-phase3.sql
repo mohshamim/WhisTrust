@@ -132,7 +132,12 @@ CREATE TRIGGER trigger_report_assignment_change
   FOR EACH ROW
   EXECUTE FUNCTION log_assignment_change();
 
--- 7. Create a view for notifications with user context
+-- 7. Add resource_id column to notifications if it doesn't exist
+ALTER TABLE notifications
+ADD COLUMN IF NOT EXISTS resource_id TEXT,
+ADD COLUMN IF NOT EXISTS assigned_to UUID REFERENCES admin_profiles(id);
+
+-- Create a view for notifications with user context
 CREATE OR REPLACE VIEW notifications_enriched AS
 SELECT 
   n.*,
