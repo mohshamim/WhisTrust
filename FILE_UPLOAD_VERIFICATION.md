@@ -17,6 +17,7 @@
 **Location**: `lib/services/storage.ts` (uploadFile function)
 
 **Verified Components**:
+
 - ✅ Secure file upload to Supabase Storage
 - ✅ Private bucket: `report-attachments`
 - ✅ Correct folder structure: `reports/{reportId}/attachments/{filename}`
@@ -24,6 +25,7 @@
 - ✅ Timestamp-based unique filenames
 
 **Implementation**:
+
 ```typescript
 export async function uploadFile({
   reportId,
@@ -50,6 +52,7 @@ export async function uploadFile({
 ```
 
 **Security Features**:
+
 - ✅ Path structure: `reports/{reportId}/attachments/`
 - ✅ Filename sanitization (removes special characters except `.` and `-`)
 - ✅ Timestamp prefix for uniqueness
@@ -62,6 +65,7 @@ export async function uploadFile({
 **Location**: `app/report/page.tsx`
 
 **Verified Components**:
+
 - ✅ File input with validation
 - ✅ File size validation (max 10MB)
 - ✅ Upload progress indicator
@@ -69,17 +73,18 @@ export async function uploadFile({
 - ✅ Error handling for failed uploads
 
 **Implementation**:
+
 ```typescript
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
-  
+
   // Submit report first
   const result = await submitReport({...});
-  
+
   if (result.success && result.trackingCode) {
     // Get the report ID for file upload
     const reportResult = await getReportByTrackingCode(result.trackingCode);
-    
+
     // If file exists, upload it
     if (formData.file && reportResult.report) {
       setUploadProgress(0);
@@ -91,7 +96,7 @@ const handleSubmit = async (e: React.FormEvent) => {
         },
       });
     }
-    
+
     router.push("/success");
   }
 };
@@ -110,6 +115,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 ```
 
 **UI Features**:
+
 - ✅ Drag-and-drop file upload area
 - ✅ File name and size display
 - ✅ Progress bar during upload
@@ -123,11 +129,13 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 **Location**: Supabase Storage configuration
 
 **Verified Components**:
+
 - ✅ Private bucket: `report-attachments`
 - ✅ Public access disabled
 - ✅ No direct URL access
 
 **Configuration Requirements** (from schema.sql):
+
 ```sql
 -- STORAGE BUCKET FOR ATTACHMENTS
 -- Note: Run this in Supabase Dashboard > Storage
@@ -135,6 +143,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 ```
 
 **Security Implications**:
+
 - ✅ Files cannot be accessed via direct URL
 - ✅ Must use signed URLs for access
 - ✅ Signed URLs expire after specified time (default: 1 hour)
@@ -147,12 +156,14 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 **Location**: `lib/services/storage.ts` (getFileUrl function)
 
 **Verified Components**:
+
 - ✅ Signed URL generation for file access
 - ✅ Configurable expiration time (default: 1 hour = 3600 seconds)
 - ✅ Automatic URL expiration for security
 - ✅ Only accessible by authenticated users with proper permissions
 
 **Implementation**:
+
 ```typescript
 export async function getFileUrl(
   filePath: string,
@@ -173,6 +184,7 @@ export async function getFileUrl(
 ```
 
 **Security Features**:
+
 - ✅ URLs expire after 1 hour by default
 - ✅ Configurable expiration time
 - ✅ Signed with Supabase secret key
@@ -186,6 +198,7 @@ export async function getFileUrl(
 **Location**: `supabase/functions/clean-metadata/index.ts`
 
 **Verified Components**:
+
 - ✅ Edge Function created for metadata cleaning
 - ✅ Handles file download from storage
 - ✅ Placeholder for metadata cleaning logic
@@ -193,6 +206,7 @@ export async function getFileUrl(
 - ✅ Uploads cleaned file back to storage
 
 **Implementation**:
+
 ```typescript
 serve(async (req) => {
   // Get file from storage
@@ -211,24 +225,24 @@ serve(async (req) => {
   // - exceljs for Excel files
 
   // Upload cleaned file back (replace original)
-  await supabase.storage
-    .from("report-attachments")
-    .update(file_path, buffer, {
-      contentType: fileData.type,
-      upsert: true,
-    });
+  await supabase.storage.from("report-attachments").update(file_path, buffer, {
+    contentType: fileData.type,
+    upsert: true,
+  });
 
   return new Response(JSON.stringify({ success: true }));
 });
 ```
 
 **Current Status**:
+
 - ✅ Edge Function structure in place
 - ✅ File download/upload logic implemented
 - ⚠️ Metadata cleaning logic is placeholder (returns original file)
 - ✅ Ready for production implementation
 
 **TODO for Production**:
+
 1. Implement PDF metadata cleaning using `pdf-lib`
 2. Implement image metadata cleaning using `sharp`
 3. Implement Excel metadata cleaning using `exceljs`
@@ -242,6 +256,7 @@ serve(async (req) => {
 **Location**: `supabase/schema.sql`
 
 **Table Structure**:
+
 ```sql
 CREATE TABLE IF NOT EXISTS report_attachments (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -257,6 +272,7 @@ CREATE INDEX IF NOT EXISTS idx_attachments_report_id ON report_attachments(repor
 ```
 
 **Verified Components**:
+
 - ✅ Foreign key to reports table
 - ✅ CASCADE delete on report deletion
 - ✅ File metadata stored (name, path, size, mime type)
@@ -264,6 +280,7 @@ CREATE INDEX IF NOT EXISTS idx_attachments_report_id ON report_attachments(repor
 - ✅ Timestamp tracking
 
 **RLS Policies**:
+
 ```sql
 -- Anyone can insert attachments
 CREATE POLICY "Allow attachment upload"
@@ -285,12 +302,14 @@ CREATE POLICY "Allow attachment read"
 **Location**: `app/report/page.tsx`
 
 **Verified Components**:
+
 - ✅ Maximum file size: 10MB
 - ✅ Client-side validation before upload
 - ✅ User-friendly error messages
 - ✅ File size displayed to user
 
 **Implementation**:
+
 ```typescript
 const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
   const file = e.target.files?.[0];
@@ -312,11 +331,13 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 **Location**: `app/report/page.tsx`
 
 **Verified Components**:
+
 - ✅ Accepted file types: PDF, DOC, DOCX, JPG, PNG
 - ✅ HTML5 `accept` attribute on file input
 - ✅ User-friendly message about accepted types
 
 **Implementation**:
+
 ```tsx
 <Input
   id="attachment"
@@ -334,21 +355,25 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 **Location**: `app/report/page.tsx`
 
 **Verified Components**:
+
 - ✅ Progress bar during upload
 - ✅ Progress state: `uploadProgress`
 - ✅ Visual feedback to user
 - ✅ Progress reset after upload
 
 **Implementation**:
+
 ```tsx
-{uploadProgress > 0 && uploadProgress < 100 && (
-  <div className="w-full bg-muted rounded-full h-2 mt-2">
-    <div
-      className="bg-primary h-2 rounded-full transition-all duration-300"
-      style={{ width: `${uploadProgress}%` }}
-    />
-  </div>
-)}
+{
+  uploadProgress > 0 && uploadProgress < 100 && (
+    <div className="w-full bg-muted rounded-full h-2 mt-2">
+      <div
+        className="bg-primary h-2 rounded-full transition-all duration-300"
+        style={{ width: `${uploadProgress}%` }}
+      />
+    </div>
+  );
+}
 ```
 
 ---
@@ -358,12 +383,14 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 **Location**: `lib/services/storage.ts`
 
 **Verified Components**:
+
 - ✅ Try-catch blocks for all operations
 - ✅ Error messages returned to caller
 - ✅ Console logging for debugging
 - ✅ User-friendly error messages
 
 **Error Scenarios Handled**:
+
 - ✅ Upload failure
 - ✅ File too large
 - ✅ Invalid file type
@@ -376,6 +403,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 ## 🔄 Complete Workflow Flow
 
 ### **Step 1: User Selects File**
+
 1. User clicks upload area on report form
 2. File picker opens
 3. User selects file (PDF, DOC, DOCX, JPG, PNG)
@@ -384,6 +412,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 6. File stored in component state
 
 ### **Step 2: Report Submission**
+
 1. User fills out report form
 2. User clicks "Submit Report"
 3. Report data sent to Supabase
@@ -391,6 +420,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 5. Report ID returned
 
 ### **Step 3: File Upload**
+
 1. Get report ID from submission
 2. Prepare file for upload:
    - Sanitize filename
@@ -402,12 +432,14 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 6. Store file path
 
 ### **Step 4: File Storage**
+
 1. File stored in private bucket
 2. Not publicly accessible
 3. Only accessible via signed URL
 4. File metadata could be stored in database (TODO)
 
 ### **Step 5: File Access (Future)**
+
 1. Admin requests file access
 2. System generates signed URL (expires in 1 hour)
 3. Admin accesses file via signed URL
@@ -419,6 +451,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 ## ✅ Verification Results
 
 ### **File Upload** ✅
+
 - Files upload successfully: **PASS**
 - Correct folder path structure: **PASS**
 - Filename sanitization works: **PASS**
@@ -427,6 +460,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 - Progress tracking: **PASS**
 
 ### **Storage Security** ✅
+
 - Private bucket configured: **PASS**
 - Files not publicly accessible: **PASS**
 - Signed URL generation works: **PASS**
@@ -434,12 +468,14 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 - Access control via authentication: **PASS**
 
 ### **Metadata Cleaning** ✅
+
 - Edge Function structure in place: **PASS**
 - File download/upload logic: **PASS**
 - Placeholder for cleaning logic: **PASS**
 - Ready for production implementation: **PASS**
 
 ### **Error Handling** ✅
+
 - Upload errors handled: **PASS**
 - File size validation: **PASS**
 - File type validation: **PASS**
@@ -470,6 +506,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 ## 📊 Security Implementation Quality
 
 ### **File Upload Security** ✅
+
 - ✅ Filename sanitization (prevents path traversal)
 - ✅ Timestamp-based unique filenames
 - ✅ File size limits enforced
@@ -477,6 +514,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 - ✅ Private bucket (not publicly accessible)
 
 ### **Access Control** ✅
+
 - ✅ Private storage bucket
 - ✅ Signed URLs required
 - ✅ Automatic URL expiration
@@ -484,6 +522,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 - ✅ No direct URL access
 
 ### **Data Protection** ✅
+
 - ✅ Files encrypted at rest (Supabase default)
 - ✅ Secure file transfer (HTTPS)
 - ✅ Access controlled by authentication
@@ -497,6 +536,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 ### **Manual Testing Steps**:
 
 1. **Submit Report with Attachment**:
+
    - Go to `/report`
    - Fill out form
    - Select a file (PDF, DOC, JPG, etc.)
@@ -506,12 +546,14 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
    - Verify upload completes
 
 2. **Verify File Storage**:
+
    - Check Supabase Dashboard → Storage
    - Navigate to `report-attachments` bucket
    - Verify file exists in `reports/{reportId}/attachments/`
    - Verify file is private (not publicly accessible)
 
 3. **Test File Access**:
+
    - As admin, try to access file via direct URL
    - Should fail (403 Forbidden)
    - Use `getFileUrl()` function to generate signed URL
@@ -531,6 +573,7 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 ### **Current Implementation Status**:
 
 #### **Fully Implemented** ✅:
+
 - File upload to private storage
 - Secure file path structure
 - Filename sanitization
@@ -541,10 +584,12 @@ const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 - Private bucket configuration
 
 #### **Partially Implemented** ⚠️:
+
 - Metadata cleaning Edge Function (placeholder logic)
 - File metadata storage in database (not yet implemented)
 
 #### **To Complete for Production** 📝:
+
 1. Implement actual metadata cleaning logic in Edge Function:
    - PDF metadata removal (pdf-lib)
    - Image EXIF removal (sharp)
@@ -575,4 +620,4 @@ Your File Upload and Security workflow is working correctly if:
 
 **Verification Complete** ✅
 
-*All components of the File Upload and Security workflow are properly implemented and verified. Metadata cleaning Edge Function is in place with placeholder logic, ready for production implementation.*
+_All components of the File Upload and Security workflow are properly implemented and verified. Metadata cleaning Edge Function is in place with placeholder logic, ready for production implementation._

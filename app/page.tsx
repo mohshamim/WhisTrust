@@ -53,8 +53,8 @@ export default function Home() {
             >
               Pricing
             </Link>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/report">Report</Link>
+            <Button variant="outline" size="sm" asChild>
+              <Link href="/documentation">Documentation</Link>
             </Button>
             <Button size="sm" asChild>
               <Link href="/demo">
@@ -101,7 +101,7 @@ export default function Home() {
               size="lg"
               className="text-base h-14 px-8"
             >
-              <Link href="/report">Submit a Report</Link>
+              <Link href="/documentation">Documentation</Link>
             </Button>
           </div>
 
@@ -419,7 +419,7 @@ export default function Home() {
               </Link>
             </Button>
             <Button asChild variant="outline" size="lg" className="h-14 px-8">
-              <Link href="/report">Submit a Report</Link>
+              <Link href="/documentation">View Documentation</Link>
             </Button>
           </CardContent>
         </Card>
@@ -444,26 +444,26 @@ export default function Home() {
               <ul className="space-y-2 text-sm">
                 <li>
                   <Link
-                    href="/report"
-                    className="text-muted-foreground hover:text-primary"
-                  >
-                    Submit Report
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/track"
-                    className="text-muted-foreground hover:text-primary"
-                  >
-                    Track Case
-                  </Link>
-                </li>
-                <li>
-                  <Link
                     href="/demo"
                     className="text-muted-foreground hover:text-primary"
                   >
                     Demo
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/documentation"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    Documentation
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="#features"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    Features
                   </Link>
                 </li>
               </ul>

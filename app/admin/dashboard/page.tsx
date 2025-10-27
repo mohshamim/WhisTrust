@@ -239,7 +239,7 @@ export default function AdminDashboardPage() {
                       <div
                         key={case_.id}
                         className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                        onClick={() => window.location.href = `/admin/cases`}
+                        onClick={() => (window.location.href = `/admin/cases`)}
                       >
                         <div className="space-y-1">
                           <p className="text-sm font-medium">Case {case_.id}</p>

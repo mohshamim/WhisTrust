@@ -5,6 +5,7 @@ Quick guide to test all workflows in WhisTrust.
 ## 🎯 Prerequisites
 
 Before you start:
+
 1. ✅ Supabase project created (see `SUPABASE_SETUP.md`)
 2. ✅ Environment variables set up (`.env.local`)
 3. ✅ Development server running
@@ -150,6 +151,7 @@ npm run dev
 ## 🧪 Advanced Testing
 
 ### Test File Upload
+
 1. Submit a new report with a file attachment
 2. Check the upload progress bar
 3. **✅ Success**: File should upload successfully
@@ -157,17 +159,20 @@ npm run dev
 5. **✅ Success**: Attachment should be visible
 
 ### Test Multiple Users
+
 1. Open multiple browser tabs
 2. Submit multiple reports
 3. Check admin dashboard
 4. **✅ Success**: All reports should appear in real-time
 
 ### Test Filtering
+
 1. In admin cases page, use search box
 2. Filter by status dropdown
 3. **✅ Success**: Results should filter correctly
 
 ### Test Security
+
 1. Try accessing `/admin/dashboard` without logging in
 2. **✅ Success**: Should redirect to login page
 3. Try accessing someone else's tracking code
@@ -201,25 +206,33 @@ Use this checklist to verify all features:
 ## 🐛 Common Issues & Solutions
 
 ### Issue: "Missing environment variables"
+
 **Solution**: Check `.env.local` file has correct values
 
 ### Issue: "Report not found"
+
 **Solution**: Make sure you copied the tracking code correctly
 
 ### Issue: "Cannot login"
-**Solution**: 
+
+**Solution**:
+
 1. Check user exists in Supabase Auth
 2. Check user exists in `admin_profiles` table
 3. Verify password is correct
 
 ### Issue: "Real-time not working"
+
 **Solution**:
+
 1. Check browser console for errors
 2. Verify Supabase project is running
 3. Check Realtime is enabled in Supabase dashboard
 
 ### Issue: "File upload fails"
+
 **Solution**:
+
 1. Check storage bucket exists
 2. Verify bucket is named `report-attachments`
 3. Check file size (max 10MB)
@@ -229,6 +242,7 @@ Use this checklist to verify all features:
 ## 📊 What to Look For
 
 ### ✅ Good Signs
+
 - ⚡ Fast page loads (< 2 seconds)
 - 🔄 Live updates work smoothly
 - 📱 Responsive design on mobile
@@ -236,6 +250,7 @@ Use this checklist to verify all features:
 - 💬 Messages sync instantly
 
 ### ⚠️ Warning Signs
+
 - ❌ Pages load slowly (> 5 seconds)
 - ❌ Real-time updates don't work
 - ❌ Console errors in browser
