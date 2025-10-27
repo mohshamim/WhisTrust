@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AdminSidebar } from "@/components/admin-sidebar";
@@ -54,7 +54,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 
-export default function CasesPage() {
+function CasesPageContent() {
   const searchParams = useSearchParams();
   const statusParam = searchParams.get("status");
 
@@ -124,9 +124,7 @@ export default function CasesPage() {
     };
 
     const statusInfo = statusMap[status] || statusMap.pending;
-    return (
-      <Badge className={statusInfo.className}>{statusInfo.label}</Badge>
-    );
+    return <Badge className={statusInfo.className}>{statusInfo.label}</Badge>;
   };
 
   const filteredCases = cases.filter((case_) => {
@@ -147,7 +145,7 @@ export default function CasesPage() {
 
     try {
       const { updateReport } = await import("@/lib/services/reports");
-      
+
       const result = await updateReport(selectedCase.tracking_code, {
         status: newStatus,
       });
@@ -234,7 +232,8 @@ export default function CasesPage() {
                 <div>
                   <CardTitle>Cases</CardTitle>
                   <CardDescription>
-                    {filteredCases.length} case{filteredCases.length !== 1 ? "s" : ""} found
+                    {filteredCases.length} case
+                    {filteredCases.length !== 1 ? "s" : ""} found
                   </CardDescription>
                 </div>
               </div>
@@ -353,7 +352,8 @@ export default function CasesPage() {
                         </p>
                       </div>
 
-                      {(selectedCase.reporter_name || selectedCase.reporter_email) && (
+                      {(selectedCase.reporter_name ||
+                        selectedCase.reporter_email) && (
                         <div>
                           <p className="text-sm font-medium text-muted-foreground mb-2">
                             Reporter Information
@@ -366,7 +366,9 @@ export default function CasesPage() {
                               </p>
                             )}
                             {selectedCase.reporter_email && (
-                              <p className="text-sm">{selectedCase.reporter_email}</p>
+                              <p className="text-sm">
+                                {selectedCase.reporter_email}
+                              </p>
                             )}
                           </div>
                         </div>
@@ -398,7 +400,7 @@ export default function CasesPage() {
 
             <DrawerFooter className="border-t">
               <div className="flex gap-3">
-                <Select 
+                <Select
                   defaultValue={selectedCase?.status}
                   onValueChange={(value) => {
                     // Store selected value for update
@@ -418,8 +420,10 @@ export default function CasesPage() {
                     <SelectItem value="closed">Closed</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button 
-                  onClick={() => selectedCase && handleStatusUpdate(selectedCase.status)}
+                <Button
+                  onClick={() =>
+                    selectedCase && handleStatusUpdate(selectedCase.status)
+                  }
                 >
                   Update Status
                 </Button>
@@ -432,5 +436,13 @@ export default function CasesPage() {
         </Drawer>
       </SidebarInset>
     </SidebarProvider>
+  );
+}
+
+export default function CasesPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+      <CasesPageContent />
+    </Suspense>
   );
 }
