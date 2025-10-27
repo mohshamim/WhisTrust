@@ -142,6 +142,35 @@ export default function CasesPage() {
     setIsDrawerOpen(true);
   };
 
+  const handleStatusUpdate = async (newStatus: string) => {
+    if (!selectedCase) return;
+
+    try {
+      const { updateReport } = await import("@/lib/services/reports");
+      
+      const result = await updateReport(selectedCase.tracking_code, {
+        status: newStatus,
+      });
+
+      if (result.success) {
+        // Update local state
+        setCases((prev) =>
+          prev.map((c) =>
+            c.id === selectedCase.id ? { ...c, status: newStatus } : c
+          )
+        );
+        // Update selected case
+        setSelectedCase({ ...selectedCase, status: newStatus });
+        alert("Status updated successfully!");
+      } else {
+        alert(result.error || "Failed to update status");
+      }
+    } catch (error) {
+      console.error("Error updating status:", error);
+      alert("An error occurred while updating the status");
+    }
+  };
+
   return (
     <SidebarProvider>
       <AdminSidebar />
@@ -369,7 +398,15 @@ export default function CasesPage() {
 
             <DrawerFooter className="border-t">
               <div className="flex gap-3">
-                <Select defaultValue={selectedCase?.status}>
+                <Select 
+                  defaultValue={selectedCase?.status}
+                  onValueChange={(value) => {
+                    // Store selected value for update
+                    if (selectedCase) {
+                      setSelectedCase({ ...selectedCase, status: value });
+                    }
+                  }}
+                >
                   <SelectTrigger className="flex-1">
                     <SelectValue />
                   </SelectTrigger>
@@ -381,7 +418,11 @@ export default function CasesPage() {
                     <SelectItem value="closed">Closed</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button>Update Status</Button>
+                <Button 
+                  onClick={() => selectedCase && handleStatusUpdate(selectedCase.status)}
+                >
+                  Update Status
+                </Button>
               </div>
               <DrawerClose asChild>
                 <Button variant="outline">Close</Button>
