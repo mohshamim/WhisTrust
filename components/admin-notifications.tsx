@@ -33,8 +33,8 @@ export function AdminNotifications() {
       try {
         const { getCurrentAdmin } = await import("@/lib/services/auth");
         const admin = await getCurrentAdmin();
-        if (admin) {
-          setCurrentUserId(admin.id);
+        if (admin.success && admin.user) {
+          setCurrentUserId(admin.user.id);
         }
       } catch (error) {
         console.error("Error loading current user:", error);
@@ -44,13 +44,21 @@ export function AdminNotifications() {
   }, []);
 
   // Subscribe to realtime notifications
-  const { isConnected } = useRealtimeNotifications({
+  const {
+    isConnected,
+    notifications: realtimeNotifications,
+    unreadCount: realtimeUnreadCount,
+  } = useRealtimeNotifications({
     userId: currentUserId || "",
-    onNewNotification: (notification) => {
-      setNotifications((prev) => [notification, ...prev]);
-      setUnreadCount((prev) => prev + 1);
-    },
   });
+
+  // Update local state when realtime notifications change
+  useEffect(() => {
+    if (realtimeNotifications.length > 0) {
+      setNotifications(realtimeNotifications);
+      setUnreadCount(realtimeUnreadCount);
+    }
+  }, [realtimeNotifications, realtimeUnreadCount]);
 
   // Load initial notifications
   useEffect(() => {

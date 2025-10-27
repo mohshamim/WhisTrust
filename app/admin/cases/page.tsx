@@ -77,6 +77,7 @@ function CasesPageContent() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState(statusParam || "all");
+  const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [labels, setLabels] = useState<ReportLabel[]>([]);
   const [loadingAssignment, setLoadingAssignment] = useState(false);
@@ -163,7 +164,11 @@ function CasesPageContent() {
       case_.tracking_code.toLowerCase().includes(searchQuery.toLowerCase()) ||
       case_.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
       case_.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch;
+
+    const matchesPriority =
+      priorityFilter === "all" || case_.priority === priorityFilter;
+
+    return matchesSearch && matchesPriority;
   });
 
   const openCaseDetails = (case_: any) => {
@@ -213,7 +218,7 @@ function CasesPageContent() {
       const result = await sendMessage({
         report_id: selectedCase.id,
         sender_type: "admin",
-        sender_id: null,
+        sender_id: undefined,
         content: newMessage,
       });
 
@@ -229,9 +234,10 @@ function CasesPageContent() {
           const currentAdmin = await getCurrentAdmin();
 
           if (
-            currentAdmin &&
+            currentAdmin.success &&
+            currentAdmin.user &&
             selectedCase.assigned_to &&
-            selectedCase.assigned_to !== currentAdmin.id
+            selectedCase.assigned_to !== currentAdmin.user.id
           ) {
             const { createNotification } = await import(
               "@/lib/services/notifications"
@@ -384,6 +390,35 @@ function CasesPageContent() {
     }
   };
 
+  const handlePriorityUpdate = async (newPriority: string) => {
+    if (!selectedCase) return;
+
+    try {
+      const { updateReport } = await import("@/lib/services/reports");
+
+      const result = await updateReport(selectedCase.tracking_code, {
+        priority: newPriority as "low" | "medium" | "high",
+      });
+
+      if (result.success) {
+        // Update local state
+        setCases((prev) =>
+          prev.map((c) =>
+            c.id === selectedCase.id ? { ...c, priority: newPriority } : c
+          )
+        );
+        // Update selected case
+        setSelectedCase({ ...selectedCase, priority: newPriority });
+        alert("Priority updated successfully!");
+      } else {
+        alert(result.error || "Failed to update priority");
+      }
+    } catch (error) {
+      console.error("Error updating priority:", error);
+      alert("An error occurred while updating the priority");
+    }
+  };
+
   return (
     <SidebarProvider>
       <AdminSidebar />
@@ -436,6 +471,22 @@ function CasesPageContent() {
                       <SelectItem value="open">Open</SelectItem>
                       <SelectItem value="progress">In Progress</SelectItem>
                       <SelectItem value="resolved">Resolved</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="w-[200px]">
+                  <Select
+                    value={priorityFilter}
+                    onValueChange={setPriorityFilter}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Priority" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Priorities</SelectItem>
+                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="medium">Medium</SelectItem>
+                      <SelectItem value="low">Low</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -639,12 +690,27 @@ function CasesPageContent() {
                     <CardTitle className="text-base">Priority</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <PriorityBadge priority={selectedCase.priority} />
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {selectedCase.priority
-                        ? "Current priority level"
-                        : "No priority set"}
-                    </p>
+                    <div className="space-y-3">
+                      <PriorityBadge priority={selectedCase.priority} />
+                      <div className="space-y-2">
+                        <p className="text-xs font-medium text-muted-foreground">
+                          Update Priority
+                        </p>
+                        <Select
+                          value={selectedCase.priority || "medium"}
+                          onValueChange={handlePriorityUpdate}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select priority" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="low">Low</SelectItem>
+                            <SelectItem value="medium">Medium</SelectItem>
+                            <SelectItem value="high">High</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                   </CardContent>
                 </Card>
 
