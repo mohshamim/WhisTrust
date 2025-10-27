@@ -6,7 +6,6 @@ import {
   FileSearch,
   Settings,
   Shield,
-  MessageSquare,
   BarChart3,
   History,
 } from "lucide-react";
@@ -52,11 +51,6 @@ const data = {
           url: "/admin/cases?status=resolved",
         },
       ],
-    },
-    {
-      title: "Messages",
-      url: "/admin/messages",
-      icon: MessageSquare,
     },
     {
       title: "Analytics",
