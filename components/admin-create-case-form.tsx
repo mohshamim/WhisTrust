@@ -55,6 +55,7 @@ export function CreateCaseForm({ onSuccess }: { onSuccess?: () => void }) {
         description: formData.description,
         source: formData.source,
         priority: formData.priority,
+        submitted_by: 'admin',
         reporter_name: formData.reporter_name || undefined,
         reporter_email: formData.reporter_email || undefined,
       });
