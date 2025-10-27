@@ -13,7 +13,10 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRealtimeNotifications } from "@/hooks/use-realtime-notifications";
-import { markNotificationRead, markAllNotificationsRead } from "@/lib/services/notifications";
+import {
+  markNotificationRead,
+  markAllNotificationsRead,
+} from "@/lib/services/notifications";
 import { useRouter } from "next/navigation";
 
 // BRD Phase 3: Notification Bell Component
@@ -22,12 +25,27 @@ export function AdminNotifications() {
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  // Get current user ID (you'd need to fetch this from auth context)
-  const currentUserId = "current-user-id"; // TODO: Get from auth context
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+
+  // Get current user ID from auth
+  useEffect(() => {
+    const loadCurrentUser = async () => {
+      try {
+        const { getCurrentAdmin } = await import("@/lib/services/auth");
+        const admin = await getCurrentAdmin();
+        if (admin) {
+          setCurrentUserId(admin.id);
+        }
+      } catch (error) {
+        console.error("Error loading current user:", error);
+      }
+    };
+    loadCurrentUser();
+  }, []);
 
   // Subscribe to realtime notifications
   const { isConnected } = useRealtimeNotifications({
-    userId: currentUserId,
+    userId: currentUserId || "",
     onNewNotification: (notification) => {
       setNotifications((prev) => [notification, ...prev]);
       setUnreadCount((prev) => prev + 1);
@@ -36,17 +54,23 @@ export function AdminNotifications() {
 
   // Load initial notifications
   useEffect(() => {
-    loadNotifications();
-  }, []);
+    if (currentUserId) {
+      loadNotifications();
+    }
+  }, [currentUserId]);
 
   const loadNotifications = async () => {
+    if (!currentUserId) return;
+
     try {
-      const { getUserNotifications } = await import("@/lib/services/notifications");
+      const { getUserNotifications } = await import(
+        "@/lib/services/notifications"
+      );
       const result = await getUserNotifications(currentUserId);
-      
+
       if (result.success && result.notifications) {
         setNotifications(result.notifications);
-        setUnreadCount(result.notifications.filter((n: any) => !n.is_read).length);
+        setUnreadCount(result.notifications.filter((n: any) => !n.read).length);
       }
     } catch (error) {
       console.error("Error loading notifications:", error);
@@ -57,7 +81,7 @@ export function AdminNotifications() {
     try {
       await markNotificationRead(notificationId);
       setNotifications((prev) =>
-        prev.map((n) => (n.id === notificationId ? { ...n, is_read: true } : n))
+        prev.map((n) => (n.id === notificationId ? { ...n, read: true } : n))
       );
       setUnreadCount((prev) => Math.max(0, prev - 1));
     } catch (error) {
@@ -66,9 +90,11 @@ export function AdminNotifications() {
   };
 
   const handleMarkAllAsRead = async () => {
+    if (!currentUserId) return;
+
     try {
       await markAllNotificationsRead(currentUserId);
-      setNotifications((prev) => prev.map((n) => ({ ...n, is_read: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
       setUnreadCount(0);
     } catch (error) {
       console.error("Error marking all as read:", error);
@@ -77,10 +103,10 @@ export function AdminNotifications() {
 
   const handleNotificationClick = (notification: any) => {
     // Mark as read
-    if (!notification.is_read) {
+    if (!notification.read) {
       handleMarkAsRead(notification.id);
     }
-    
+
     // Navigate to case if resource_id exists
     if (notification.resource_id) {
       router.push(`/admin/cases`);
@@ -118,9 +144,9 @@ export function AdminNotifications() {
             </Button>
           )}
         </div>
-        
+
         <DropdownMenuSeparator />
-        
+
         <ScrollArea className="h-[400px]">
           {notifications.length === 0 ? (
             <div className="p-4 text-center text-sm text-muted-foreground">
@@ -133,7 +159,7 @@ export function AdminNotifications() {
                   key={notification.id}
                   onClick={() => handleNotificationClick(notification)}
                   className={`cursor-pointer ${
-                    !notification.is_read ? "bg-muted" : ""
+                    !notification.read ? "bg-muted" : ""
                   }`}
                 >
                   <div className="flex items-start gap-3 w-full">
@@ -150,7 +176,7 @@ export function AdminNotifications() {
                         {new Date(notification.created_at).toLocaleString()}
                       </p>
                     </div>
-                    {!notification.is_read && (
+                    {!notification.read && (
                       <div className="h-2 w-2 rounded-full bg-primary" />
                     )}
                   </div>

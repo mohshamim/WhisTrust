@@ -44,6 +44,30 @@ export async function submitReport(data: NewReport): Promise<{ success: boolean;
       return { success: false, error: error.message };
     }
 
+    // Notify all admins about the new report
+    try {
+      const admins = await getAdminUsers();
+      if (admins && admins.length > 0) {
+        const { createNotification } = await import("@/lib/services/notifications");
+        
+        // Create notifications for all admins
+        const notificationPromises = admins.map(admin => 
+          createNotification({
+            userId: admin.id,
+            type: "new_report",
+            title: "New Report Submitted",
+            message: `A new ${data.category} report has been submitted. Tracking code: ${trackingCode}`,
+            link: "/admin/cases",
+          })
+        );
+        
+        await Promise.all(notificationPromises);
+      }
+    } catch (notificationError) {
+      // Don't fail the report submission if notification fails
+      console.error("Error creating notifications:", notificationError);
+    }
+
     return { success: true, trackingCode };
   } catch (error) {
     console.error("Error in submitReport:", error);

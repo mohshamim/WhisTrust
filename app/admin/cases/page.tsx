@@ -57,6 +57,7 @@ import {
 import { PriorityBadge } from "@/components/ui/priority-badge";
 import { CaseAssignmentSelect } from "@/components/ui/case-assignment-select";
 import { LabelsInput } from "@/components/ui/labels-input";
+import { AdminNotifications } from "@/components/admin-notifications";
 import type { AdminUser, ReportLabel } from "@/lib/types/database";
 
 // Helper function to format file size
@@ -219,6 +220,33 @@ function CasesPageContent() {
       if (result.success) {
         setNewMessage("");
         await loadMessages();
+
+        // Create notification for the reporter (if they have tracking code access)
+        // Note: This would require looking up the reporter's contact info from the case
+        // For now, we'll notify other admins who can see this case
+        try {
+          const { getCurrentAdmin } = await import("@/lib/services/auth");
+          const currentAdmin = await getCurrentAdmin();
+
+          if (
+            currentAdmin &&
+            selectedCase.assigned_to &&
+            selectedCase.assigned_to !== currentAdmin.id
+          ) {
+            const { createNotification } = await import(
+              "@/lib/services/notifications"
+            );
+            await createNotification({
+              userId: selectedCase.assigned_to,
+              type: "new_message",
+              title: "New Message on Case",
+              message: `A new message has been added to case ${selectedCase.tracking_code}.`,
+              link: `/admin/cases`,
+            });
+          }
+        } catch (error) {
+          console.error("Error creating message notification:", error);
+        }
       }
     } catch (error) {
       console.error("Error sending message:", error);
@@ -248,7 +276,44 @@ function CasesPageContent() {
 
       if (result.success) {
         await loadCases();
+        const newAssignee = adminId
+          ? admins.find((a) => a.id === adminId)
+          : null;
         setSelectedCase({ ...selectedCase, assigned_to: adminId });
+
+        // Show success notification
+        const assigneeName =
+          newAssignee?.full_name || newAssignee?.email || "Unassigned";
+        console.log(
+          `Case ${selectedCase.tracking_code} assigned to: ${assigneeName}`
+        );
+
+        // Update local cases list
+        setCases((prev) =>
+          prev.map((c) =>
+            c.id === selectedCase.id ? { ...c, assigned_to: adminId } : c
+          )
+        );
+
+        // Create notification for assigned admin if assigned to someone
+        if (adminId) {
+          try {
+            const { createNotification } = await import(
+              "@/lib/services/notifications"
+            );
+            await createNotification({
+              userId: adminId,
+              type: "case_assigned",
+              title: "Case Assigned to You",
+              message: `Case ${selectedCase.tracking_code} has been assigned to you.`,
+              link: `/admin/cases`,
+            });
+          } catch (error) {
+            console.error("Error creating notification:", error);
+          }
+        }
+      } else {
+        alert(result.error || "Failed to assign case");
       }
     } catch (error) {
       console.error("Error assigning case:", error);
@@ -334,6 +399,9 @@ function CasesPageContent() {
               </p>
             </div>
           </div>
+          <div className="ml-auto px-4">
+            <AdminNotifications />
+          </div>
         </header>
 
         <div className="flex flex-1 flex-col gap-4 p-4">
@@ -411,6 +479,7 @@ function CasesPageContent() {
                       <TableHead>Category</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Priority</TableHead>
+                      <TableHead>Assigned To</TableHead>
                       <TableHead>Created</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
@@ -429,6 +498,19 @@ function CasesPageContent() {
                         <TableCell>{getStatusBadge(case_.status)}</TableCell>
                         <TableCell>
                           <PriorityBadge priority={case_.priority} />
+                        </TableCell>
+                        <TableCell>
+                          {case_.assigned_to ? (
+                            admins.find((a) => a.id === case_.assigned_to)
+                              ?.full_name ||
+                            admins.find((a) => a.id === case_.assigned_to)
+                              ?.email ||
+                            "Unknown"
+                          ) : (
+                            <span className="text-muted-foreground">
+                              Unassigned
+                            </span>
+                          )}
                         </TableCell>
                         <TableCell>
                           {new Date(case_.created_at).toLocaleDateString()}
