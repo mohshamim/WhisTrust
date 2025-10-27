@@ -134,8 +134,8 @@ function AnimatedGroup({
   const containerVariants = variants?.container || selectedVariants.container;
   const itemVariants = variants?.item || selectedVariants.item;
 
-  const MotionComponent = motionComponents[as] || MotionDiv;
-  const MotionChild = motionComponents[asChild] || MotionDiv;
+  const MotionComponent = (motionComponents[as as string] || MotionDiv) as React.ElementType;
+  const MotionChild = (motionComponents[asChild as string] || MotionDiv) as React.ElementType;
 
   return (
     <MotionComponent
