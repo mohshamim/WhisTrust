@@ -60,7 +60,9 @@ export async function addLabel(
 
     if (error) {
       console.error("Error adding label:", error);
-      return { success: false, error: error.message };
+      // Handle both error.message and error as string
+      const errorMessage = typeof error === 'string' ? error : error.message || error.code || 'Unknown error occurred';
+      return { success: false, error: errorMessage };
     }
 
     return { success: true, label: data };
