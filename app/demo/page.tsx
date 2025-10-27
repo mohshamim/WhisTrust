@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,10 +25,14 @@ import {
   EyeOff,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { signInAdmin } from "@/lib/services/auth";
 
 export default function DemoPage() {
+  const router = useRouter();
   const [copied, setCopied] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [loginError, setLoginError] = useState("");
 
   const demoCredentials = {
     email: "admin@whistrust.com",
@@ -38,6 +43,31 @@ export default function DemoPage() {
     navigator.clipboard.writeText(text);
     setCopied(type);
     setTimeout(() => setCopied(null), 2000);
+  };
+
+  const handleQuickLogin = async () => {
+    setLoginError("");
+    setIsLoggingIn(true);
+
+    try {
+      const result = await signInAdmin({
+        email: demoCredentials.email,
+        password: demoCredentials.password,
+      });
+
+      if (result.success) {
+        router.push("/admin/dashboard");
+      } else {
+        setLoginError(
+          result.error || "Login failed. Please check your credentials."
+        );
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      setLoginError("An unexpected error occurred. Please try again.");
+    } finally {
+      setIsLoggingIn(false);
+    }
   };
 
   return (
@@ -228,6 +258,14 @@ export default function DemoPage() {
                 </div>
               </div>
 
+              {loginError && (
+                <Alert variant="destructive" className="mt-4">
+                  <AlertDescription className="text-sm">
+                    {loginError}
+                  </AlertDescription>
+                </Alert>
+              )}
+
               <div className="flex gap-3">
                 <Button
                   variant="outline"
@@ -253,11 +291,20 @@ export default function DemoPage() {
                     </>
                   )}
                 </Button>
-                <Button asChild size="lg" className="flex-1 h-12">
-                  <Link href="/admin/login">
-                    Login to Dashboard
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
+                <Button
+                  size="lg"
+                  className="flex-1 h-12"
+                  onClick={handleQuickLogin}
+                  disabled={isLoggingIn}
+                >
+                  {isLoggingIn ? (
+                    "Logging in..."
+                  ) : (
+                    <>
+                      Login to Dashboard
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
                 </Button>
               </div>
             </CardContent>

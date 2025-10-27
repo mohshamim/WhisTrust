@@ -159,16 +159,37 @@ function TrackPageContent() {
 
     try {
       const { sendMessage } = await import("@/lib/services/messages");
+      const messageText = newMessageText.trim();
 
       const result = await sendMessage({
         report_id: caseData.reportId,
         sender_type: "reporter",
-        content: newMessageText.trim(),
+        content: messageText,
       });
 
       if (result.success) {
+        // Immediately add the message to the UI for instant feedback
+        const newMessage: CaseMessage = {
+          id: result.message?.id || Date.now().toString(),
+          type: "reporter",
+          text: messageText,
+          timestamp: new Date().toLocaleString(),
+        };
+
+        setCaseData((prev) => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            messages: [...prev.messages, newMessage],
+          };
+        });
+
         setNewMessageText("");
-        // Message will appear automatically via realtime subscription
+        
+        // Scroll to bottom after adding message
+        setTimeout(() => {
+          scrollToBottom();
+        }, 100);
       } else {
         alert(result.error || "Failed to send message");
       }
@@ -276,7 +297,13 @@ function TrackPageContent() {
                   ref={scrollContainerRef}
                   className="space-y-4 max-h-[600px] overflow-y-auto pr-2"
                 >
-                  {caseData.messages.map((message) => {
+                  {caseData.messages.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>No messages yet. Start the conversation!</p>
+                    </div>
+                  ) : (
+                    caseData.messages.map((message) => {
                     const isReporter = message.type === "reporter";
                     return (
                       <div
@@ -307,7 +334,8 @@ function TrackPageContent() {
                         </div>
                       </div>
                     );
-                  })}
+                  })
+                  )}
                   <div ref={messagesEndRef} />
                 </div>
 
