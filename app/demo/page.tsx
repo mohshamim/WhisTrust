@@ -30,8 +30,8 @@ export default function DemoPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   const demoCredentials = {
-    email: "demo@whistrust.com",
-    password: "Demo123!@#",
+    email: "admin@whistrust.com",
+    password: "Admin@123",
   };
 
   const copyToClipboard = (text: string, type: string) => {
