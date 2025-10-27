@@ -53,11 +53,20 @@ import {
   Calendar,
   User,
   MessageSquare,
+  File,
+  Download,
 } from "lucide-react";
 import { PriorityBadge } from "@/components/ui/priority-badge";
 import { CaseAssignmentSelect } from "@/components/ui/case-assignment-select";
 import { LabelsInput } from "@/components/ui/labels-input";
 import type { AdminUser, ReportLabel } from "@/lib/types/database";
+
+// Helper function to format file size
+const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(2) + " MB";
+};
 
 function CasesPageContent() {
   const searchParams = useSearchParams();
@@ -74,6 +83,7 @@ function CasesPageContent() {
   const [loadingAssignment, setLoadingAssignment] = useState(false);
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [attachments, setAttachments] = useState<any[]>([]);
 
   useEffect(() => {
     loadCases();
@@ -87,6 +97,7 @@ function CasesPageContent() {
     if (selectedCase) {
       loadLabels();
       loadMessages();
+      loadAttachments();
     }
   }, [selectedCase?.id]);
 
@@ -213,6 +224,19 @@ function CasesPageContent() {
       }
     } catch (error) {
       console.error("Error sending message:", error);
+    }
+  };
+
+  const loadAttachments = async () => {
+    if (!selectedCase) return;
+    try {
+      const { getReportAttachments } = await import("@/lib/services/storage");
+      const result = await getReportAttachments(selectedCase.id);
+      if (result.success && result.attachments) {
+        setAttachments(result.attachments);
+      }
+    } catch (error) {
+      console.error("Error loading attachments:", error);
     }
   };
 
@@ -549,6 +573,65 @@ function CasesPageContent() {
                         onAdd={handleAddLabel}
                         onRemove={handleRemoveLabel}
                       />
+                    </CardContent>
+                  </Card>
+
+                  {/* Attachments Section */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <File className="h-5 w-5" />
+                        Attachments
+                      </CardTitle>
+                      <CardDescription>
+                        Documents and files uploaded with this report
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      {attachments.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <File className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                          <p>No attachments</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-2">
+                          {attachments.map((attachment) => (
+                            <div
+                              key={attachment.id}
+                              className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                            >
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <File className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium truncate">
+                                    {attachment.file_name}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {formatFileSize(attachment.file_size)}
+                                    {" • "}
+                                    {attachment.mime_type}
+                                  </p>
+                                </div>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="flex-shrink-0"
+                                asChild
+                              >
+                                <a
+                                  href={attachment.signedUrl}
+                                  download={attachment.file_name}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <Download className="h-4 w-4" />
+                                </a>
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </CardContent>
                   </Card>
 

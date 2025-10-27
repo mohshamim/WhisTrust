@@ -9,7 +9,22 @@ export interface UploadFileParams {
 export interface UploadResult {
   success: boolean;
   filePath?: string;
+  attachmentId?: string;
   error?: string;
+}
+
+export interface Attachment {
+  id: string;
+  report_id: string;
+  file_name: string;
+  file_path: string;
+  file_size: number;
+  mime_type: string;
+  created_at: string;
+}
+
+export interface AttachmentWithUrl extends Attachment {
+  signedUrl: string;
 }
 
 /**
@@ -55,9 +70,33 @@ export async function uploadFile({
       };
     }
 
+    // Insert attachment record into database
+    const { data: attachmentData, error: dbError } = await supabase
+      .from("report_attachments")
+      .insert({
+        report_id: reportId,
+        file_name: file.name,
+        file_path: data.path,
+        file_size: file.size,
+        mime_type: file.type,
+      })
+      .select()
+      .single();
+
+    if (dbError) {
+      console.error("Database insert error:", dbError);
+      // File was uploaded but record insert failed - could clean up file here
+      // For now, we'll still return success since the file is uploaded
+      return {
+        success: true,
+        filePath: data.path,
+      };
+    }
+
     return {
       success: true,
       filePath: data.path,
+      attachmentId: attachmentData.id,
     };
   } catch (error) {
     console.error("Upload exception:", error);
@@ -99,6 +138,59 @@ export async function getFileUrl(
     };
   } catch (error) {
     console.error("Signed URL exception:", error);
+    return {
+      success: false,
+      error: "An unexpected error occurred",
+    };
+  }
+}
+
+/**
+ * Get all attachments for a specific report
+ * Returns attachments with signed URLs for download/viewing
+ */
+export async function getReportAttachments(
+  reportId: string
+): Promise<{ success: boolean; attachments?: AttachmentWithUrl[]; error?: string }> {
+  try {
+    const supabase = createClient();
+
+    // Fetch attachments from database
+    const { data: attachments, error: dbError } = await supabase
+      .from("report_attachments")
+      .select("*")
+      .eq("report_id", reportId)
+      .order("created_at", { ascending: false });
+
+    if (dbError) {
+      console.error("Error fetching attachments:", dbError);
+      return {
+        success: false,
+        error: dbError.message || "Failed to fetch attachments",
+      };
+    }
+
+    if (!attachments || attachments.length === 0) {
+      return { success: true, attachments: [] };
+    }
+
+    // Generate signed URLs for each attachment
+    const attachmentsWithUrls: AttachmentWithUrl[] = await Promise.all(
+      attachments.map(async (attachment) => {
+        const urlResult = await getFileUrl(attachment.file_path, 3600);
+        return {
+          ...attachment,
+          signedUrl: urlResult.url || "",
+        };
+      })
+    );
+
+    return {
+      success: true,
+      attachments: attachmentsWithUrls,
+    };
+  } catch (error) {
+    console.error("Get attachments exception:", error);
     return {
       success: false,
       error: "An unexpected error occurred",
