@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Card,
@@ -33,7 +33,7 @@ interface CaseData {
   messages: CaseMessage[];
 }
 
-export default function TrackPage() {
+function TrackPageContent() {
   const searchParams = useSearchParams();
   const codeParam = searchParams.get("code");
 
@@ -339,5 +339,13 @@ export default function TrackPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function TrackPage() {
+  return (
+    <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
+      <TrackPageContent />
+    </Suspense>
   );
 }
