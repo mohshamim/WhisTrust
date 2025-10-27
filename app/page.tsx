@@ -511,41 +511,6 @@ export default function Home() {
             </Card>
           </div>
 
-          {/* Add-ons Section */}
-          <Card className="mt-12 bg-gradient-to-br from-muted/50 to-background">
-            <CardHeader>
-              <CardTitle className="text-center">Add-ons</CardTitle>
-              <CardDescription className="text-center">
-                Enhance your plan with additional features
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="p-4 bg-background rounded-xl border">
-                  <h4 className="font-semibold mb-2">KSA Data Residency</h4>
-                  <p className="text-2xl font-bold text-primary">+$100/mo</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Keep data within Saudi Arabia
-                  </p>
-                </div>
-                <div className="p-4 bg-background rounded-xl border">
-                  <h4 className="font-semibold mb-2">Extra Storage</h4>
-                  <p className="text-2xl font-bold text-primary">+$10/100GB</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Per 100GB per month
-                  </p>
-                </div>
-                <div className="p-4 bg-background rounded-xl border">
-                  <h4 className="font-semibold mb-2">Phone Hotline</h4>
-                  <p className="text-2xl font-bold text-primary">+$29/mo</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Phone/IVR support included
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
           {/* Included in all plans */}
           <div className="text-center mt-12">
             <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
@@ -558,16 +523,6 @@ export default function Home() {
           <div className="mt-20 max-w-3xl mx-auto">
             <h3 className="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h3>
             <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1">
-                <AccordionTrigger className="text-left">
-                  Do you store data in Saudi Arabia?
-                </AccordionTrigger>
-                <AccordionContent>
-                  Yes, we offer KSA data residency as an add-on service. Your
-                  data will be stored entirely within Saudi Arabia to comply
-                  with local regulations. Contact us for details.
-                </AccordionContent>
-              </AccordionItem>
               <AccordionItem value="item-2">
                 <AccordionTrigger className="text-left">
                   Is my data encrypted?
