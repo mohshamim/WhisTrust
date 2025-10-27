@@ -335,10 +335,10 @@ export default function DocumentationPage() {
           <CardContent>
             <div className="p-4 bg-muted rounded-lg font-mono text-sm">
               <p>
-                <strong>Email:</strong> admin@example.com
+                <strong>Email:</strong> admin@whistrust.com
               </p>
               <p className="mt-2">
-                <strong>Password:</strong> password123
+                <strong>Password:</strong> Admin@123
               </p>
             </div>
             <p className="text-xs text-muted-foreground mt-4">

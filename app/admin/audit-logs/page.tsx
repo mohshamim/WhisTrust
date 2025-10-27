@@ -92,7 +92,8 @@ export default function AuditLogsPage() {
 
   const getActionBadgeVariant = (action: string) => {
     if (action.includes("created")) return "default";
-    if (action.includes("updated") || action.includes("changed")) return "secondary";
+    if (action.includes("updated") || action.includes("changed"))
+      return "secondary";
     if (action.includes("deleted")) return "destructive";
     if (action.includes("login")) return "outline";
     return "default";
@@ -100,9 +101,10 @@ export default function AuditLogsPage() {
 
   const formatDetails = (details: any) => {
     if (!details) return "—";
-    
+
     try {
-      const parsed = typeof details === "string" ? JSON.parse(details) : details;
+      const parsed =
+        typeof details === "string" ? JSON.parse(details) : details;
       return JSON.stringify(parsed, null, 2);
     } catch {
       return String(details);
@@ -138,11 +140,7 @@ export default function AuditLogsPage() {
                   <Filter className="h-4 w-4" />
                   <CardTitle>Filters</CardTitle>
                 </div>
-                <Button
-                  onClick={clearFilters}
-                  variant="outline"
-                  size="sm"
-                >
+                <Button onClick={clearFilters} variant="outline" size="sm">
                   Clear All
                 </Button>
               </div>
@@ -156,7 +154,9 @@ export default function AuditLogsPage() {
                   <Input
                     placeholder="Action type"
                     value={filters.action}
-                    onChange={(e) => handleFilterChange("action", e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("action", e.target.value)
+                    }
                   />
                 </div>
                 <div>
@@ -166,7 +166,9 @@ export default function AuditLogsPage() {
                   <Input
                     placeholder="Resource type"
                     value={filters.resourceType}
-                    onChange={(e) => handleFilterChange("resourceType", e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("resourceType", e.target.value)
+                    }
                   />
                 </div>
                 <div>
@@ -176,7 +178,9 @@ export default function AuditLogsPage() {
                   <Input
                     placeholder="User ID"
                     value={filters.userId}
-                    onChange={(e) => handleFilterChange("userId", e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("userId", e.target.value)
+                    }
                   />
                 </div>
                 <div>
@@ -186,7 +190,9 @@ export default function AuditLogsPage() {
                   <Input
                     type="date"
                     value={filters.startDate}
-                    onChange={(e) => handleFilterChange("startDate", e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("startDate", e.target.value)
+                    }
                   />
                 </div>
                 <div>
@@ -196,7 +202,9 @@ export default function AuditLogsPage() {
                   <Input
                     type="date"
                     value={filters.endDate}
-                    onChange={(e) => handleFilterChange("endDate", e.target.value)}
+                    onChange={(e) =>
+                      handleFilterChange("endDate", e.target.value)
+                    }
                   />
                 </div>
               </div>
@@ -219,7 +227,11 @@ export default function AuditLogsPage() {
                   size="sm"
                   disabled={isLoading}
                 >
-                  <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                  <RefreshCw
+                    className={`h-4 w-4 mr-2 ${
+                      isLoading ? "animate-spin" : ""
+                    }`}
+                  />
                   Refresh
                 </Button>
               </div>
@@ -240,17 +252,24 @@ export default function AuditLogsPage() {
                     <table className="w-full text-sm">
                       <thead>
                         <tr className="border-b">
-                          <th className="text-left p-2 font-medium">Timestamp</th>
+                          <th className="text-left p-2 font-medium">
+                            Timestamp
+                          </th>
                           <th className="text-left p-2 font-medium">User</th>
                           <th className="text-left p-2 font-medium">Role</th>
                           <th className="text-left p-2 font-medium">Action</th>
-                          <th className="text-left p-2 font-medium">Resource</th>
+                          <th className="text-left p-2 font-medium">
+                            Resource
+                          </th>
                           <th className="text-left p-2 font-medium">Details</th>
                         </tr>
                       </thead>
                       <tbody>
                         {logs.map((log) => (
-                          <tr key={log.id} className="border-b hover:bg-muted/50">
+                          <tr
+                            key={log.id}
+                            className="border-b hover:bg-muted/50"
+                          >
                             <td className="p-2">
                               <div className="flex items-center gap-1 text-xs">
                                 <Clock className="h-3 w-3" />
@@ -273,13 +292,18 @@ export default function AuditLogsPage() {
                               </Badge>
                             </td>
                             <td className="p-2">
-                              <Badge variant={getActionBadgeVariant(log.action)} className="text-xs">
+                              <Badge
+                                variant={getActionBadgeVariant(log.action)}
+                                className="text-xs"
+                              >
                                 {log.action}
                               </Badge>
                             </td>
                             <td className="p-2">
                               <div className="text-xs">
-                                <div className="font-medium">{log.resource_type}</div>
+                                <div className="font-medium">
+                                  {log.resource_type}
+                                </div>
                                 <div className="text-muted-foreground">
                                   {log.resource_id?.substring(0, 8)}...
                                 </div>
@@ -300,13 +324,17 @@ export default function AuditLogsPage() {
                   {totalPages > 1 && (
                     <div className="flex items-center justify-between">
                       <div className="text-sm text-muted-foreground">
-                        Showing {((currentPage - 1) * itemsPerPage) + 1} to {Math.min(currentPage * itemsPerPage, logs.length)} of {logs.length} logs
+                        Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
+                        {Math.min(currentPage * itemsPerPage, logs.length)} of{" "}
+                        {logs.length} logs
                       </div>
                       <div className="flex gap-2">
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                          onClick={() =>
+                            setCurrentPage((p) => Math.max(1, p - 1))
+                          }
                           disabled={currentPage === 1}
                         >
                           Previous
@@ -314,7 +342,9 @@ export default function AuditLogsPage() {
                         <Button
                           variant="outline"
                           size="sm"
-                          onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                          onClick={() =>
+                            setCurrentPage((p) => Math.min(totalPages, p + 1))
+                          }
                           disabled={currentPage === totalPages}
                         >
                           Next
