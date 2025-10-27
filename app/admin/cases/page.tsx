@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Table,
   TableBody,
@@ -71,6 +72,8 @@ function CasesPageContent() {
   const [admins, setAdmins] = useState<AdminUser[]>([]);
   const [labels, setLabels] = useState<ReportLabel[]>([]);
   const [loadingAssignment, setLoadingAssignment] = useState(false);
+  const [messages, setMessages] = useState<any[]>([]);
+  const [newMessage, setNewMessage] = useState("");
 
   useEffect(() => {
     loadCases();
@@ -83,6 +86,7 @@ function CasesPageContent() {
   useEffect(() => {
     if (selectedCase) {
       loadLabels();
+      loadMessages();
     }
   }, [selectedCase?.id]);
 
@@ -175,6 +179,40 @@ function CasesPageContent() {
       setLabels(labelsList);
     } catch (error) {
       console.error("Error loading labels:", error);
+    }
+  };
+
+  const loadMessages = async () => {
+    if (!selectedCase) return;
+    try {
+      const { getReportMessages } = await import("@/lib/services/messages");
+      const result = await getReportMessages(selectedCase.id);
+      if (result.success && result.messages) {
+        setMessages(result.messages);
+      }
+    } catch (error) {
+      console.error("Error loading messages:", error);
+    }
+  };
+
+  const handleSendMessage = async () => {
+    if (!selectedCase || !newMessage.trim()) return;
+
+    try {
+      const { sendMessage } = await import("@/lib/services/messages");
+      const result = await sendMessage({
+        report_id: selectedCase.id,
+        sender_type: "admin",
+        sender_id: null,
+        content: newMessage,
+      });
+
+      if (result.success) {
+        setNewMessage("");
+        await loadMessages();
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
     }
   };
 
@@ -526,9 +564,56 @@ function CasesPageContent() {
                       </CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <div className="text-center py-8 text-muted-foreground">
-                        <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                        <p>No messages yet</p>
+                      {messages.length === 0 ? (
+                        <div className="text-center py-8 text-muted-foreground">
+                          <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                          <p>No messages yet</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                          {messages.map((message) => (
+                            <div
+                              key={message.id}
+                              className={`p-3 rounded-lg ${
+                                message.sender_type === "admin"
+                                  ? "bg-primary/10 ml-8"
+                                  : "bg-muted mr-8"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-sm font-medium">
+                                  {message.sender_type === "admin"
+                                    ? "Admin"
+                                    : "Reporter"}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(
+                                    message.created_at
+                                  ).toLocaleString()}
+                                </span>
+                              </div>
+                              <p className="text-sm">{message.content}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Send Message */}
+                      <div className="mt-4 pt-4 border-t">
+                        <Textarea
+                          placeholder="Write a message..."
+                          value={newMessage}
+                          onChange={(e) => setNewMessage(e.target.value)}
+                          rows={2}
+                        />
+                        <Button
+                          onClick={handleSendMessage}
+                          disabled={!newMessage.trim()}
+                          className="mt-2"
+                          size="sm"
+                        >
+                          Send
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
