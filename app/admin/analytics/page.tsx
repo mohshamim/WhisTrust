@@ -23,6 +23,7 @@ import {
   Clock,
   Download,
   PieChart,
+  RefreshCw,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -44,26 +45,29 @@ export default function AnalyticsPage() {
     try {
       setIsLoading(true);
 
-      // TODO: Replace with actual analytics service calls
-      // const { getReportStatistics, getCategoryStatistics } = await import("@/lib/services/analytics");
-      // const statsResult = await getReportStatistics();
-      // const categoryResult = await getCategoryStatistics();
+      // Import analytics service
+      const { getReportStatistics, getCategoryStatistics } = await import("@/lib/services/analytics");
+      
+      // Fetch statistics
+      const statsResult = await getReportStatistics();
+      const categoryResult = await getCategoryStatistics();
 
-      // Mock data for now
-      setStats({
-        totalReports: 42,
-        pendingReports: 15,
-        resolvedReports: 27,
-        avgResolutionDays: 3.5,
-      });
+      if (statsResult.success && statsResult.stats) {
+        setStats({
+          totalReports: statsResult.stats.total_reports || 0,
+          pendingReports: statsResult.stats.pending_reports || 0,
+          resolvedReports: (statsResult.stats.resolved_reports || 0) + (statsResult.stats.closed_reports || 0),
+          avgResolutionDays: Math.round((statsResult.stats.avg_resolution_days || 0) * 10) / 10,
+        });
+      }
 
-      setCategoryStats([
-        { category: "Harassment", count: 12, percentage: 28.6 },
-        { category: "Discrimination", count: 10, percentage: 23.8 },
-        { category: "Theft", count: 8, percentage: 19.0 },
-        { category: "Safety", count: 7, percentage: 16.7 },
-        { category: "Other", count: 5, percentage: 11.9 },
-      ]);
+      if (categoryResult.success && categoryResult.stats) {
+        setCategoryStats(categoryResult.stats.map((cat) => ({
+          category: cat.category,
+          count: cat.total_count,
+          percentage: cat.percentage,
+        })));
+      }
     } catch (error) {
       console.error("Error loading analytics:", error);
     } finally {
@@ -71,9 +75,40 @@ export default function AnalyticsPage() {
     }
   };
 
-  const handleExport = () => {
-    // TODO: Implement CSV/PDF export
-    alert("Export functionality coming soon!");
+  const handleExport = async () => {
+    try {
+      const { exportAnalyticsToCSV } = await import("@/lib/services/analytics");
+      
+      // Prepare data for export
+      const exportData = [
+        { Metric: "Total Reports", Value: stats.totalReports },
+        { Metric: "Pending Reports", Value: stats.pendingReports },
+        { Metric: "Resolved Reports", Value: stats.resolvedReports },
+        { Metric: "Avg Resolution Days", Value: stats.avgResolutionDays },
+        ...categoryStats.map(cat => ({
+          Metric: `Category: ${cat.category}`,
+          Value: `${cat.count} (${cat.percentage}%)`
+        }))
+      ];
+
+      const csvContent = exportAnalyticsToCSV(exportData);
+
+      // Create download link
+      const blob = new Blob([csvContent], { type: "text/csv" });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `whistrust-analytics-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+
+      alert("Analytics data exported successfully!");
+    } catch (error) {
+      console.error("Error exporting analytics:", error);
+      alert("Failed to export analytics data");
+    }
   };
 
   return (
@@ -102,14 +137,30 @@ export default function AnalyticsPage() {
             <div className="text-sm text-muted-foreground">
               Last updated: {new Date().toLocaleString()}
             </div>
-            <Button onClick={handleExport} variant="outline" size="sm">
-              <Download className="h-4 w-4 mr-2" />
-              Export Report
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={loadAnalytics} 
+                variant="outline" 
+                size="sm"
+                disabled={isLoading}
+              >
+                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                Refresh
+              </Button>
+              <Button onClick={handleExport} variant="outline" size="sm">
+                <Download className="h-4 w-4 mr-2" />
+                Export Report
+              </Button>
+            </div>
           </div>
 
           {/* Key Metrics */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {isLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
@@ -170,6 +221,7 @@ export default function AnalyticsPage() {
               </CardContent>
             </Card>
           </div>
+          )}
 
           {/* Charts Grid */}
           <div className="grid gap-4 md:grid-cols-2">
