@@ -42,11 +42,48 @@ CREATE POLICY "Admins can view assigned reports"
     )
   );
 
--- 5. Grant necessary permissions
+-- 5. Add RLS policies for report_labels
+DROP POLICY IF EXISTS "Admins can view report labels" ON report_labels;
+CREATE POLICY "Admins can view report labels"
+  ON report_labels
+  FOR SELECT
+  USING (
+    auth.role() = 'authenticated' 
+    AND EXISTS (
+      SELECT 1 FROM admin_profiles 
+      WHERE admin_profiles.id = auth.uid()
+    )
+  );
+
+DROP POLICY IF EXISTS "Admins can insert report labels" ON report_labels;
+CREATE POLICY "Admins can insert report labels"
+  ON report_labels
+  FOR INSERT
+  WITH CHECK (
+    auth.role() = 'authenticated' 
+    AND EXISTS (
+      SELECT 1 FROM admin_profiles 
+      WHERE admin_profiles.id = auth.uid()
+    )
+  );
+
+DROP POLICY IF EXISTS "Admins can delete report labels" ON report_labels;
+CREATE POLICY "Admins can delete report labels"
+  ON report_labels
+  FOR DELETE
+  USING (
+    auth.role() = 'authenticated' 
+    AND EXISTS (
+      SELECT 1 FROM admin_profiles 
+      WHERE admin_profiles.id = auth.uid()
+    )
+  );
+
+-- 6. Grant necessary permissions
 GRANT SELECT, INSERT, UPDATE, DELETE ON report_labels TO authenticated;
 GRANT SELECT, INSERT, UPDATE ON reports TO authenticated;
 
--- 6. Audit log trigger for assignments and priority changes
+-- 7. Audit log trigger for assignments and priority changes
 CREATE OR REPLACE FUNCTION log_assignment_change()
 RETURNS TRIGGER AS $$
 BEGIN
