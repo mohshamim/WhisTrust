@@ -53,6 +53,10 @@ import {
   User,
   MessageSquare,
 } from "lucide-react";
+import { PriorityBadge } from "@/components/ui/priority-badge";
+import { CaseAssignmentSelect } from "@/components/ui/case-assignment-select";
+import { LabelsInput } from "@/components/ui/labels-input";
+import type { AdminUser, ReportLabel } from "@/lib/types/database";
 
 function CasesPageContent() {
   const searchParams = useSearchParams();
@@ -64,10 +68,23 @@ function CasesPageContent() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState(statusParam || "all");
+  const [admins, setAdmins] = useState<AdminUser[]>([]);
+  const [labels, setLabels] = useState<ReportLabel[]>([]);
+  const [loadingAssignment, setLoadingAssignment] = useState(false);
 
   useEffect(() => {
     loadCases();
   }, [statusFilter]);
+
+  useEffect(() => {
+    loadAdmins();
+  }, []);
+
+  useEffect(() => {
+    if (selectedCase) {
+      loadLabels();
+    }
+  }, [selectedCase?.id]);
 
   const loadCases = async () => {
     try {
@@ -138,6 +155,79 @@ function CasesPageContent() {
   const openCaseDetails = (case_: any) => {
     setSelectedCase(case_);
     setIsDrawerOpen(true);
+  };
+
+  const loadAdmins = async () => {
+    try {
+      const { getAdminUsers } = await import("@/lib/services/reports");
+      const adminsList = await getAdminUsers();
+      setAdmins(adminsList);
+    } catch (error) {
+      console.error("Error loading admins:", error);
+    }
+  };
+
+  const loadLabels = async () => {
+    if (!selectedCase) return;
+    try {
+      const { getLabelsForReport } = await import("@/lib/services/labels");
+      const labelsList = await getLabelsForReport(selectedCase.id);
+      setLabels(labelsList);
+    } catch (error) {
+      console.error("Error loading labels:", error);
+    }
+  };
+
+  const handleAssign = async (adminId: string) => {
+    if (!selectedCase) return;
+    
+    setLoadingAssignment(true);
+    try {
+      const { assignCase } = await import("@/lib/services/reports");
+      const result = await assignCase(selectedCase.id, adminId);
+      
+      if (result.success) {
+        await loadCases();
+        setSelectedCase({ ...selectedCase, assigned_to: adminId });
+      }
+    } catch (error) {
+      console.error("Error assigning case:", error);
+      alert("Failed to assign case");
+    } finally {
+      setLoadingAssignment(false);
+    }
+  };
+
+  const handleAddLabel = async (label: string, color: string) => {
+    if (!selectedCase) return;
+    
+    try {
+      const { addLabel } = await import("@/lib/services/labels");
+      const result = await addLabel({ 
+        report_id: selectedCase.id, 
+        label, 
+        color 
+      });
+      
+      if (result.success) {
+        await loadLabels();
+      }
+    } catch (error) {
+      console.error("Error adding label:", error);
+    }
+  };
+
+  const handleRemoveLabel = async (labelId: string) => {
+    try {
+      const { removeLabel } = await import("@/lib/services/labels");
+      const result = await removeLabel(labelId);
+      
+      if (result.success) {
+        await loadLabels();
+      }
+    } catch (error) {
+      console.error("Error removing label:", error);
+    }
   };
 
   const handleStatusUpdate = async (newStatus: string) => {
@@ -260,6 +350,7 @@ function CasesPageContent() {
                       <TableHead>Tracking Code</TableHead>
                       <TableHead>Category</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Priority</TableHead>
                       <TableHead>Created</TableHead>
                       <TableHead>Actions</TableHead>
                     </TableRow>
@@ -276,6 +367,9 @@ function CasesPageContent() {
                         </TableCell>
                         <TableCell>{case_.category}</TableCell>
                         <TableCell>{getStatusBadge(case_.status)}</TableCell>
+                        <TableCell>
+                          <PriorityBadge priority={case_.priority} />
+                        </TableCell>
                         <TableCell>
                           {new Date(case_.created_at).toLocaleDateString()}
                         </TableCell>
@@ -373,6 +467,48 @@ function CasesPageContent() {
                           </div>
                         </div>
                       )}
+                    </CardContent>
+                  </Card>
+
+                  {/* Assignment Section - BRD Phase 3 */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Assignment</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <CaseAssignmentSelect
+                        admins={admins}
+                        currentAssigneeId={selectedCase.assigned_to}
+                        onAssign={handleAssign}
+                        disabled={loadingAssignment}
+                      />
+                    </CardContent>
+                  </Card>
+
+                  {/* Priority Section - BRD Phase 3 */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Priority</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <PriorityBadge priority={selectedCase.priority} />
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {selectedCase.priority ? "Current priority level" : "No priority set"}
+                      </p>
+                    </CardContent>
+                  </Card>
+
+                  {/* Labels Section - BRD Phase 3 */}
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-base">Labels</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <LabelsInput
+                        labels={labels}
+                        onAdd={handleAddLabel}
+                        onRemove={handleRemoveLabel}
+                      />
                     </CardContent>
                   </Card>
 
