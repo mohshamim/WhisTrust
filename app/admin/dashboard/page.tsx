@@ -224,45 +224,57 @@ export default function AdminDashboardPage() {
                 <CardDescription>Latest report submissions</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {recentCases.map((case_) => (
-                    <div
-                      key={case_.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
-                    >
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">Case {case_.id}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {case_.category}
-                        </p>
+                {isLoading ? (
+                  <div className="flex items-center justify-center py-12">
+                    <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                  </div>
+                ) : recentCases.length === 0 ? (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No cases yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {recentCases.map((case_) => (
+                      <div
+                        key={case_.id}
+                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                        onClick={() => window.location.href = `/admin/cases`}
+                      >
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium">Case {case_.id}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {case_.category}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <span className="text-xs text-muted-foreground">
+                            {case_.created}
+                          </span>
+                          {case_.status === "pending" && (
+                            <span className="px-2 py-1 text-xs rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                              Pending
+                            </span>
+                          )}
+                          {(case_.status === "in_review" ||
+                            case_.status === "in_progress") && (
+                            <span className="px-2 py-1 text-xs rounded-full bg-blue-500/10 text-blue-600 border border-blue-500/20">
+                              {case_.status === "in_review"
+                                ? "In Review"
+                                : "In Progress"}
+                            </span>
+                          )}
+                          {(case_.status === "resolved" ||
+                            case_.status === "closed") && (
+                            <span className="px-2 py-1 text-xs rounded-full bg-green-500/10 text-green-600 border border-green-500/20">
+                              Resolved
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <span className="text-xs text-muted-foreground">
-                          {case_.created}
-                        </span>
-                        {case_.status === "pending" && (
-                          <span className="px-2 py-1 text-xs rounded-full bg-amber-500/10 text-amber-600 border border-amber-500/20">
-                            Pending
-                          </span>
-                        )}
-                        {(case_.status === "in_review" ||
-                          case_.status === "in_progress") && (
-                          <span className="px-2 py-1 text-xs rounded-full bg-blue-500/10 text-blue-600 border border-blue-500/20">
-                            {case_.status === "in_review"
-                              ? "In Review"
-                              : "In Progress"}
-                          </span>
-                        )}
-                        {(case_.status === "resolved" ||
-                          case_.status === "closed") && (
-                          <span className="px-2 py-1 text-xs rounded-full bg-green-500/10 text-green-600 border border-green-500/20">
-                            Resolved
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

@@ -7,6 +7,8 @@ import {
   Settings,
   Shield,
   MessageSquare,
+  BarChart3,
+  History,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -55,6 +57,16 @@ const data = {
       title: "Messages",
       url: "/admin/messages",
       icon: MessageSquare,
+    },
+    {
+      title: "Analytics",
+      url: "/admin/analytics",
+      icon: BarChart3,
+    },
+    {
+      title: "Audit Logs",
+      url: "/admin/audit-logs",
+      icon: History,
     },
     {
       title: "Settings",
