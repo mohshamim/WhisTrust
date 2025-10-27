@@ -30,14 +30,12 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import {
   Select,
   SelectContent,
@@ -456,260 +454,263 @@ function CasesPageContent() {
           </Card>
         </div>
 
-        {/* Case Details Drawer */}
-        <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-          <DrawerContent className="max-h-[90vh]">
-            <DrawerHeader className="border-b">
-              <DrawerTitle className="flex items-center gap-2">
-                <FileSearch className="h-5 w-5" />
-                Case Details
-              </DrawerTitle>
-              <DrawerDescription>
-                Tracking Code: {selectedCase?.tracking_code}
-              </DrawerDescription>
-            </DrawerHeader>
+        {/* Case Details Side Drawer */}
+        <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
+          <SheetContent
+            side="right"
+            className="w-full sm:max-w-2xl overflow-y-auto p-0"
+          >
+            <SheetHeader className="border-b p-6 sticky top-0 bg-background z-10">
+              <div className="flex items-center justify-between">
+                <div>
+                  <SheetTitle className="text-2xl flex items-center gap-2">
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <FileSearch className="h-6 w-6 text-primary" />
+                    </div>
+                    Case Details
+                  </SheetTitle>
+                  <SheetDescription className="mt-2 text-base font-mono font-semibold">
+                    {selectedCase?.tracking_code}
+                  </SheetDescription>
+                </div>
+                {selectedCase && getStatusBadge(selectedCase.status)}
+              </div>
+            </SheetHeader>
 
             {selectedCase && (
-              <div className="overflow-y-auto flex-1 p-6">
-                <div className="max-w-3xl mx-auto space-y-6">
-                  {/* Case Info */}
-                  <Card>
-                    <CardHeader>
-                      <div className="flex items-center justify-between">
-                        <CardTitle>Case Information</CardTitle>
-                        {getStatusBadge(selectedCase.status)}
+              <div className="p-6 space-y-6">
+                {/* Case Info */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Case Information</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Category
+                        </p>
+                        <p className="mt-1">{selectedCase.category}</p>
                       </div>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                      <div className="grid md:grid-cols-2 gap-4">
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">
-                            Category
-                          </p>
-                          <p className="mt-1">{selectedCase.category}</p>
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground">
-                            Created At
-                          </p>
-                          <p className="mt-1 flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            {new Date(selectedCase.created_at).toLocaleString()}
-                          </p>
-                        </div>
+                      <div>
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Created At
+                        </p>
+                        <p className="mt-1 flex items-center gap-2">
+                          <Calendar className="h-4 w-4" />
+                          {new Date(selectedCase.created_at).toLocaleString()}
+                        </p>
                       </div>
+                    </div>
 
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground mb-2">
+                        Description
+                      </p>
+                      <p className="text-sm whitespace-pre-wrap bg-muted p-4 rounded-lg">
+                        {selectedCase.description}
+                      </p>
+                    </div>
+
+                    {(selectedCase.reporter_name ||
+                      selectedCase.reporter_email) && (
                       <div>
                         <p className="text-sm font-medium text-muted-foreground mb-2">
-                          Description
+                          Reporter Information
                         </p>
-                        <p className="text-sm whitespace-pre-wrap bg-muted p-4 rounded-lg">
-                          {selectedCase.description}
-                        </p>
-                      </div>
-
-                      {(selectedCase.reporter_name ||
-                        selectedCase.reporter_email) && (
-                        <div>
-                          <p className="text-sm font-medium text-muted-foreground mb-2">
-                            Reporter Information
-                          </p>
-                          <div className="space-y-2">
-                            {selectedCase.reporter_name && (
-                              <p className="text-sm flex items-center gap-2">
-                                <User className="h-4 w-4" />
-                                {selectedCase.reporter_name}
-                              </p>
-                            )}
-                            {selectedCase.reporter_email && (
-                              <p className="text-sm">
-                                {selectedCase.reporter_email}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  {/* Assignment Section - BRD Phase 3 */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Assignment</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <CaseAssignmentSelect
-                        admins={admins}
-                        currentAssigneeId={selectedCase.assigned_to}
-                        onAssign={handleAssign}
-                        disabled={loadingAssignment}
-                      />
-                    </CardContent>
-                  </Card>
-
-                  {/* Priority Section - BRD Phase 3 */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Priority</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <PriorityBadge priority={selectedCase.priority} />
-                      <p className="text-xs text-muted-foreground mt-2">
-                        {selectedCase.priority
-                          ? "Current priority level"
-                          : "No priority set"}
-                      </p>
-                    </CardContent>
-                  </Card>
-
-                  {/* Labels Section - BRD Phase 3 */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="text-base">Labels</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <LabelsInput
-                        labels={labels}
-                        onAdd={handleAddLabel}
-                        onRemove={handleRemoveLabel}
-                      />
-                    </CardContent>
-                  </Card>
-
-                  {/* Attachments Section */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <File className="h-5 w-5" />
-                        Attachments
-                      </CardTitle>
-                      <CardDescription>
-                        Documents and files uploaded with this report
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {attachments.length === 0 ? (
-                        <div className="text-center py-8 text-muted-foreground">
-                          <File className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                          <p>No attachments</p>
-                        </div>
-                      ) : (
                         <div className="space-y-2">
-                          {attachments.map((attachment) => (
-                            <div
-                              key={attachment.id}
-                              className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-                            >
-                              <div className="flex items-center gap-3 flex-1 min-w-0">
-                                <File className="h-5 w-5 text-muted-foreground flex-shrink-0" />
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-sm font-medium truncate">
-                                    {attachment.file_name}
-                                  </p>
-                                  <p className="text-xs text-muted-foreground">
-                                    {formatFileSize(attachment.file_size)}
-                                    {" • "}
-                                    {attachment.mime_type}
-                                  </p>
-                                </div>
-                              </div>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="flex-shrink-0"
-                                asChild
-                              >
-                                <a
-                                  href={attachment.signedUrl}
-                                  download={attachment.file_name}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                >
-                                  <Download className="h-4 w-4" />
-                                </a>
-                              </Button>
-                            </div>
-                          ))}
+                          {selectedCase.reporter_name && (
+                            <p className="text-sm flex items-center gap-2">
+                              <User className="h-4 w-4" />
+                              {selectedCase.reporter_name}
+                            </p>
+                          )}
+                          {selectedCase.reporter_email && (
+                            <p className="text-sm">
+                              {selectedCase.reporter_email}
+                            </p>
+                          )}
                         </div>
-                      )}
-                    </CardContent>
-                  </Card>
-
-                  {/* Messages Section */}
-                  <Card>
-                    <CardHeader>
-                      <CardTitle className="flex items-center gap-2">
-                        <MessageSquare className="h-5 w-5" />
-                        Messages
-                      </CardTitle>
-                      <CardDescription>
-                        Communication history for this case
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      {messages.length === 0 ? (
-                        <div className="text-center py-8 text-muted-foreground">
-                          <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                          <p>No messages yet</p>
-                        </div>
-                      ) : (
-                        <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                          {messages.map((message) => (
-                            <div
-                              key={message.id}
-                              className={`p-3 rounded-lg ${
-                                message.sender_type === "admin"
-                                  ? "bg-primary/10 ml-8"
-                                  : "bg-muted mr-8"
-                              }`}
-                            >
-                              <div className="flex items-center gap-2 mb-1">
-                                <span className="text-sm font-medium">
-                                  {message.sender_type === "admin"
-                                    ? "Admin"
-                                    : "Reporter"}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {new Date(
-                                    message.created_at
-                                  ).toLocaleString()}
-                                </span>
-                              </div>
-                              <p className="text-sm">{message.content}</p>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Send Message */}
-                      <div className="mt-4 pt-4 border-t">
-                        <Textarea
-                          placeholder="Write a message..."
-                          value={newMessage}
-                          onChange={(e) => setNewMessage(e.target.value)}
-                          rows={2}
-                        />
-                        <Button
-                          onClick={handleSendMessage}
-                          disabled={!newMessage.trim()}
-                          className="mt-2"
-                          size="sm"
-                        >
-                          Send
-                        </Button>
                       </div>
-                    </CardContent>
-                  </Card>
-                </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Assignment Section - BRD Phase 3 */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Assignment</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <CaseAssignmentSelect
+                      admins={admins}
+                      currentAssigneeId={selectedCase.assigned_to}
+                      onAssign={handleAssign}
+                      disabled={loadingAssignment}
+                    />
+                  </CardContent>
+                </Card>
+
+                {/* Priority Section - BRD Phase 3 */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Priority</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <PriorityBadge priority={selectedCase.priority} />
+                    <p className="text-xs text-muted-foreground mt-2">
+                      {selectedCase.priority
+                        ? "Current priority level"
+                        : "No priority set"}
+                    </p>
+                  </CardContent>
+                </Card>
+
+                {/* Labels Section - BRD Phase 3 */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-base">Labels</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <LabelsInput
+                      labels={labels}
+                      onAdd={handleAddLabel}
+                      onRemove={handleRemoveLabel}
+                    />
+                  </CardContent>
+                </Card>
+
+                {/* Attachments Section */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <File className="h-5 w-5" />
+                      Attachments
+                    </CardTitle>
+                    <CardDescription>
+                      Documents and files uploaded with this report
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {attachments.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <File className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>No attachments</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {attachments.map((attachment) => (
+                          <div
+                            key={attachment.id}
+                            className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                          >
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <File className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium truncate">
+                                  {attachment.file_name}
+                                </p>
+                                <p className="text-xs text-muted-foreground">
+                                  {formatFileSize(attachment.file_size)}
+                                  {" • "}
+                                  {attachment.mime_type}
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="flex-shrink-0"
+                              asChild
+                            >
+                              <a
+                                href={attachment.signedUrl}
+                                download={attachment.file_name}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                <Download className="h-4 w-4" />
+                              </a>
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Messages Section */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MessageSquare className="h-5 w-5" />
+                      Messages
+                    </CardTitle>
+                    <CardDescription>
+                      Communication history for this case
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {messages.length === 0 ? (
+                      <div className="text-center py-8 text-muted-foreground">
+                        <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                        <p>No messages yet</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                        {messages.map((message) => (
+                          <div
+                            key={message.id}
+                            className={`p-3 rounded-lg ${
+                              message.sender_type === "admin"
+                                ? "bg-primary/10 ml-8"
+                                : "bg-muted mr-8"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-sm font-medium">
+                                {message.sender_type === "admin"
+                                  ? "Admin"
+                                  : "Reporter"}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {new Date(message.created_at).toLocaleString()}
+                              </span>
+                            </div>
+                            <p className="text-sm">{message.content}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Send Message */}
+                    <div className="mt-4 pt-4 border-t">
+                      <Textarea
+                        placeholder="Write a message..."
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        rows={2}
+                      />
+                      <Button
+                        onClick={handleSendMessage}
+                        disabled={!newMessage.trim()}
+                        className="mt-2"
+                        size="sm"
+                      >
+                        Send
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
               </div>
             )}
 
-            <DrawerFooter className="border-t">
+            {/* Status Update Footer */}
+            <div className="sticky bottom-0 border-t p-6 bg-background">
               <div className="flex gap-3">
                 <Select
                   defaultValue={selectedCase?.status}
                   onValueChange={(value) => {
-                    // Store selected value for update
                     if (selectedCase) {
                       setSelectedCase({ ...selectedCase, status: value });
                     }
@@ -730,16 +731,14 @@ function CasesPageContent() {
                   onClick={() =>
                     selectedCase && handleStatusUpdate(selectedCase.status)
                   }
+                  className="min-w-[140px]"
                 >
                   Update Status
                 </Button>
               </div>
-              <DrawerClose asChild>
-                <Button variant="outline">Close</Button>
-              </DrawerClose>
-            </DrawerFooter>
-          </DrawerContent>
-        </Drawer>
+            </div>
+          </SheetContent>
+        </Sheet>
       </SidebarInset>
     </SidebarProvider>
   );
