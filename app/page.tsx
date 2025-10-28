@@ -84,13 +84,14 @@ export default function Home() {
           <div className="md:hidden">
             <Sheet>
               <SheetTrigger asChild>
-                {/* Custom burger - synced visually, sheet controls the state */}
-                <label className="burger text-foreground" aria-label="Open menu">
-                  <input type="checkbox" aria-hidden="true" />
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </label>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="Open menu"
+                  className="size-9 rounded-xl border bg-background/70 shadow-sm hover:bg-muted transition"
+                >
+                  <Menu className="h-5 w-5" />
+                </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-80 p-0">
                 <SheetHeader className="px-4 py-4 border-b">

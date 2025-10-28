@@ -591,9 +591,9 @@ function CasesPageContent() {
         <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
           <SheetContent
             side="right"
-            className="w-full sm:max-w-2xl overflow-y-auto p-0 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 border-l shadow-xl"
+            className="w-full sm:max-w-2xl overflow-y-auto p-0"
           >
-            <SheetHeader className="border-b p-6 sticky top-0 bg-gradient-to-r from-primary/5 to-transparent z-10">
+            <SheetHeader className="border-b p-6 sticky top-0 bg-background z-10">
               <div className="flex items-center justify-between">
                 <div>
                   <SheetTitle className="text-2xl flex items-center gap-2">
@@ -602,7 +602,7 @@ function CasesPageContent() {
                     </div>
                     Case Details
                   </SheetTitle>
-                  <SheetDescription className="mt-2 text-base font-mono font-semibold text-muted-foreground">
+                  <SheetDescription className="mt-2 text-base font-mono font-semibold">
                     {selectedCase?.tracking_code}
                   </SheetDescription>
                 </div>
@@ -613,8 +613,8 @@ function CasesPageContent() {
             {selectedCase && (
               <div className="p-6 space-y-6">
                 {/* Case Info */}
-                <Card className="rounded-2xl shadow-md">
-                  <CardHeader className="pb-3">
+                <Card>
+                  <CardHeader>
                     <CardTitle>Case Information</CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
@@ -640,14 +640,14 @@ function CasesPageContent() {
                       <p className="text-sm font-medium text-muted-foreground mb-2">
                         Description
                       </p>
-                      <p className="text-sm whitespace-pre-wrap bg-muted p-4 rounded-xl border">
+                      <p className="text-sm whitespace-pre-wrap bg-muted p-4 rounded-lg">
                         {selectedCase.description}
                       </p>
                     </div>
 
                     {(selectedCase.reporter_name ||
                       selectedCase.reporter_email) && (
-                      <div className="pt-2">
+                      <div>
                         <p className="text-sm font-medium text-muted-foreground mb-2">
                           Reporter Information
                         </p>
@@ -670,8 +670,8 @@ function CasesPageContent() {
                 </Card>
 
                 {/* Assignment Section - BRD Phase 3 */}
-                <Card className="rounded-2xl shadow-md">
-                  <CardHeader className="pb-3">
+                <Card>
+                  <CardHeader>
                     <CardTitle className="text-base">Assignment</CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -685,8 +685,8 @@ function CasesPageContent() {
                 </Card>
 
                 {/* Priority Section - BRD Phase 3 */}
-                <Card className="rounded-2xl shadow-md">
-                  <CardHeader className="pb-3">
+                <Card>
+                  <CardHeader>
                     <CardTitle className="text-base">Priority</CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -700,7 +700,7 @@ function CasesPageContent() {
                           value={selectedCase.priority || "medium"}
                           onValueChange={handlePriorityUpdate}
                         >
-                          <SelectTrigger className="w-full rounded-xl h-10">
+                          <SelectTrigger className="w-full">
                             <SelectValue placeholder="Select priority" />
                           </SelectTrigger>
                           <SelectContent>
@@ -715,8 +715,8 @@ function CasesPageContent() {
                 </Card>
 
                 {/* Labels Section - BRD Phase 3 */}
-                <Card className="rounded-2xl shadow-md">
-                  <CardHeader className="pb-3">
+                <Card>
+                  <CardHeader>
                     <CardTitle className="text-base">Labels</CardTitle>
                   </CardHeader>
                   <CardContent>
@@ -729,8 +729,8 @@ function CasesPageContent() {
                 </Card>
 
                 {/* Attachments Section */}
-                <Card className="rounded-2xl shadow-md">
-                  <CardHeader className="pb-3">
+                <Card>
+                  <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <File className="h-5 w-5" />
                       Attachments
@@ -750,7 +750,7 @@ function CasesPageContent() {
                         {attachments.map((attachment) => (
                           <div
                             key={attachment.id}
-                            className="flex items-center justify-between p-3 border rounded-xl hover:bg-muted/50 transition-colors"
+                            className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
                           >
                             <div className="flex items-center gap-3 flex-1 min-w-0">
                               <File className="h-5 w-5 text-muted-foreground flex-shrink-0" />
@@ -788,8 +788,8 @@ function CasesPageContent() {
                 </Card>
 
                 {/* Messages Section */}
-                <Card className="rounded-2xl shadow-md">
-                  <CardHeader className="pb-3">
+                <Card>
+                  <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <MessageSquare className="h-5 w-5" />
                       Messages
@@ -805,14 +805,14 @@ function CasesPageContent() {
                         <p>No messages yet</p>
                       </div>
                     ) : (
-                      <div className="space-y-3 max-h-[400px] overflow-y-auto pr-1">
+                      <div className="space-y-3 max-h-[400px] overflow-y-auto">
                         {messages.map((message) => (
                           <div
                             key={message.id}
-                            className={`p-3 rounded-xl border ${
+                            className={`p-3 rounded-lg ${
                               message.sender_type === "admin"
-                                ? "bg-primary/10 ml-8 border-primary/20"
-                                : "bg-muted mr-8 border-border"
+                                ? "bg-primary/10 ml-8"
+                                : "bg-muted mr-8"
                             }`}
                           >
                             <div className="flex items-center gap-2 mb-1">
@@ -854,7 +854,7 @@ function CasesPageContent() {
             )}
 
             {/* Status Update Footer */}
-            <div className="sticky bottom-0 border-t p-6 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 shadow-lg">
+            <div className="sticky bottom-0 border-t p-6 bg-background">
               <div className="flex gap-3">
                 <Select
                   defaultValue={selectedCase?.status}
@@ -864,7 +864,7 @@ function CasesPageContent() {
                     }
                   }}
                 >
-                  <SelectTrigger className="flex-1 rounded-xl h-10">
+                  <SelectTrigger className="flex-1">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -879,7 +879,7 @@ function CasesPageContent() {
                   onClick={() =>
                     selectedCase && handleStatusUpdate(selectedCase.status)
                   }
-                  className="min-w-[140px] h-10 rounded-xl shadow-sm"
+                  className="min-w-[140px]"
                 >
                   Update Status
                 </Button>
