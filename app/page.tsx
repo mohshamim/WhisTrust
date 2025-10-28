@@ -23,6 +23,7 @@ import {
   Award,
   TrendingUp,
   ChevronDown,
+  Menu,
 } from "lucide-react";
 import {
   Accordion,
@@ -31,6 +32,14 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { Separator } from "@/components/ui/separator";
 
 export default function Home() {
   return (
@@ -70,6 +79,68 @@ export default function Home() {
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
+          </div>
+          {/* Mobile Hamburger */}
+          <div className="md:hidden">
+            <Sheet>
+              <SheetTrigger asChild>
+                {/* Custom burger - synced visually, sheet controls the state */}
+                <label className="burger text-foreground" aria-label="Open menu">
+                  <input type="checkbox" aria-hidden="true" />
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </label>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80 p-0">
+                <SheetHeader className="px-4 py-4 border-b">
+                  <SheetTitle className="text-lg">Menu</SheetTitle>
+                </SheetHeader>
+                <nav className="p-3">
+                  <ul className="flex flex-col gap-1">
+                    <li>
+                      <Link
+                        href="#features"
+                        className="flex items-center justify-between rounded-lg px-3 py-2 text-base hover:bg-muted transition"
+                      >
+                        Features
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="#how-it-works"
+                        className="flex items-center justify-between rounded-lg px-3 py-2 text-base hover:bg-muted transition"
+                      >
+                        How It Works
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="#pricing"
+                        className="flex items-center justify-between rounded-lg px-3 py-2 text-base hover:bg-muted transition"
+                      >
+                        Pricing
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/documentation"
+                        className="flex items-center justify-between rounded-lg px-3 py-2 text-base hover:bg-muted transition"
+                      >
+                        Documentation
+                      </Link>
+                    </li>
+                  </ul>
+                  <Separator className="my-3" />
+                  <Button asChild className="w-full h-11 mt-1 shadow-sm">
+                    <Link href="/demo">
+                      See Demo
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Link>
+                  </Button>
+                </nav>
+              </SheetContent>
+            </Sheet>
           </div>
         </div>
       </nav>
@@ -482,7 +553,9 @@ export default function Home() {
                   <div className="flex items-baseline gap-1">
                     <span className="text-4xl font-bold">Custom</span>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">from $149+/mo</p>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    from $149+/mo
+                  </p>
                 </div>
               </CardHeader>
               <CardContent className="flex-grow flex flex-col gap-4">
@@ -521,7 +594,9 @@ export default function Home() {
 
           {/* FAQ Section */}
           <div className="mt-20 max-w-3xl mx-auto">
-            <h3 className="text-3xl font-bold text-center mb-8">Frequently Asked Questions</h3>
+            <h3 className="text-3xl font-bold text-center mb-8">
+              Frequently Asked Questions
+            </h3>
             <Accordion type="single" collapsible className="w-full">
               <AccordionItem value="item-2">
                 <AccordionTrigger className="text-left">
@@ -558,11 +633,11 @@ export default function Home() {
                   How does WhisTrust compare to other providers?
                 </AccordionTrigger>
                 <AccordionContent>
-                  WhisTrust offers enterprise-grade security at a fraction of the
-                  cost. We provide unlimited reports, advanced encryption,
-                  metadata cleaning, real-time messaging, and comprehensive audit
-                  logging. All at transparent, affordable pricing with KSA data
-                  residency options.
+                  WhisTrust offers enterprise-grade security at a fraction of
+                  the cost. We provide unlimited reports, advanced encryption,
+                  metadata cleaning, real-time messaging, and comprehensive
+                  audit logging. All at transparent, affordable pricing with KSA
+                  data residency options.
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
