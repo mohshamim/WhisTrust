@@ -158,7 +158,7 @@ export default function ReportPage() {
                   }
                   required
                 >
-                  <SelectTrigger id="category" className="h-12">
+                  <SelectTrigger id="category" className="h-12 w-full">
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>

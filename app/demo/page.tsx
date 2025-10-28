@@ -79,12 +79,18 @@ export default function DemoPage() {
             <Shield className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold">WhisTrust</span>
           </Link>
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" asChild>
-              <Link href="/documentation">Documentation</Link>
+          <div className="flex gap-2 flex-wrap justify-end">
+            <Button variant="outline" size="sm" asChild className="h-9 px-3">
+              <Link href="/documentation">
+                <span className="hidden sm:inline">Documentation</span>
+                <span className="sm:hidden inline">Docs</span>
+              </Link>
             </Button>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/">Back to Home</Link>
+            <Button variant="ghost" size="sm" asChild className="h-9 px-3">
+              <Link href="/">
+                <span className="hidden sm:inline">Back to Home</span>
+                <span className="sm:hidden inline">Home</span>
+              </Link>
             </Button>
           </div>
         </div>
