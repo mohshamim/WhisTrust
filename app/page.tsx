@@ -45,13 +45,13 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-background">
       {/* Navigation */}
-      <nav className="border-b sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <nav className="border-b sticky top-0 z-50 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+        <div className="container mx-auto px-3 sm:px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Shield className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold">WhisTrust</span>
           </div>
-          <div className="hidden md:flex items-center gap-6">
+          <div className="hidden md:flex items-center gap-4 lg:gap-6">
             <Link
               href="#features"
               className="text-sm hover:text-primary transition-colors"
@@ -93,7 +93,7 @@ export default function Home() {
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-80 p-0">
+              <SheetContent side="right" className="w-[88vw] max-w-sm p-0">
                 <SheetHeader className="px-4 py-4 border-b">
                   <SheetTitle className="text-lg">Menu</SheetTitle>
                 </SheetHeader>
@@ -147,7 +147,7 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20 md:py-32">
+      <section className="container mx-auto px-4 py-14 md:py-28">
         <div className="max-w-4xl mx-auto text-center space-y-8">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20 animate-in fade-in-0 zoom-in-95 duration-500">
             <Shield className="h-4 w-4 text-primary" />
@@ -311,7 +311,7 @@ export default function Home() {
               <div className="h-20 w-20 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-3xl font-bold mx-auto shadow-lg">
                 1
               </div>
-              <div className="absolute top-10 left-1/2 h-0.5 w-full bg-gradient-to-r from-primary/50 to-transparent hidden md:block"></div>
+              <div className="absolute top-10 left-1/2 h-0.5 w-full bg-linear-to-r from-primary/50 to-transparent hidden md:block"></div>
               <h3 className="text-xl font-semibold">Submit Report</h3>
               <p className="text-muted-foreground">
                 Provide details about the incident anonymously. Upload
@@ -323,7 +323,7 @@ export default function Home() {
               <div className="h-20 w-20 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-3xl font-bold mx-auto shadow-lg">
                 2
               </div>
-              <div className="absolute top-10 left-1/2 h-0.5 w-full bg-gradient-to-r from-primary/50 to-transparent hidden md:block"></div>
+              <div className="absolute top-10 left-1/2 h-0.5 w-full bg-linear-to-r from-primary/50 to-transparent hidden md:block"></div>
               <h3 className="text-xl font-semibold">Get Tracking Code</h3>
               <p className="text-muted-foreground">
                 Receive a unique tracking code to monitor your case and
@@ -348,7 +348,7 @@ export default function Home() {
       {/* Pricing Section */}
       <section
         id="pricing"
-        className="container-enhanced py-20 bg-gradient-to-b from-background to-muted/20"
+        className="container-enhanced py-20 bg-linear-to-b from-background to-muted/20"
       >
         <div className="max-w-7xl mx-auto">
           {/* Header */}

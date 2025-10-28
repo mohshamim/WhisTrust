@@ -71,7 +71,7 @@ export default function DemoPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-[calc(env(safe-area-inset-bottom)+16px)]">
       {/* Navigation */}
       <nav className="border-b sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -91,7 +91,7 @@ export default function DemoPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-20">
+      <section className="container mx-auto px-4 py-12 sm:py-20">
         <div className="max-w-4xl mx-auto text-center space-y-4 mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20">
             <Shield className="h-4 w-4 text-primary" />
@@ -109,7 +109,7 @@ export default function DemoPage() {
         </div>
 
         {/* Demo Options */}
-        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-8">
+        <div className="max-w-5xl mx-auto grid md:grid-cols-2 gap-6 sm:gap-8">
           {/* Reporter Demo */}
           <Card className="border-2 border-primary/20 hover:border-primary/50 transition-all hover:shadow-lg">
             <CardHeader className="space-y-4">
@@ -197,15 +197,16 @@ export default function DemoPage() {
               <div className="space-y-3">
                 <div>
                   <Label className="text-xs mb-2 block">Email</Label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-stretch">
                     <Input
                       value={demoCredentials.email}
                       readOnly
-                      className="font-mono text-sm"
+                      className="font-mono text-sm flex-1"
                     />
                     <Button
                       size="icon"
                       variant="outline"
+                      className="shrink-0"
                       onClick={() =>
                         copyToClipboard(demoCredentials.email, "email")
                       }
@@ -221,7 +222,7 @@ export default function DemoPage() {
 
                 <div>
                   <Label className="text-xs mb-2 block">Password</Label>
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 items-stretch">
                     <div className="relative flex-1">
                       <Input
                         type={showPassword ? "text" : "password"}
@@ -244,6 +245,7 @@ export default function DemoPage() {
                     <Button
                       size="icon"
                       variant="outline"
+                      className="shrink-0"
                       onClick={() =>
                         copyToClipboard(demoCredentials.password, "password")
                       }
@@ -266,7 +268,7 @@ export default function DemoPage() {
                 </Alert>
               )}
 
-              <div className="flex gap-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <Button
                   variant="outline"
                   size="lg"

@@ -39,16 +39,24 @@ const data = {
       icon: FileSearch,
       items: [
         {
-          title: "Open Cases",
-          url: "/admin/cases?status=open",
+          title: "Pending",
+          url: "/admin/cases?status=pending",
+        },
+        {
+          title: "In Review",
+          url: "/admin/cases?status=in_review",
         },
         {
           title: "In Progress",
-          url: "/admin/cases?status=progress",
+          url: "/admin/cases?status=in_progress",
         },
         {
           title: "Resolved",
           url: "/admin/cases?status=resolved",
+        },
+        {
+          title: "Closed",
+          url: "/admin/cases?status=closed",
         },
       ],
     },

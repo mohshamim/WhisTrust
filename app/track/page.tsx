@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { MessageSquare, Search, Send, User, Radio } from "lucide-react";
@@ -185,7 +186,7 @@ function TrackPageContent() {
         });
 
         setNewMessageText("");
-        
+
         // Scroll to bottom after adding message
         setTimeout(() => {
           scrollToBottom();
@@ -204,11 +205,11 @@ function TrackPageContent() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Under Review":
-        return "bg-blue-500/10 text-blue-600 border-blue-500/20";
+        return "bg-blue-500/15 text-blue-700 border-blue-500/30";
       case "In Progress":
-        return "bg-amber-500/10 text-amber-600 border-amber-500/20";
+        return "bg-amber-500/15 text-amber-700 border-amber-500/30";
       case "Resolved":
-        return "bg-green-500/10 text-green-600 border-green-500/20";
+        return "bg-green-500/15 text-green-700 border-green-500/30";
       default:
         return "bg-muted";
     }
@@ -304,54 +305,74 @@ function TrackPageContent() {
                     </div>
                   ) : (
                     caseData.messages.map((message) => {
-                    const isReporter = message.type === "reporter";
-                    return (
-                      <div
-                        key={message.id}
-                        className={`flex gap-3 ${
-                          isReporter ? "justify-start" : "justify-end"
-                        }`}
-                      >
+                      const isReporter = message.type === "reporter";
+                      return (
                         <div
-                          className={`max-w-[70%] rounded-lg p-4 ${
-                            isReporter
-                              ? "bg-muted border border-border"
-                              : "bg-primary/10 border border-primary/20"
+                          key={message.id}
+                          className={`flex gap-3 animate-in fade-in slide-in-from-bottom-2 transition-all duration-200 ${
+                            isReporter ? "justify-start" : "justify-end"
                           }`}
                         >
-                          <div className="flex items-center gap-2 mb-2">
-                            <User className="h-4 w-4" />
-                            <span className="text-xs font-medium">
-                              {isReporter ? "You" : "Compliance Team"}
-                            </span>
-                            <span className="text-xs text-muted-foreground">
-                              {message.timestamp}
-                            </span>
+                          <div
+                            className={`max-w-[70%] rounded-lg p-4 ${
+                              isReporter
+                                ? "bg-muted border border-border hover:shadow-sm"
+                                : "bg-primary/10 border border-primary/20 hover:shadow-sm"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2 mb-2">
+                              <User className="h-4 w-4" />
+                              <span className="text-xs font-medium">
+                                {isReporter ? "You" : "Compliance Team"}
+                              </span>
+                              <span className="text-xs text-muted-foreground">
+                                {message.timestamp}
+                              </span>
+                            </div>
+                            <p className="text-sm whitespace-pre-wrap wrap-break-word">
+                              {message.text}
+                            </p>
                           </div>
-                          <p className="text-sm whitespace-pre-wrap break-words">
-                            {message.text}
-                          </p>
                         </div>
-                      </div>
-                    );
-                  })
+                      );
+                    })
                   )}
                   <div ref={messagesEndRef} />
                 </div>
 
                 <Separator className="my-4" />
 
+                {/* Closed case banner */}
+                {caseData?.status === "Closed" && (
+                  <div className="mb-3 rounded-lg border bg-amber-50 text-amber-700 px-3 py-2 text-xs">
+                    This case is closed. No further messages can be sent.
+                  </div>
+                )}
+
                 <form onSubmit={handleSendMessage} className="flex gap-2">
-                  <Input
+                  <Textarea
                     placeholder="Write a message..."
                     value={newMessageText}
                     onChange={(e) => setNewMessageText(e.target.value)}
                     className="flex-1"
-                    disabled={isSending}
+                    rows={2}
+                    disabled={isSending || caseData?.status === "Closed"}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault();
+                        if (!isSending && newMessageText.trim()) {
+                          handleSendMessage(e as any);
+                        }
+                      }
+                    }}
                   />
                   <Button
                     type="submit"
-                    disabled={isSending || !newMessageText.trim()}
+                    disabled={
+                      isSending ||
+                      !newMessageText.trim() ||
+                      caseData?.status === "Closed"
+                    }
                   >
                     {isSending ? (
                       <div className="h-4 w-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

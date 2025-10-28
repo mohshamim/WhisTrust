@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { useRealtimeMessages } from "@/hooks/use-realtime-messages";
 import {
   Table,
   TableBody,
@@ -84,6 +85,7 @@ function CasesPageContent() {
   const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [attachments, setAttachments] = useState<any[]>([]);
+  const [isSending, setIsSending] = useState(false);
 
   useEffect(() => {
     loadCases();
@@ -101,6 +103,19 @@ function CasesPageContent() {
     }
   }, [selectedCase?.id]);
 
+  // Realtime: subscribe when drawer has a selected case
+  const { isConnected } = useRealtimeMessages({
+    reportId: selectedCase?.id || null,
+    enabled: !!selectedCase?.id,
+    onNewMessage: (message) => {
+      if (!selectedCase || message.report_id !== selectedCase.id) return;
+      setMessages((prev) => {
+        if (prev.some((m) => m.id === message.id)) return prev;
+        return [...prev, message];
+      });
+    },
+  });
+
   const loadCases = async () => {
     try {
       setIsLoading(true);
@@ -113,9 +128,11 @@ function CasesPageContent() {
         // Apply status filter
         if (statusFilter !== "all") {
           const statusMap: { [key: string]: string } = {
-            open: "pending",
-            progress: "in_progress",
+            pending: "pending",
+            in_review: "in_review",
+            in_progress: "in_progress",
             resolved: "resolved",
+            closed: "closed",
           };
           filteredCases = filteredCases.filter(
             (c: any) => c.status === statusMap[statusFilter]
@@ -211,20 +228,41 @@ function CasesPageContent() {
   };
 
   const handleSendMessage = async () => {
-    if (!selectedCase || !newMessage.trim()) return;
+    if (!selectedCase || !newMessage.trim() || selectedCase.status === "closed")
+      return;
 
     try {
+      setIsSending(true);
       const { sendMessage } = await import("@/lib/services/messages");
+      const { assignCase } = await import("@/lib/services/reports");
+      const { getCurrentAdmin } = await import("@/lib/services/auth");
+      // Auto-assign if unassigned
+      if (!selectedCase.assigned_to) {
+        const current = await getCurrentAdmin();
+        if (current.success && current.user) {
+          await assignCase(selectedCase.id, current.user.id);
+          setSelectedCase({ ...selectedCase, assigned_to: current.user.id });
+          setCases((prev) =>
+            prev.map((c) =>
+              c.id === selectedCase.id
+                ? { ...c, assigned_to: current.user!.id }
+                : c
+            )
+          );
+        }
+      }
       const result = await sendMessage({
         report_id: selectedCase.id,
         sender_type: "admin",
         sender_id: undefined,
-        content: newMessage,
+        content: newMessage.trim(),
       });
 
       if (result.success) {
         setNewMessage("");
-        await loadMessages();
+        setMessages((prev) =>
+          result.message ? [...prev, result.message] : prev
+        );
 
         // Create notification for the reporter (if they have tracking code access)
         // Note: This would require looking up the reporter's contact info from the case
@@ -256,6 +294,8 @@ function CasesPageContent() {
       }
     } catch (error) {
       console.error("Error sending message:", error);
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -468,9 +508,11 @@ function CasesPageContent() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="open">Open</SelectItem>
-                      <SelectItem value="progress">In Progress</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="in_review">In Review</SelectItem>
+                      <SelectItem value="in_progress">In Progress</SelectItem>
                       <SelectItem value="resolved">Resolved</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -591,13 +633,13 @@ function CasesPageContent() {
         <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
           <SheetContent
             side="right"
-            className="w-full sm:max-w-2xl overflow-y-auto p-0"
+            className="w-full sm:max-w-2xl overflow-y-auto p-0 animate-in slide-in-from-right-full duration-300"
           >
-            <SheetHeader className="border-b p-6 sticky top-0 bg-background z-10">
+            <SheetHeader className="border-b p-6 sticky top-0 bg-background z-10 shadow-sm">
               <div className="flex items-center justify-between">
                 <div>
-                  <SheetTitle className="text-2xl flex items-center gap-2">
-                    <div className="p-2 bg-primary/10 rounded-lg">
+                  <SheetTitle className="text-2xl flex items-center gap-2 animate-in fade-in slide-in-from-left-4 duration-300">
+                    <div className="p-2 bg-primary/10 rounded-lg ring-1 ring-primary/20">
                       <FileSearch className="h-6 w-6 text-primary" />
                     </div>
                     Case Details
@@ -611,36 +653,41 @@ function CasesPageContent() {
             </SheetHeader>
 
             {selectedCase && (
-              <div className="p-6 space-y-6">
+              <div className="p-6 space-y-6 animate-in fade-in duration-300">
                 {/* Case Info */}
-                <Card>
+                <Card className="hover:shadow-md transition-shadow">
                   <CardHeader>
-                    <CardTitle>Case Information</CardTitle>
+                    <CardTitle className="flex items-center gap-2">
+                      <File className="h-5 w-5 text-primary" />
+                      Case Information
+                    </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="grid md:grid-cols-2 gap-4">
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">
+                      <div className="p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                        <p className="text-sm font-medium text-muted-foreground mb-1">
                           Category
                         </p>
-                        <p className="mt-1">{selectedCase.category}</p>
+                        <p className="font-medium">{selectedCase.category}</p>
                       </div>
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground">
+                      <div className="p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                        <p className="text-sm font-medium text-muted-foreground mb-1">
                           Created At
                         </p>
-                        <p className="mt-1 flex items-center gap-2">
-                          <Calendar className="h-4 w-4" />
-                          {new Date(selectedCase.created_at).toLocaleString()}
+                        <p className="flex items-center gap-2">
+                          <Calendar className="h-4 w-4 text-muted-foreground" />
+                          <span>
+                            {new Date(selectedCase.created_at).toLocaleString()}
+                          </span>
                         </p>
                       </div>
                     </div>
 
-                    <div>
+                    <div className="p-4 rounded-lg bg-muted/50 border border-border hover:border-primary/20 transition-colors">
                       <p className="text-sm font-medium text-muted-foreground mb-2">
                         Description
                       </p>
-                      <p className="text-sm whitespace-pre-wrap bg-muted p-4 rounded-lg">
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed">
                         {selectedCase.description}
                       </p>
                     </div>
@@ -753,7 +800,7 @@ function CasesPageContent() {
                             className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
                           >
                             <div className="flex items-center gap-3 flex-1 min-w-0">
-                              <File className="h-5 w-5 text-muted-foreground flex-shrink-0" />
+                              <File className="h-5 w-5 text-muted-foreground shrink-0" />
                               <div className="flex-1 min-w-0">
                                 <p className="text-sm font-medium truncate">
                                   {attachment.file_name}
@@ -768,7 +815,7 @@ function CasesPageContent() {
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="flex-shrink-0"
+                              className="shrink-0"
                               asChild
                             >
                               <a
@@ -805,15 +852,16 @@ function CasesPageContent() {
                         <p>No messages yet</p>
                       </div>
                     ) : (
-                      <div className="space-y-3 max-h-[400px] overflow-y-auto">
-                        {messages.map((message) => (
+                      <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                        {messages.map((message, idx) => (
                           <div
                             key={message.id}
-                            className={`p-3 rounded-lg ${
+                            className={`p-3 rounded-lg animate-in fade-in slide-in-from-bottom-2 transition-all duration-200 ${
                               message.sender_type === "admin"
-                                ? "bg-primary/10 ml-8"
-                                : "bg-muted mr-8"
-                            }`}
+                                ? "bg-primary/10 ml-8 border border-primary/20"
+                                : "bg-muted mr-8 border border-border"
+                            } hover:shadow-sm`}
+                            style={{ animationDelay: `${idx * 50}ms` }}
                           >
                             <div className="flex items-center gap-2 mb-1">
                               <span className="text-sm font-medium">
@@ -833,20 +881,45 @@ function CasesPageContent() {
 
                     {/* Send Message */}
                     <div className="mt-4 pt-4 border-t">
+                      {selectedCase?.status === "closed" && (
+                        <div className="mb-2 rounded-lg border bg-amber-50 text-amber-700 px-3 py-2 text-xs">
+                          This case is closed. No further messages can be sent.
+                        </div>
+                      )}
                       <Textarea
                         placeholder="Write a message..."
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         rows={2}
+                        disabled={
+                          isSending || selectedCase?.status === "closed"
+                        }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && !e.shiftKey) {
+                            e.preventDefault();
+                            if (!isSending && newMessage.trim()) {
+                              handleSendMessage();
+                            }
+                          }
+                        }}
                       />
                       <Button
                         onClick={handleSendMessage}
-                        disabled={!newMessage.trim()}
+                        disabled={
+                          !newMessage.trim() ||
+                          isSending ||
+                          selectedCase?.status === "closed"
+                        }
                         className="mt-2"
                         size="sm"
                       >
-                        Send
+                        {isSending ? "Sending..." : "Send"}
                       </Button>
+                      {isConnected && (
+                        <p className="text-[10px] text-muted-foreground mt-1">
+                          Connected • realtime
+                        </p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -864,7 +937,7 @@ function CasesPageContent() {
                     }
                   }}
                 >
-                  <SelectTrigger className="flex-1">
+                  <SelectTrigger className="flex-1 shadow-sm border-2 hover:border-primary/50 transition-colors">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -876,10 +949,17 @@ function CasesPageContent() {
                   </SelectContent>
                 </Select>
                 <Button
-                  onClick={() =>
-                    selectedCase && handleStatusUpdate(selectedCase.status)
-                  }
-                  className="min-w-[140px]"
+                  onClick={async () => {
+                    if (!selectedCase) return;
+                    if (selectedCase.status === "closed") {
+                      const ok = confirm(
+                        "Are you sure you want to close this case? Unresolved issues may remain."
+                      );
+                      if (!ok) return;
+                    }
+                    await handleStatusUpdate(selectedCase.status);
+                  }}
+                  className="min-w-[140px] shadow-sm hover:shadow-md transition-shadow"
                 >
                   Update Status
                 </Button>

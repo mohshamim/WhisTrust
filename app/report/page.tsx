@@ -48,20 +48,26 @@ export default function ReportPage() {
       // Import the services
       const { submitReport } = await import("@/lib/services/reports");
       const { uploadFile } = await import("@/lib/services/storage");
-      
+
       // Submit report to Supabase first
       const result = await submitReport({
         category: formData.category,
         description: formData.description,
-        reporter_name: formData.provideIdentity && formData.name ? formData.name : undefined,
-        reporter_email: formData.provideIdentity && formData.email ? formData.email : undefined,
+        reporter_name:
+          formData.provideIdentity && formData.name ? formData.name : undefined,
+        reporter_email:
+          formData.provideIdentity && formData.email
+            ? formData.email
+            : undefined,
       });
 
       if (result.success && result.trackingCode) {
         // Get the report ID for file upload
-        const { getReportByTrackingCode } = await import("@/lib/services/reports");
+        const { getReportByTrackingCode } = await import(
+          "@/lib/services/reports"
+        );
         const reportResult = await getReportByTrackingCode(result.trackingCode);
-        
+
         // If file exists, upload it
         if (formData.file && reportResult.report) {
           setUploadProgress(0);
@@ -97,6 +103,19 @@ export default function ReportPage() {
         alert("File size must be less than 10MB");
         return;
       }
+
+      // Validate supported types
+      const allowedTypes = [
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        "application/msword",
+      ];
+      if (!allowedTypes.includes(file.type)) {
+        alert("Unsupported file type. Please upload images or PDF files.");
+        return;
+      }
       setFormData({ ...formData, file });
     }
   };
@@ -109,10 +128,10 @@ export default function ReportPage() {
             <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
               <Lock className="h-8 w-8 text-primary" />
             </div>
-            <CardTitle className="text-3xl font-bold">
+            <CardTitle className="text-3xl sm:text-4xl font-bold leading-tight">
               Submit Anonymous Report
             </CardTitle>
-            <CardDescription className="text-base">
+            <CardDescription className="text-base sm:text-lg">
               Your identity will remain confidential. All information is
               securely encrypted.
             </CardDescription>
@@ -139,7 +158,7 @@ export default function ReportPage() {
                   }
                   required
                 >
-                  <SelectTrigger id="category">
+                  <SelectTrigger id="category" className="h-12">
                     <SelectValue placeholder="Select a category" />
                   </SelectTrigger>
                   <SelectContent>
@@ -171,7 +190,7 @@ export default function ReportPage() {
                 <Textarea
                   id="description"
                   placeholder="Please provide a detailed description of the incident, including when and where it occurred..."
-                  className="min-h-[200px] resize-none"
+                  className="min-h-[180px] sm:min-h-[220px] resize-y"
                   value={formData.description}
                   onChange={(e) =>
                     setFormData({ ...formData, description: e.target.value })
@@ -196,7 +215,9 @@ export default function ReportPage() {
                     <FileUp className="h-10 w-10 mx-auto mb-2 text-muted-foreground group-hover:text-primary" />
                     {formData.file ? (
                       <>
-                        <p className="text-sm font-medium">{formData.file.name}</p>
+                        <p className="text-sm font-medium">
+                          {formData.file.name}
+                        </p>
                         <p className="text-xs text-muted-foreground">
                           {(formData.file.size / 1024 / 1024).toFixed(2)} MB
                         </p>
@@ -278,7 +299,7 @@ export default function ReportPage() {
               <div className="pt-4 space-y-4">
                 <Button
                   type="submit"
-                  className="w-full h-12 text-base font-semibold"
+                  className="w-full h-12 text-base font-semibold shadow-sm hover:shadow-md transition-shadow"
                   disabled={
                     isSubmitting || !formData.category || !formData.description
                   }
