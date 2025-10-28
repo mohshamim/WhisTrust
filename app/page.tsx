@@ -185,21 +185,7 @@ export default function Home() {
             </Button>
           </div>
 
-          {/* Trust Indicators */}
-          <div className="grid grid-cols-3 gap-8 pt-16 border-t">
-            <div>
-              <div className="text-3xl font-bold text-primary">99.9%</div>
-              <div className="text-sm text-muted-foreground">Uptime</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary">10K+</div>
-              <div className="text-sm text-muted-foreground">Reports</div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-primary">500+</div>
-              <div className="text-sm text-muted-foreground">Organizations</div>
-            </div>
-          </div>
+          
         </div>
       </section>
 
