@@ -538,7 +538,7 @@ export default function WorkflowPage() {
                     gap={20}
                     size={1}
                     color="var(--muted-foreground)"
-                    opacity={0.1}
+                    className="opacity-10"
                   />
 
                   {/* Start Label */}
