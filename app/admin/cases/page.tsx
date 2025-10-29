@@ -160,7 +160,7 @@ function CasesPageContent() {
             );
           }
 
-          if (role === "manager") {
+          if (role === "manager" && user) {
             // Manager: view department-assigned cases only
             // Filter by cases where assigned user's department matches manager's department
             const { data: currentUser } = await supabase
