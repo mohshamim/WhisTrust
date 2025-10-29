@@ -370,7 +370,7 @@ export default function WorkflowPage() {
                     gap={20}
                     size={1}
                     color="var(--muted-foreground)"
-                    opacity={0.2}
+                    className="opacity-20"
                   />
                   <Controls
                     className="bg-background border border-border rounded-lg shadow-md"
