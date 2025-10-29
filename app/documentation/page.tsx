@@ -21,8 +21,10 @@ import {
   Upload,
   Search,
   Filter,
+  GitBranch,
 } from "lucide-react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function DocumentationPage() {
   return (
@@ -33,12 +35,21 @@ export default function DocumentationPage() {
           <Link href="/" className="text-2xl font-bold text-primary">
             WhisTrust
           </Link>
-          <Link
-            href="/demo"
-            className="text-sm text-muted-foreground hover:text-primary transition-colors"
-          >
-            Back to Demo →
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link
+              href="/docs/workflow"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
+            >
+              <GitBranch className="h-4 w-4" />
+              Workflow
+            </Link>
+            <Link
+              href="/demo"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
+              Back to Demo →
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -49,10 +60,18 @@ export default function DocumentationPage() {
             <Shield className="h-8 w-8 text-primary" />
             <h1 className="text-4xl font-bold">WhisTrust Documentation</h1>
           </div>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
             Complete guide to using WhisTrust - your secure digital
             whistleblowing system
           </p>
+          <div className="flex items-center justify-center gap-3">
+            <Button asChild size="lg" className="gap-2">
+              <Link href="/docs/workflow">
+                <GitBranch className="h-5 w-5" />
+                View Interactive Workflow Diagram
+              </Link>
+            </Button>
+          </div>
         </div>
 
         {/* Introduction */}
@@ -145,6 +164,10 @@ export default function DocumentationPage() {
 
             <div>
               <h3 className="font-semibold mb-2">For Admin Users</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                WhisTrust uses Role-Based Access Control (RBAC). Your access
+                depends on your assigned role:
+              </p>
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">1</Badge>
@@ -167,7 +190,8 @@ export default function DocumentationPage() {
                 <div className="flex items-center gap-2">
                   <Badge variant="outline">3</Badge>
                   <span>
-                    Access Dashboard, Cases, Analytics, and Audit Logs
+                    Access features based on your role (see Role Permissions
+                    section below)
                   </span>
                 </div>
               </div>
@@ -316,8 +340,16 @@ export default function DocumentationPage() {
                 <h4 className="font-semibold mb-2">Key Features</h4>
                 <ul className="list-disc list-inside space-y-2 text-sm">
                   <li>
-                    <strong>Case Overview:</strong> View all reports with
-                    filtering and search
+                    <strong>Case Overview:</strong> View reports with role-based
+                    filtering:
+                    <ul className="list-disc list-inside ml-4 mt-1">
+                      <li>Admin: All cases</li>
+                      <li>
+                        Manager: Cases assigned to users in their department
+                      </li>
+                      <li>Investigator: Only cases assigned to them</li>
+                      <li>HR: Only HR-related categories</li>
+                    </ul>
                   </li>
                   <li>
                     <strong>Case Details:</strong> Side drawer with full case
@@ -325,19 +357,22 @@ export default function DocumentationPage() {
                   </li>
                   <li>
                     <strong>Assignment:</strong> Assign cases to specific
-                    administrators or investigators
+                    administrators or investigators (Admin & Manager only -
+                    Investigator/HR cannot assign)
                   </li>
                   <li>
                     <strong>Status Management:</strong> Update case status
-                    (Pending → In Review → In Progress → Resolved)
+                    (Pending → In Review → In Progress → Resolved) - Admin,
+                    Manager, and Investigator can update; HR is read-only
                   </li>
                   <li>
                     <strong>Priority & Labels:</strong> Set priority levels
-                    (Low/Medium/High) and add custom labels
+                    (Low/Medium/High) and add custom labels - HR role cannot
+                    edit priority
                   </li>
                   <li>
                     <strong>Two-Way Messaging:</strong> Communicate with
-                    reporters securely
+                    reporters securely (all roles can send messages)
                   </li>
                 </ul>
               </div>
@@ -349,11 +384,27 @@ export default function DocumentationPage() {
                 </h4>
                 <ul className="list-disc list-inside space-y-1 text-sm text-green-900 dark:text-green-100">
                   <li>Open a case and review all details</li>
-                  <li>Assign case to another admin user</li>
-                  <li>Update case status and priority</li>
+                  <li>
+                    Verify case filtering works per role (Admin sees all,
+                    Manager sees department, etc.)
+                  </li>
+                  <li>As Admin/Manager: Assign case to another user</li>
+                  <li>
+                    As Investigator/HR: Verify assignment controls are hidden
+                  </li>
+                  <li>
+                    Update case status and priority (Admin, Manager,
+                    Investigator)
+                  </li>
+                  <li>
+                    As HR: Verify status/priority controls are disabled with
+                    tooltips
+                  </li>
                   <li>Add custom labels to case</li>
                   <li>Filter cases by status, priority, or label</li>
-                  <li>Send message to reporter from case details</li>
+                  <li>
+                    Send message to reporter from case details (all roles)
+                  </li>
                 </ul>
               </div>
             </CardContent>
@@ -470,9 +521,27 @@ export default function DocumentationPage() {
               <div>
                 <h4 className="font-semibold mb-2">Audit Log Features</h4>
                 <ul className="list-disc list-inside space-y-2 text-sm">
-                  <li>Track all user actions with timestamps</li>
-                  <li>Filter by action type, resource, user, and date range</li>
-                  <li>View detailed metadata for each action</li>
+                  <li>
+                    Track all user actions with timestamps and user role
+                    information
+                  </li>
+                  <li>
+                    Automatic role capture: Every audit entry automatically
+                    includes the{" "}
+                    <code className="bg-muted px-1 rounded">user_role</code>{" "}
+                    field
+                  </li>
+                  <li>
+                    Track user management actions: Role changes, user
+                    activation/deactivation are logged with full details
+                  </li>
+                  <li>
+                    Filter by action type, resource, user, role, and date range
+                  </li>
+                  <li>
+                    View detailed metadata for each action (old/new values,
+                    target user info)
+                  </li>
                   <li>Export logs for compliance reporting</li>
                 </ul>
               </div>
@@ -542,8 +611,10 @@ export default function DocumentationPage() {
                     access control
                   </li>
                   <li>
-                    <strong>Role-Based Access:</strong> Admin, Manager,
-                    Investigator roles with different permissions
+                    <strong>Role-Based Access Control (RBAC):</strong> Four
+                    distinct roles (Admin, Manager, Investigator, HR) with
+                    granular permissions. Each role sees only authorized
+                    features and data.
                   </li>
                   <li>
                     <strong>Secure Authentication:</strong> Supabase Auth with
@@ -604,15 +675,262 @@ export default function DocumentationPage() {
             </CardContent>
           </Card>
 
-          {/* Workflow 9 */}
+          {/* Workflow 9 - RBAC */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-blue-500" />
+                Workflow 9: Role-Based Access Control (RBAC)
+              </CardTitle>
+              <CardDescription>
+                Granular permissions and access control for different user roles
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">What This Does</h4>
+                <p className="text-sm text-muted-foreground">
+                  WhisTrust implements comprehensive role-based access control
+                  with four distinct roles. Each role has specific permissions,
+                  sees only relevant data, and has access to appropriate
+                  features. Unauthorized routes are automatically blocked with
+                  clear access-denied messaging.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-semibold mb-3">Role Permissions</h4>
+                <div className="space-y-4">
+                  <div className="border rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="default">Admin</Badge>
+                      <span className="text-xs text-muted-foreground">
+                        Full System Access
+                      </span>
+                    </div>
+                    <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                      <li>View all cases across all departments</li>
+                      <li>Assign cases to any user</li>
+                      <li>Update case status and priority</li>
+                      <li>View Analytics dashboard</li>
+                      <li>Access Audit Logs</li>
+                      <li>
+                        Manage user accounts - change roles, activate/deactivate
+                        users (see User Management section)
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="border rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="secondary">Manager</Badge>
+                      <span className="text-xs text-muted-foreground">
+                        Department Oversight
+                      </span>
+                    </div>
+                    <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                      <li>
+                        View cases assigned to users in their department
+                        (department-based filtering)
+                      </li>
+                      <li>
+                        Assign cases to investigators within their department
+                      </li>
+                      <li>Update case status and priority</li>
+                      <li>View Analytics dashboard</li>
+                      <li>Access Audit Logs</li>
+                      <li>
+                        <span className="text-destructive">Cannot</span> manage
+                        users or access user management page
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="border rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="outline">Investigator</Badge>
+                      <span className="text-xs text-muted-foreground">
+                        Case Investigation
+                      </span>
+                    </div>
+                    <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                      <li>View only cases assigned to them</li>
+                      <li>Update status and priority of assigned cases</li>
+                      <li>Send messages and manage assigned cases</li>
+                      <li>
+                        <span className="text-destructive">Cannot</span> assign
+                        cases
+                      </li>
+                      <li>
+                        <span className="text-destructive">Cannot</span> view
+                        Analytics or Audit Logs
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="border rounded-lg p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Badge variant="outline">HR</Badge>
+                      <span className="text-xs text-muted-foreground">
+                        Human Resources Focus
+                      </span>
+                    </div>
+                    <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
+                      <li>
+                        View only HR-related categories (Workplace Conduct,
+                        Harassment, Discrimination, Bullying)
+                      </li>
+                      <li>Send messages to reporters</li>
+                      <li>
+                        <span className="text-destructive">Read-only:</span>{" "}
+                        Cannot edit status or priority
+                      </li>
+                      <li>
+                        <span className="text-destructive">Cannot</span> assign
+                        cases
+                      </li>
+                      <li>
+                        <span className="text-destructive">Cannot</span> view
+                        Analytics or Audit Logs
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h4 className="font-semibold mb-2">UI Features</h4>
+                <ul className="list-disc list-inside space-y-2 text-sm">
+                  <li>
+                    <strong>Role Badge:</strong> Your role is displayed next to
+                    your name in the sidebar with color-coding (Admin: primary,
+                    Manager: secondary, Investigator/HR: outline)
+                  </li>
+                  <li>
+                    <strong>Conditional Navigation:</strong> Only authorized
+                    menu items appear in the sidebar. Unauthorized routes (e.g.,
+                    Users page for non-admin) are hidden
+                  </li>
+                  <li>
+                    <strong>Disabled Controls:</strong> Unauthorized actions
+                    (like status updates for HR) show helpful tooltips when
+                    hovered, explaining permission restrictions
+                  </li>
+                  <li>
+                    <strong>Access Denied Page:</strong> Attempting to access
+                    unauthorized routes (e.g., /admin/users as Manager)
+                    redirects to a clear access-denied page with navigation
+                    options
+                  </li>
+                  <li>
+                    <strong>Case Filtering:</strong> Cases are automatically
+                    filtered based on your role's permissions:
+                    <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
+                      <li>
+                        <strong>Admin:</strong> All cases
+                      </li>
+                      <li>
+                        <strong>Manager:</strong> Cases assigned to users in the
+                        same department
+                      </li>
+                      <li>
+                        <strong>Investigator:</strong> Only cases assigned to
+                        them
+                      </li>
+                      <li>
+                        <strong>HR:</strong> Only HR-related categories
+                        (Workplace Conduct, Harassment, Discrimination,
+                        Bullying)
+                      </li>
+                    </ul>
+                  </li>
+                  <li>
+                    <strong>User Management (Admin Only):</strong> Admin users
+                    can manage other admin accounts - change roles,
+                    activate/deactivate users. All actions are logged in audit
+                    trail with user role information
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-semibold mb-2">Tooltip Examples</h4>
+                <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-1">
+                  <p>
+                    <strong>HR trying to update status:</strong> "You don't have
+                    permission to edit reports. Only Admin, Manager, and
+                    Investigator can update case status."
+                  </p>
+                  <p>
+                    <strong>Non-admin trying to manage users:</strong> "Only
+                    Admin can change user roles." or "Only Admin can
+                    activate/deactivate users."
+                  </p>
+                </div>
+              </div>
+
+              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 p-4 rounded-lg">
+                <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" />
+                  Testing Checklist
+                </h4>
+                <ul className="list-disc list-inside space-y-1 text-sm text-green-900 dark:text-green-100">
+                  <li>
+                    Login as each role and verify sidebar shows correct menu
+                    items
+                  </li>
+                  <li>
+                    Check role badge displays correctly next to your name with
+                    appropriate color
+                  </li>
+                  <li>
+                    Verify case filtering works:
+                    <ul className="list-disc list-inside ml-4 mt-1">
+                      <li>Admin sees all cases</li>
+                      <li>
+                        Manager sees only cases assigned to users in their
+                        department
+                      </li>
+                      <li>Investigator sees only assigned cases</li>
+                      <li>HR sees only HR-related categories</li>
+                    </ul>
+                  </li>
+                  <li>
+                    Attempt to access restricted routes (e.g., /admin/users as
+                    Manager) - should redirect to access-denied page
+                  </li>
+                  <li>
+                    Hover over disabled controls (status/priority for HR, user
+                    management for non-admin) and verify tooltips appear
+                  </li>
+                  <li>
+                    As Admin: Change a user's role and verify audit log entry
+                    shows{" "}
+                    <code className="bg-white/20 px-1 rounded">
+                      user_role_updated
+                    </code>{" "}
+                    with old/new values
+                  </li>
+                  <li>
+                    Check audit logs show correct{" "}
+                    <code className="bg-white/20 px-1 rounded">user_role</code>{" "}
+                    column for each action
+                  </li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Workflow 10 */}
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-teal-500" />
-                Workflow 9: Reports & Analytics Dashboard
+                Workflow 10: Reports & Analytics Dashboard
               </CardTitle>
               <CardDescription>
-                Comprehensive insights into case volumes and trends
+                Comprehensive insights into case volumes and trends (Admin &
+                Manager only)
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -633,6 +951,10 @@ export default function DocumentationPage() {
                   <li>Category distribution with percentages</li>
                   <li>Trend analysis over time</li>
                   <li>CSV export functionality</li>
+                  <li>
+                    <strong>Access:</strong> Admin and Manager roles only
+                    (Investigator and HR cannot access Analytics)
+                  </li>
                 </ul>
               </div>
 
@@ -642,11 +964,160 @@ export default function DocumentationPage() {
                   Testing Checklist
                 </h4>
                 <ul className="list-disc list-inside space-y-1 text-sm text-green-900 dark:text-green-100">
-                  <li>View analytics dashboard with real data</li>
+                  <li>
+                    As Admin/Manager: View analytics dashboard with real data
+                  </li>
                   <li>Verify metrics match actual report counts</li>
                   <li>Check category breakdown is accurate</li>
                   <li>Export analytics data to CSV</li>
                   <li>Verify CSV contains all expected data</li>
+                  <li>
+                    As Investigator/HR: Attempt to access /admin/analytics -
+                    should redirect to access-denied page
+                  </li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Workflow 11 - User Management */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-pink-500" />
+                Workflow 11: User Management (Admin Only)
+              </CardTitle>
+              <CardDescription>
+                Manage admin user accounts, roles, and activation status
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="bg-muted/50 p-4 rounded-lg">
+                <h4 className="font-semibold mb-2">What This Does</h4>
+                <p className="text-sm text-muted-foreground">
+                  Allows Admin users to manage other admin accounts in the
+                  system. This includes changing user roles (Admin, Manager,
+                  Investigator, HR), activating or deactivating accounts, and
+                  viewing user information. All user management actions are
+                  automatically logged in the audit trail with full details
+                  including who performed the action and what changed.
+                </p>
+              </div>
+
+              <div>
+                <h4 className="font-semibold mb-2">Key Features</h4>
+                <ul className="list-disc list-inside space-y-2 text-sm">
+                  <li>
+                    <strong>User List:</strong> View all admin users with their
+                    roles, departments, and activation status
+                  </li>
+                  <li>
+                    <strong>Role Management:</strong> Change user roles between
+                    Admin, Manager, Investigator, and HR
+                  </li>
+                  <li>
+                    <strong>Account Activation:</strong> Activate or deactivate
+                    user accounts (inactive users cannot log in)
+                  </li>
+                  <li>
+                    <strong>Audit Logging:</strong> All changes are logged with:
+                    <ul className="list-disc list-inside ml-4 mt-1">
+                      <li>Who made the change (user and role)</li>
+                      <li>What changed (old/new role, activation status)</li>
+                      <li>When the change occurred</li>
+                      <li>Target user details</li>
+                    </ul>
+                  </li>
+                  <li>
+                    <strong>Access Control:</strong> Only Admin role can access
+                    this page. Other roles attempting to access will be
+                    redirected to the access-denied page.
+                  </li>
+                  <li>
+                    <strong>UI Restrictions:</strong> Non-admin users see
+                    disabled controls with helpful tooltips explaining
+                    permission requirements.
+                  </li>
+                </ul>
+              </div>
+
+              <div>
+                <h4 className="font-semibold mb-2">User Management Actions</h4>
+                <div className="space-y-3">
+                  <div className="border rounded-lg p-3">
+                    <h5 className="font-semibold text-sm mb-1">
+                      Change User Role
+                    </h5>
+                    <p className="text-xs text-muted-foreground">
+                      Update a user's role. This immediately affects their
+                      permissions and access. Logged as{" "}
+                      <code className="bg-muted px-1 rounded">
+                        user_role_updated
+                      </code>{" "}
+                      with old and new role values.
+                    </p>
+                  </div>
+                  <div className="border rounded-lg p-3">
+                    <h5 className="font-semibold text-sm mb-1">
+                      Activate/Deactivate Account
+                    </h5>
+                    <p className="text-xs text-muted-foreground">
+                      Control user access. Deactivated users cannot log in.
+                      Logged as{" "}
+                      <code className="bg-muted px-1 rounded">
+                        user_activated
+                      </code>{" "}
+                      or{" "}
+                      <code className="bg-muted px-1 rounded">
+                        user_deactivated
+                      </code>{" "}
+                      with user details.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 p-4 rounded-lg">
+                <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" />
+                  Testing Checklist
+                </h4>
+                <ul className="list-disc list-inside space-y-1 text-sm text-green-900 dark:text-green-100">
+                  <li>As Admin: Access /admin/users page</li>
+                  <li>View list of all admin users with their roles</li>
+                  <li>Change a user's role (e.g., Manager → Investigator)</li>
+                  <li>
+                    Verify audit log shows{" "}
+                    <code className="bg-white/20 px-1 rounded">
+                      user_role_updated
+                    </code>{" "}
+                    entry
+                  </li>
+                  <li>Deactivate a user account</li>
+                  <li>
+                    Verify audit log shows{" "}
+                    <code className="bg-white/20 px-1 rounded">
+                      user_deactivated
+                    </code>{" "}
+                    entry
+                  </li>
+                  <li>Activate the user account again</li>
+                  <li>
+                    Verify audit log shows{" "}
+                    <code className="bg-white/20 px-1 rounded">
+                      user_activated
+                    </code>{" "}
+                    entry
+                  </li>
+                  <li>
+                    As Manager/Investigator/HR: Attempt to access /admin/users -
+                    should redirect to access-denied
+                  </li>
+                  <li>
+                    Check audit logs verify{" "}
+                    <code className="bg-white/20 px-1 rounded">user_role</code>{" "}
+                    is captured for all actions
+                  </li>
                 </ul>
               </div>
             </CardContent>
@@ -664,25 +1135,74 @@ export default function DocumentationPage() {
           <CardContent className="space-y-4">
             <div>
               <h3 className="font-semibold mb-3">Test User Roles</h3>
-              <div className="grid md:grid-cols-3 gap-4">
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-semibold text-sm mb-2">Reporter</h4>
-                  <p className="text-xs text-muted-foreground">
-                    No login required. Use tracking codes to access cases.
-                  </p>
-                </div>
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-semibold text-sm mb-2">Admin</h4>
-                  <p className="text-xs text-muted-foreground">
-                    Full access. Login: admin@whistrust.com
-                  </p>
-                </div>
+              <div className="grid md:grid-cols-2 gap-4">
                 <div className="p-4 border rounded-lg">
                   <h4 className="font-semibold text-sm mb-2">
-                    Compliance Officer
+                    Reporter (Anonymous)
                   </h4>
                   <p className="text-xs text-muted-foreground">
-                    Manager role with case management access.
+                    No login required. Use tracking codes to access cases. Can
+                    submit reports and communicate via messages.
+                  </p>
+                </div>
+                <div className="p-4 border rounded-lg">
+                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                    Admin
+                    <Badge variant="default" className="text-xs">
+                      Full Access
+                    </Badge>
+                  </h4>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Full system access including user management.
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Login: admin@whistrust.com
+                  </p>
+                </div>
+                <div className="p-4 border rounded-lg">
+                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                    Manager
+                    <Badge variant="secondary" className="text-xs">
+                      Department
+                    </Badge>
+                  </h4>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Department-based case oversight. Sees cases assigned to
+                    users in their department. Can view analytics and audit
+                    logs.
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Cannot manage users or access user management page.
+                  </p>
+                </div>
+                <div className="p-4 border rounded-lg">
+                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                    Investigator
+                    <Badge variant="outline" className="text-xs">
+                      Assigned Cases
+                    </Badge>
+                  </h4>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    View and manage only assigned cases.
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Cannot assign cases or view analytics.
+                  </p>
+                </div>
+                <div className="p-4 border rounded-lg md:col-span-2">
+                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                    HR
+                    <Badge variant="outline" className="text-xs">
+                      HR Categories
+                    </Badge>
+                  </h4>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    View HR-related cases only (Workplace Conduct, Harassment,
+                    Discrimination, Bullying).
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Read-only access. Cannot edit case status or priority.
+                    Cannot view analytics.
                   </p>
                 </div>
               </div>

@@ -50,8 +50,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // Optional: Check if user has admin profile
-    // This is a bonus security layer
+    // Fetch admin profile with role
     const { data: profile } = await supabase
       .from("admin_profiles")
       .select("id, role")
@@ -63,6 +62,26 @@ export async function middleware(request: NextRequest) {
       const url = request.nextUrl.clone();
       url.pathname = "/admin/login";
       return NextResponse.redirect(url);
+    }
+    // Role-based route restrictions
+    if (profile) {
+      const restrictedAnalytics = pathname === "/admin/analytics";
+      const restrictedAuditLogs = pathname === "/admin/audit-logs";
+      const restrictedUsers = pathname.startsWith("/admin/users");
+
+      // Only admin/manager: analytics, audit logs
+      if ((restrictedAnalytics || restrictedAuditLogs) && !["admin", "manager"].includes(profile.role)) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/admin/access-denied";
+        return NextResponse.redirect(url);
+      }
+
+      // Only admin: user management
+      if (restrictedUsers && profile.role !== "admin") {
+        const url = request.nextUrl.clone();
+        url.pathname = "/admin/access-denied";
+        return NextResponse.redirect(url);
+      }
     }
   }
 

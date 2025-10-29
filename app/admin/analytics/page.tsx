@@ -1,6 +1,7 @@
 "use client";
 
 import { AdminSidebar } from "@/components/admin-sidebar";
+import { useUserRole, Permissions } from "@/hooks/use-user-role";
 import {
   SidebarInset,
   SidebarProvider,
@@ -28,6 +29,7 @@ import {
 import { useEffect, useState } from "react";
 
 export default function AnalyticsPage() {
+  const { role } = useUserRole();
   const [stats, setStats] = useState({
     totalReports: 0,
     pendingReports: 0,
@@ -38,16 +40,19 @@ export default function AnalyticsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    if (!Permissions.canViewAnalytics(role)) return;
     loadAnalytics();
-  }, []);
+  }, [role]);
 
   const loadAnalytics = async () => {
     try {
       setIsLoading(true);
 
       // Import analytics service
-      const { getReportStatistics, getCategoryStatistics } = await import("@/lib/services/analytics");
-      
+      const { getReportStatistics, getCategoryStatistics } = await import(
+        "@/lib/services/analytics"
+      );
+
       // Fetch statistics
       const statsResult = await getReportStatistics();
       const categoryResult = await getCategoryStatistics();
@@ -56,17 +61,22 @@ export default function AnalyticsPage() {
         setStats({
           totalReports: statsResult.stats.total_reports || 0,
           pendingReports: statsResult.stats.pending_reports || 0,
-          resolvedReports: (statsResult.stats.resolved_reports || 0) + (statsResult.stats.closed_reports || 0),
-          avgResolutionDays: Math.round((statsResult.stats.avg_resolution_days || 0) * 10) / 10,
+          resolvedReports:
+            (statsResult.stats.resolved_reports || 0) +
+            (statsResult.stats.closed_reports || 0),
+          avgResolutionDays:
+            Math.round((statsResult.stats.avg_resolution_days || 0) * 10) / 10,
         });
       }
 
       if (categoryResult.success && categoryResult.stats) {
-        setCategoryStats(categoryResult.stats.map((cat) => ({
-          category: cat.category,
-          count: cat.total_count,
-          percentage: cat.percentage,
-        })));
+        setCategoryStats(
+          categoryResult.stats.map((cat) => ({
+            category: cat.category,
+            count: cat.total_count,
+            percentage: cat.percentage,
+          }))
+        );
       }
     } catch (error) {
       console.error("Error loading analytics:", error);
@@ -78,17 +88,17 @@ export default function AnalyticsPage() {
   const handleExport = async () => {
     try {
       const { exportAnalyticsToCSV } = await import("@/lib/services/analytics");
-      
+
       // Prepare data for export
       const exportData = [
         { Metric: "Total Reports", Value: stats.totalReports },
         { Metric: "Pending Reports", Value: stats.pendingReports },
         { Metric: "Resolved Reports", Value: stats.resolvedReports },
         { Metric: "Avg Resolution Days", Value: stats.avgResolutionDays },
-        ...categoryStats.map(cat => ({
+        ...categoryStats.map((cat) => ({
           Metric: `Category: ${cat.category}`,
-          Value: `${cat.count} (${cat.percentage}%)`
-        }))
+          Value: `${cat.count} (${cat.percentage}%)`,
+        })),
       ];
 
       const csvContent = await exportAnalyticsToCSV(exportData);
@@ -98,7 +108,9 @@ export default function AnalyticsPage() {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `whistrust-analytics-${new Date().toISOString().split('T')[0]}.csv`;
+      link.download = `whistrust-analytics-${
+        new Date().toISOString().split("T")[0]
+      }.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -138,13 +150,15 @@ export default function AnalyticsPage() {
               Last updated: {new Date().toLocaleString()}
             </div>
             <div className="flex gap-2">
-              <Button 
-                onClick={loadAnalytics} 
-                variant="outline" 
+              <Button
+                onClick={loadAnalytics}
+                variant="outline"
                 size="sm"
                 disabled={isLoading}
               >
-                <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+                <RefreshCw
+                  className={`h-4 w-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
+                />
                 Refresh
               </Button>
               <Button onClick={handleExport} variant="outline" size="sm">
@@ -161,66 +175,68 @@ export default function AnalyticsPage() {
             </div>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Total Reports
-                </CardTitle>
-                <FileText className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.totalReports}</div>
-                <p className="text-xs text-muted-foreground">
-                  All time submissions
-                </p>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Total Reports
+                  </CardTitle>
+                  <FileText className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">{stats.totalReports}</div>
+                  <p className="text-xs text-muted-foreground">
+                    All time submissions
+                  </p>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Pending Cases
-                </CardTitle>
-                <TrendingUp className="h-4 w-4 text-amber-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-amber-600">
-                  {stats.pendingReports}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Requiring attention
-                </p>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Pending Cases
+                  </CardTitle>
+                  <TrendingUp className="h-4 w-4 text-amber-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-amber-600">
+                    {stats.pendingReports}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Requiring attention
+                  </p>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Resolved</CardTitle>
-                <PieChart className="h-4 w-4 text-green-500" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">
-                  {stats.resolvedReports}
-                </div>
-                <p className="text-xs text-muted-foreground">Closed cases</p>
-              </CardContent>
-            </Card>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Resolved
+                  </CardTitle>
+                  <PieChart className="h-4 w-4 text-green-500" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-green-600">
+                    {stats.resolvedReports}
+                  </div>
+                  <p className="text-xs text-muted-foreground">Closed cases</p>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  Avg Resolution
-                </CardTitle>
-                <Clock className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {stats.avgResolutionDays} days
-                </div>
-                <p className="text-xs text-muted-foreground">Time to close</p>
-              </CardContent>
-            </Card>
-          </div>
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    Avg Resolution
+                  </CardTitle>
+                  <Clock className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {stats.avgResolutionDays} days
+                  </div>
+                  <p className="text-xs text-muted-foreground">Time to close</p>
+                </CardContent>
+              </Card>
+            </div>
           )}
 
           {/* Charts Grid */}

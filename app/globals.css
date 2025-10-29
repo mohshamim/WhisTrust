@@ -291,6 +291,95 @@
   animation: scaleIn 0.2s ease-out;
 }
 
+/* ReactFlow Custom Styling */
+.react-flow__edge-path {
+  stroke: hsl(var(--primary));
+  stroke-width: 2;
+}
+
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke: hsl(var(--primary));
+  stroke-width: 3;
+}
+
+.react-flow__edge:hover .react-flow__edge-path {
+  stroke: hsl(var(--primary));
+  filter: drop-shadow(0 0 4px hsl(var(--primary) / 0.5));
+}
+
+.react-flow__arrowhead {
+  fill: hsl(var(--primary));
+}
+
+.react-flow__controls-button {
+  background-color: hsl(var(--background));
+  border-color: hsl(var(--border));
+  color: hsl(var(--foreground));
+}
+
+.react-flow__controls-button:hover {
+  background-color: hsl(var(--muted));
+}
+
+.react-flow__minimap {
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+}
+
+.react-flow__minimap-mask {
+  fill: hsl(var(--background) / 0.8);
+}
+
+.react-flow__minimap-node {
+  fill: hsl(var(--primary));
+  stroke: hsl(var(--primary));
+}
+
+/* Animated Edge Fade-in */
+@keyframes edgeFadeIn {
+  0% {
+    opacity: 0;
+    stroke-dashoffset: 20;
+  }
+  100% {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+.animate-edge-fade-in {
+  animation: edgeFadeIn 0.8s ease-out forwards;
+  animation-delay: calc(var(--edge-index, 0) * 0.15s);
+}
+
+/* Flowing Animation for Edges */
+@keyframes flowEdge {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -12;
+  }
+}
+
+.react-flow__edge-path {
+  animation: flowEdge 2s linear infinite;
+}
+
+/* Pulse Animation for Highlighted Cards */
+@keyframes cardPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 hsl(var(--primary) / 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px hsl(var(--primary) / 0);
+  }
+}
+
+.card-highlighted {
+  animation: cardPulse 2s ease-in-out;
+}
+
 /* Professional Card Styles */
 .card-enhanced {
   @apply bg-card border border-border rounded-2xl shadow-md hover:shadow-lg transition-all duration-300;

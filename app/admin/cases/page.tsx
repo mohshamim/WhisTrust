@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { AdminSidebar } from "@/components/admin-sidebar";
+import { useUserRole, Permissions } from "@/hooks/use-user-role";
 import {
   SidebarInset,
   SidebarProvider,
@@ -59,6 +60,11 @@ import { PriorityBadge } from "@/components/ui/priority-badge";
 import { CaseAssignmentSelect } from "@/components/ui/case-assignment-select";
 import { LabelsInput } from "@/components/ui/labels-input";
 import { AdminNotifications } from "@/components/admin-notifications";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { AdminUser, ReportLabel } from "@/lib/types/database";
 
 // Helper function to format file size
@@ -69,6 +75,7 @@ const formatFileSize = (bytes: number): string => {
 };
 
 function CasesPageContent() {
+  const { role } = useUserRole();
   const searchParams = useSearchParams();
   const statusParam = searchParams.get("status");
 
@@ -137,6 +144,71 @@ function CasesPageContent() {
           filteredCases = filteredCases.filter(
             (c: any) => c.status === statusMap[statusFilter]
           );
+        }
+
+        // Apply role-based visibility filters
+        try {
+          const { createClient } = await import("@/lib/supabase/client");
+          const supabase = createClient();
+          const {
+            data: { user },
+          } = await supabase.auth.getUser();
+
+          if (role === "investigator" && user) {
+            filteredCases = filteredCases.filter(
+              (c: any) => c.assigned_to === user.id
+            );
+          }
+
+          if (role === "manager") {
+            // Manager: view department-assigned cases only
+            // Filter by cases where assigned user's department matches manager's department
+            const { data: currentUser } = await supabase
+              .from("admin_profiles")
+              .select("department")
+              .eq("id", user.id)
+              .single();
+
+            if (currentUser?.department) {
+              // Get all users in the same department
+              const { data: departmentUsers } = await supabase
+                .from("admin_profiles")
+                .select("id")
+                .eq("department", currentUser.department)
+                .eq("is_active", true);
+
+              const departmentUserIds = departmentUsers?.map((u) => u.id) || [];
+
+              // Filter cases assigned to users in the same department
+              filteredCases = filteredCases.filter((c: any) => {
+                // If case is assigned, check if assignee is in same department
+                if (c.assigned_to) {
+                  return departmentUserIds.includes(c.assigned_to);
+                }
+                // Unassigned cases: show only if reports.department exists and matches
+                // Otherwise, don't show unassigned cases for department filtering
+                return c.department === currentUser.department;
+              });
+            } else {
+              // No department set for manager, show cases assigned to any admin (team-scoped fallback)
+              filteredCases = filteredCases.filter((c: any) => !!c.assigned_to);
+            }
+          }
+
+          if (role === "hr") {
+            // HR: restrict to HR-related categories
+            const HR_CATEGORIES = [
+              "Workplace Conduct",
+              "Harassment",
+              "Discrimination",
+              "Bullying",
+            ];
+            filteredCases = filteredCases.filter((c: any) =>
+              HR_CATEGORIES.includes(c.category)
+            );
+          }
+        } catch (_) {
+          // Ignore filtering errors
         }
 
         setCases(filteredCases);
@@ -314,6 +386,11 @@ function CasesPageContent() {
 
   const handleAssign = async (adminId: string) => {
     if (!selectedCase) return;
+
+    if (!Permissions.canAssignCases(role)) {
+      alert("You don't have permission to assign cases.");
+      return;
+    }
 
     setLoadingAssignment(true);
     try {
@@ -561,6 +638,12 @@ function CasesPageContent() {
                   <p className="text-muted-foreground">
                     {searchQuery || statusFilter !== "all"
                       ? "Try adjusting your filters"
+                      : role === "investigator"
+                      ? "You have no assigned cases yet"
+                      : role === "hr"
+                      ? "No HR-related cases yet"
+                      : role === "manager"
+                      ? "No cases found for your team yet"
                       : "No cases have been submitted yet"}
                   </p>
                 </div>
@@ -722,12 +805,18 @@ function CasesPageContent() {
                     <CardTitle className="text-base">Assignment</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <CaseAssignmentSelect
-                      admins={admins}
-                      currentAssigneeId={selectedCase.assigned_to}
-                      onAssign={handleAssign}
-                      disabled={loadingAssignment}
-                    />
+                    {Permissions.canAssignCases(role) ? (
+                      <CaseAssignmentSelect
+                        admins={admins}
+                        currentAssigneeId={selectedCase.assigned_to}
+                        onAssign={handleAssign}
+                        disabled={loadingAssignment}
+                      />
+                    ) : (
+                      <div className="flex items-center gap-2 rounded-md border border-dashed p-3 text-sm text-muted-foreground">
+                        <span>Only Admin and Manager can assign cases.</span>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
 
@@ -739,24 +828,44 @@ function CasesPageContent() {
                   <CardContent>
                     <div className="space-y-3">
                       <PriorityBadge priority={selectedCase.priority} />
-                      <div className="space-y-2">
-                        <p className="text-xs font-medium text-muted-foreground">
-                          Update Priority
-                        </p>
-                        <Select
-                          value={selectedCase.priority || "medium"}
-                          onValueChange={handlePriorityUpdate}
-                        >
-                          <SelectTrigger className="w-full">
-                            <SelectValue placeholder="Select priority" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="low">Low</SelectItem>
-                            <SelectItem value="medium">Medium</SelectItem>
-                            <SelectItem value="high">High</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
+                      {Permissions.canEditReports(role) ? (
+                        <div className="space-y-2">
+                          <p className="text-xs font-medium text-muted-foreground">
+                            Update Priority
+                          </p>
+                          <Select
+                            value={selectedCase.priority || "medium"}
+                            onValueChange={handlePriorityUpdate}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select priority" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="low">Low</SelectItem>
+                              <SelectItem value="medium">Medium</SelectItem>
+                              <SelectItem value="high">High</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      ) : (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div>
+                              <Select
+                                disabled
+                                value={selectedCase.priority || "medium"}
+                              >
+                                <SelectTrigger className="w-full">
+                                  <SelectValue placeholder="Select priority" />
+                                </SelectTrigger>
+                              </Select>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>You don't have permission to edit reports.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
@@ -927,44 +1036,69 @@ function CasesPageContent() {
             )}
 
             {/* Status Update Footer */}
-            <div className="sticky bottom-0 border-t p-6 bg-background">
-              <div className="flex gap-3">
-                <Select
-                  defaultValue={selectedCase?.status}
-                  onValueChange={(value) => {
-                    if (selectedCase) {
-                      setSelectedCase({ ...selectedCase, status: value });
-                    }
-                  }}
-                >
-                  <SelectTrigger className="flex-1 shadow-sm border-2 hover:border-primary/50 transition-colors">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="in_review">In Review</SelectItem>
-                    <SelectItem value="in_progress">In Progress</SelectItem>
-                    <SelectItem value="resolved">Resolved</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button
-                  onClick={async () => {
-                    if (!selectedCase) return;
-                    if (selectedCase.status === "closed") {
-                      const ok = confirm(
-                        "Are you sure you want to close this case? Unresolved issues may remain."
-                      );
-                      if (!ok) return;
-                    }
-                    await handleStatusUpdate(selectedCase.status);
-                  }}
-                  className="min-w-[140px] shadow-sm hover:shadow-md transition-shadow"
-                >
-                  Update Status
-                </Button>
+            {Permissions.canEditReports(role) ? (
+              <div className="sticky bottom-0 border-t p-6 bg-background">
+                <div className="flex gap-3">
+                  <Select
+                    defaultValue={selectedCase?.status}
+                    onValueChange={(value) => {
+                      if (selectedCase) {
+                        setSelectedCase({ ...selectedCase, status: value });
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="flex-1 shadow-sm border-2 hover:border-primary/50 transition-colors">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="in_review">In Review</SelectItem>
+                      <SelectItem value="in_progress">In Progress</SelectItem>
+                      <SelectItem value="resolved">Resolved</SelectItem>
+                      <SelectItem value="closed">Closed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <Button
+                    onClick={async () => {
+                      if (!selectedCase) return;
+                      if (selectedCase.status === "closed") {
+                        const ok = confirm(
+                          "Are you sure you want to close this case? Unresolved issues may remain."
+                        );
+                        if (!ok) return;
+                      }
+                      await handleStatusUpdate(selectedCase.status);
+                    }}
+                    className="min-w-[140px] shadow-sm hover:shadow-md transition-shadow"
+                  >
+                    Update Status
+                  </Button>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="sticky bottom-0 border-t p-6 bg-background">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className="flex gap-3">
+                      <Select disabled defaultValue={selectedCase?.status}>
+                        <SelectTrigger className="flex-1">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </Select>
+                      <Button disabled className="min-w-[140px]">
+                        Update Status
+                      </Button>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>
+                      You don't have permission to edit reports. Only Admin,
+                      Manager, and Investigator can update case status.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            )}
           </SheetContent>
         </Sheet>
       </SidebarInset>

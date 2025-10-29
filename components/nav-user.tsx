@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   BadgeCheck,
@@ -7,13 +7,9 @@ import {
   CreditCard,
   LogOut,
   Sparkles,
-} from "lucide-react"
+} from "lucide-react";
 
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/components/ui/avatar"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,24 +18,47 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
+import { Badge } from "@/components/ui/badge";
+import { useUserRole } from "@/hooks/use-user-role";
 
 export function NavUser({
   user,
 }: {
   user: {
-    name: string
-    email: string
-    avatar: string
-  }
+    name: string;
+    email: string;
+    avatar: string;
+  };
 }) {
-  const { isMobile } = useSidebar()
+  const { isMobile } = useSidebar();
+  const { role } = useUserRole();
+
+  const getRoleBadgeVariant = (role: string | null) => {
+    switch (role) {
+      case "admin":
+        return "default";
+      case "manager":
+        return "secondary";
+      case "investigator":
+        return "outline";
+      case "hr":
+        return "outline";
+      default:
+        return "secondary";
+    }
+  };
+
+  const getRoleLabel = (role: string | null) => {
+    if (!role) return "";
+    return role.charAt(0).toUpperCase() + role.slice(1);
+  };
 
   return (
     <SidebarMenu>
@@ -55,7 +74,17 @@ export function NavUser({
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium">{user.name}</span>
+                <span className="truncate font-medium flex items-center gap-2">
+                  {user.name}
+                  {role && (
+                    <Badge
+                      variant={getRoleBadgeVariant(role)}
+                      className="text-xs px-1.5 py-0 h-5"
+                    >
+                      {getRoleLabel(role)}
+                    </Badge>
+                  )}
+                </span>
                 <span className="truncate text-xs">{user.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
@@ -74,7 +103,17 @@ export function NavUser({
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{user.name}</span>
+                  <span className="truncate font-medium flex items-center gap-2">
+                    {user.name}
+                    {role && (
+                      <Badge
+                        variant={getRoleBadgeVariant(role)}
+                        className="text-xs px-1.5 py-0 h-5"
+                      >
+                        {getRoleLabel(role)}
+                      </Badge>
+                    )}
+                  </span>
                   <span className="truncate text-xs">{user.email}</span>
                 </div>
               </div>
@@ -110,5 +149,5 @@ export function NavUser({
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }
