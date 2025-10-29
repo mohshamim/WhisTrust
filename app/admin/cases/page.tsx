@@ -160,7 +160,7 @@ function CasesPageContent() {
             );
           }
 
-          if (role === "manager") {
+          if (role === "manager" && user) {
             // Manager: view department-assigned cases only
             // Filter by cases where assigned user's department matches manager's department
             const { data: currentUser } = await supabase
@@ -1037,8 +1037,8 @@ function CasesPageContent() {
 
             {/* Status Update Footer */}
             {Permissions.canEditReports(role) ? (
-              <div className="sticky bottom-0 border-t p-6 bg-background">
-                <div className="flex gap-3">
+              <div className="sticky bottom-0 border-t bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 p-4 sm:p-6 shadow-[0_-2px_12px_hsl(0_0%_0%_/0.06)]">
+                <div className="flex gap-3 items-center">
                   <Select
                     defaultValue={selectedCase?.status}
                     onValueChange={(value) => {
@@ -1047,10 +1047,10 @@ function CasesPageContent() {
                       }
                     }}
                   >
-                    <SelectTrigger className="flex-1 shadow-sm border-2 hover:border-primary/50 transition-colors">
+                    <SelectTrigger className="flex-1 h-12 rounded-lg bg-card border-2 border-border px-4 text-sm sm:text-base shadow-sm hover:border-primary/60 focus-visible:ring-4 focus-visible:ring-ring/30 transition-all">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper" align="start" className="rounded-lg border shadow-lg">
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="in_review">In Review</SelectItem>
                       <SelectItem value="in_progress">In Progress</SelectItem>
@@ -1069,23 +1069,23 @@ function CasesPageContent() {
                       }
                       await handleStatusUpdate(selectedCase.status);
                     }}
-                    className="min-w-[140px] shadow-sm hover:shadow-md transition-shadow"
+                    className="min-w-[140px] h-12 rounded-lg shadow-sm hover:shadow-md transition-shadow"
                   >
                     Update Status
                   </Button>
                 </div>
               </div>
             ) : (
-              <div className="sticky bottom-0 border-t p-6 bg-background">
+              <div className="sticky bottom-0 border-t bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/80 p-4 sm:p-6">
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <div className="flex gap-3">
+                    <div className="flex gap-3 items-center">
                       <Select disabled defaultValue={selectedCase?.status}>
-                        <SelectTrigger className="flex-1">
+                        <SelectTrigger className="flex-1 h-12 rounded-lg bg-card border-2 border-border px-4 text-sm sm:text-base">
                           <SelectValue />
                         </SelectTrigger>
                       </Select>
-                      <Button disabled className="min-w-[140px]">
+                      <Button disabled className="min-w-[140px] h-12 rounded-lg">
                         Update Status
                       </Button>
                     </div>
