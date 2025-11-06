@@ -1,0 +1,20 @@
+# Allow all crawlers
+User-agent: *
+Allow: /
+
+# Disallow admin and API routes
+Disallow: /admin/
+Disallow: /api/
+
+# Allow public pages
+Allow: /
+Allow: /demo
+Allow: /documentation
+Allow: /privacy-policy
+Allow: /terms-of-service
+Allow: /report
+Allow: /track
+
+# Sitemap location
+Sitemap: https://whistrust.com/sitemap.xml
+

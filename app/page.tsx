@@ -40,15 +40,26 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
+import {
+  OrganizationSchema,
+  SoftwareApplicationSchema,
+  FAQSchema,
+  WebSiteSchema,
+} from "@/components/structured-data";
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-background">
+      {/* Structured Data for SEO */}
+      <OrganizationSchema />
+      <SoftwareApplicationSchema />
+      <FAQSchema />
+      <WebSiteSchema />
       {/* Navigation */}
       <nav className="border-b sticky top-0 z-50 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
         <div className="container mx-auto px-3 sm:px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Shield className="h-6 w-6 text-primary" />
+            <Shield className="h-6 w-6 text-primary" aria-hidden="true" />
             <span className="text-xl font-bold">WhisTrust</span>
           </div>
           <div className="hidden md:flex items-center gap-4 lg:gap-6">
@@ -87,10 +98,10 @@ export default function Home() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  aria-label="Open menu"
+                  aria-label="Open navigation menu"
                   className="size-9 rounded-xl border bg-background/70 shadow-sm hover:bg-muted transition"
                 >
-                  <Menu className="h-5 w-5" />
+                  <Menu className="h-5 w-5" aria-hidden="true" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-[88vw] max-w-sm p-0">
