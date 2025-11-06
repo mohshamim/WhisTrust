@@ -36,13 +36,13 @@ export default function DocumentationPage() {
             WhisTrust
           </Link>
           <div className="flex items-center gap-4">
-            <Link
+            {/* <Link
               href="/docs/workflow"
               className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
             >
               <GitBranch className="h-4 w-4" />
               Workflow
-            </Link>
+            </Link> */}
             <Link
               href="/demo"
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
@@ -64,14 +64,14 @@ export default function DocumentationPage() {
             Complete guide to using WhisTrust - your secure digital
             whistleblowing system
           </p>
-          <div className="flex items-center justify-center gap-3">
+          {/* <div className="flex items-center justify-center gap-3">
             <Button asChild size="lg" className="gap-2">
               <Link href="/docs/workflow">
                 <GitBranch className="h-5 w-5" />
                 View Interactive Workflow Diagram
               </Link>
             </Button>
-          </div>
+          </div> */}
         </div>
 
         {/* Introduction */}

@@ -1050,7 +1050,11 @@ function CasesPageContent() {
                     <SelectTrigger className="flex-1 h-12 rounded-lg bg-card border-2 border-border px-4 text-sm sm:text-base shadow-sm hover:border-primary/60 focus-visible:ring-4 focus-visible:ring-ring/30 transition-all">
                       <SelectValue />
                     </SelectTrigger>
-                    <SelectContent position="popper" align="start" className="rounded-lg border shadow-lg">
+                    <SelectContent
+                      position="popper"
+                      align="start"
+                      className="rounded-lg border shadow-lg"
+                    >
                       <SelectItem value="pending">Pending</SelectItem>
                       <SelectItem value="in_review">In Review</SelectItem>
                       <SelectItem value="in_progress">In Progress</SelectItem>
@@ -1085,7 +1089,10 @@ function CasesPageContent() {
                           <SelectValue />
                         </SelectTrigger>
                       </Select>
-                      <Button disabled className="min-w-[140px] h-12 rounded-lg">
+                      <Button
+                        disabled
+                        className="min-w-[140px] h-12 rounded-lg"
+                      >
                         Update Status
                       </Button>
                     </div>
