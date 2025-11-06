@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -22,11 +23,73 @@ import {
   Search,
   Filter,
   GitBranch,
+  Menu,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+// Table of Contents data
+const tocSections = [
+  { id: "introduction", label: "Introduction" },
+  { id: "getting-started", label: "Getting Started" },
+  { id: "workflow-1", label: "Anonymous Report Submission" },
+  { id: "workflow-2", label: "Case Tracking & Messaging" },
+  { id: "workflow-3", label: "Admin Dashboard" },
+  { id: "workflow-4", label: "File Upload Security" },
+  { id: "workflow-5", label: "Offline Case Entry" },
+  { id: "workflow-6", label: "Audit Logs & Notifications" },
+  { id: "workflow-7", label: "Encryption & Security" },
+  { id: "workflow-8", label: "Priority & Label Management" },
+  { id: "workflow-9", label: "Role-Based Access Control" },
+  { id: "workflow-10", label: "Reports & Analytics" },
+  { id: "workflow-11", label: "User Management" },
+  { id: "testing", label: "Testing Instructions" },
+  { id: "security", label: "Security & Data Handling" },
+  { id: "faq", label: "FAQ & Troubleshooting" },
+];
 
 export default function DocumentationPage() {
+  const [activeSection, setActiveSection] = useState("introduction");
+  const [tocOpen, setTocOpen] = useState(false);
+
+  // Track active section on scroll
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSection(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: "-100px 0px -80% 0px" }
+    );
+
+    tocSections.forEach(({ id }) => {
+      const element = document.getElementById(id);
+      if (element) observer.observe(element);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      const offset = 100;
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - offset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+      setTocOpen(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
       {/* Header */}
@@ -36,6 +99,15 @@ export default function DocumentationPage() {
             WhisTrust
           </Link>
           <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="lg:hidden"
+              onClick={() => setTocOpen(!tocOpen)}
+            >
+              {tocOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+              <span className="ml-2">Contents</span>
+            </Button>
             {/* <Link
               href="/docs/workflow"
               className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
@@ -53,7 +125,72 @@ export default function DocumentationPage() {
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-12 max-w-5xl">
+      {/* Table of Contents - Desktop Sidebar */}
+      <aside className="hidden lg:block fixed left-4 top-24 w-64 h-[calc(100vh-120px)] overflow-y-auto z-40">
+        <Card className="sticky top-24">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-sm font-semibold flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Contents
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-1">
+            {tocSections.map(({ id, label }) => (
+              <button
+                key={id}
+                onClick={() => scrollToSection(id)}
+                className={cn(
+                  "w-full text-left text-sm px-3 py-2 rounded-md transition-colors",
+                  activeSection === id
+                    ? "bg-primary text-primary-foreground font-medium"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                )}
+              >
+                {label}
+              </button>
+            ))}
+          </CardContent>
+        </Card>
+      </aside>
+
+      {/* Table of Contents - Mobile Drawer */}
+      {tocOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
+          <aside className="fixed left-0 top-0 bottom-0 w-72 bg-background border-r shadow-lg overflow-y-auto">
+            <div className="p-4 border-b flex items-center justify-between">
+              <h2 className="font-semibold flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Contents
+              </h2>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setTocOpen(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <div className="p-4 space-y-1">
+              {tocSections.map(({ id, label }) => (
+                <button
+                  key={id}
+                  onClick={() => scrollToSection(id)}
+                  className={cn(
+                    "w-full text-left text-sm px-3 py-2 rounded-md transition-colors",
+                    activeSection === id
+                      ? "bg-primary text-primary-foreground font-medium"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </aside>
+        </div>
+      )}
+
+      <div className="container mx-auto px-4 py-12 max-w-5xl lg:ml-72">
         {/* Hero Section */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 mb-4">
@@ -75,7 +212,7 @@ export default function DocumentationPage() {
         </div>
 
         {/* Introduction */}
-        <Card className="mb-8">
+        <Card id="introduction" className="mb-8 scroll-mt-24">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
@@ -115,7 +252,7 @@ export default function DocumentationPage() {
         </Card>
 
         {/* Getting Started */}
-        <Card className="mb-8">
+        <Card id="getting-started" className="mb-8 scroll-mt-24">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5" />
@@ -206,7 +343,7 @@ export default function DocumentationPage() {
           </h2>
 
           {/* Workflow 1 */}
-          <Card>
+          <Card id="workflow-1" className="scroll-mt-24">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-blue-500" />
@@ -263,7 +400,7 @@ export default function DocumentationPage() {
           </Card>
 
           {/* Workflow 2 */}
-          <Card>
+          <Card id="workflow-2" className="scroll-mt-24">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="h-5 w-5 text-green-500" />
@@ -316,7 +453,7 @@ export default function DocumentationPage() {
           </Card>
 
           {/* Workflow 3 */}
-          <Card>
+          <Card id="workflow-3" className="scroll-mt-24">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-purple-500" />
@@ -411,7 +548,7 @@ export default function DocumentationPage() {
           </Card>
 
           {/* Workflow 4 */}
-          <Card>
+          <Card id="workflow-4" className="scroll-mt-24">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Upload className="h-5 w-5 text-orange-500" />
@@ -462,7 +599,7 @@ export default function DocumentationPage() {
           </Card>
 
           {/* Workflow 5 - Offline Entry */}
-          <Card>
+          <Card id="workflow-5" className="scroll-mt-24">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-cyan-500" />
@@ -498,7 +635,7 @@ export default function DocumentationPage() {
           </Card>
 
           {/* Workflow 6 */}
-          <Card>
+          <Card id="workflow-6" className="scroll-mt-24">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Bell className="h-5 w-5 text-yellow-500" />
@@ -575,7 +712,7 @@ export default function DocumentationPage() {
           </Card>
 
           {/* Workflow 7 */}
-          <Card>
+          <Card id="workflow-7" className="scroll-mt-24">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Lock className="h-5 w-5 text-red-500" />
@@ -630,7 +767,7 @@ export default function DocumentationPage() {
           </Card>
 
           {/* Workflow 8 */}
-          <Card>
+          <Card id="workflow-8" className="scroll-mt-24">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Filter className="h-5 w-5 text-indigo-500" />
@@ -676,7 +813,7 @@ export default function DocumentationPage() {
           </Card>
 
           {/* Workflow 9 - RBAC */}
-          <Card>
+          <Card id="workflow-9" className="scroll-mt-24">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-blue-500" />
@@ -922,7 +1059,7 @@ export default function DocumentationPage() {
           </Card>
 
           {/* Workflow 10 */}
-          <Card>
+          <Card id="workflow-10" className="scroll-mt-24">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <BarChart3 className="h-5 w-5 text-teal-500" />
@@ -981,7 +1118,7 @@ export default function DocumentationPage() {
           </Card>
 
           {/* Workflow 11 - User Management */}
-          <Card>
+          <Card id="workflow-11" className="scroll-mt-24">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-pink-500" />
@@ -1125,7 +1262,7 @@ export default function DocumentationPage() {
         </div>
 
         {/* Testing Instructions */}
-        <Card className="mb-8">
+        <Card id="testing" className="mb-8 scroll-mt-24">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle className="h-5 w-5" />
@@ -1233,7 +1370,7 @@ export default function DocumentationPage() {
         </Card>
 
         {/* Security & Data Handling */}
-        <Card className="mb-8">
+        <Card id="security" className="mb-8 scroll-mt-24">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Lock className="h-5 w-5" />
@@ -1287,7 +1424,7 @@ export default function DocumentationPage() {
         </Card>
 
         {/* FAQ */}
-        <Card>
+        <Card id="faq" className="scroll-mt-24">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-5 w-5" />
