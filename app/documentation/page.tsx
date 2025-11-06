@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Card,
   CardContent,
@@ -53,18 +53,34 @@ const tocSections = [
 export default function DocumentationPage() {
   const [activeSection, setActiveSection] = useState("introduction");
   const [tocOpen, setTocOpen] = useState(false);
+  const isScrollingRef = useRef(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Track active section on scroll
   useEffect(() => {
+    let debounceTimeout: NodeJS.Timeout;
+
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setActiveSection(entry.target.id);
+        // Skip updates during programmatic scrolling
+        if (isScrollingRef.current) return;
+
+        // Debounce the state update to prevent flickering
+        clearTimeout(debounceTimeout);
+        debounceTimeout = setTimeout(() => {
+          const visibleEntries = entries.filter(entry => entry.isIntersecting);
+          if (visibleEntries.length > 0) {
+            const mostVisible = visibleEntries.reduce((prev, current) => {
+              return current.intersectionRatio > prev.intersectionRatio ? current : prev;
+            });
+            setActiveSection(mostVisible.target.id);
           }
-        });
+        }, 100);
       },
-      { rootMargin: "-100px 0px -80% 0px" }
+      { 
+        rootMargin: "-20% 0px -35% 0px",
+        threshold: [0, 0.25, 0.5, 0.75, 1]
+      }
     );
 
     tocSections.forEach(({ id }) => {
@@ -72,12 +88,21 @@ export default function DocumentationPage() {
       if (element) observer.observe(element);
     });
 
-    return () => observer.disconnect();
+    return () => {
+      clearTimeout(debounceTimeout);
+      observer.disconnect();
+    };
   }, []);
 
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
+      // Set active immediately for instant feedback
+      setActiveSection(id);
+      
+      // Disable observer during scroll
+      isScrollingRef.current = true;
+      
       const offset = 100;
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.scrollY - offset;
@@ -86,6 +111,15 @@ export default function DocumentationPage() {
         top: offsetPosition,
         behavior: "smooth",
       });
+
+      // Re-enable observer after scroll completes
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+      scrollTimeoutRef.current = setTimeout(() => {
+        isScrollingRef.current = false;
+      }, 1000);
+
       setTocOpen(false);
     }
   };
@@ -125,34 +159,6 @@ export default function DocumentationPage() {
         </div>
       </div>
 
-      {/* Table of Contents - Desktop Sidebar */}
-      <aside className="hidden lg:block fixed left-4 top-24 w-64 h-[calc(100vh-120px)] overflow-y-auto z-40">
-        <Card className="sticky top-24">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-semibold flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Contents
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1">
-            {tocSections.map(({ id, label }) => (
-              <button
-                key={id}
-                onClick={() => scrollToSection(id)}
-                className={cn(
-                  "w-full text-left text-sm px-3 py-2 rounded-md transition-colors",
-                  activeSection === id
-                    ? "bg-primary text-primary-foreground font-medium"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground"
-                )}
-              >
-                {label}
-              </button>
-            ))}
-          </CardContent>
-        </Card>
-      </aside>
-
       {/* Table of Contents - Mobile Drawer */}
       {tocOpen && (
         <div className="lg:hidden fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
@@ -190,7 +196,38 @@ export default function DocumentationPage() {
         </div>
       )}
 
-      <div className="container mx-auto px-4 py-12 max-w-5xl">
+      <div className="container mx-auto px-4 py-12 max-w-7xl">
+        <div className="flex gap-8 items-start">
+          {/* Table of Contents - Desktop Sidebar */}
+          <aside className="hidden lg:block sticky top-24 w-64 shrink-0 h-[calc(100vh-120px)] overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                  <FileText className="h-4 w-4" />
+                  Contents
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-1">
+                {tocSections.map(({ id, label }) => (
+                  <button
+                    key={id}
+                    onClick={() => scrollToSection(id)}
+                    className={cn(
+                      "w-full text-left text-sm px-3 py-2 rounded-md transition-colors",
+                      activeSection === id
+                        ? "bg-primary text-primary-foreground font-medium"
+                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </CardContent>
+            </Card>
+          </aside>
+
+          {/* Main Content */}
+          <div className="flex-1 min-w-0 max-w-4xl">
         {/* Hero Section */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 mb-4">
@@ -1509,7 +1546,9 @@ export default function DocumentationPage() {
             </Link>
           </div>
         </div>
-      </div>
+          </div> {/* End Main Content */}
+        </div> {/* End Flex Container */}
+      </div> {/* End Container */}
     </div>
   );
 }

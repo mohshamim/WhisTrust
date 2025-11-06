@@ -371,7 +371,7 @@ export default function Home() {
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Up to 10 reports/month</span>
+                    <span className="text-sm">Up to 2 reports/month</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
@@ -733,20 +733,20 @@ export default function Home() {
               <h4 className="font-semibold mb-4">Legal</h4>
               <ul className="space-y-2 text-sm">
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    href="/privacy-policy"
                     className="text-muted-foreground hover:text-primary"
                   >
                     Privacy Policy
-                  </a>
+                  </Link>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <Link
+                    href="/terms-of-service"
                     className="text-muted-foreground hover:text-primary"
                   >
                     Terms of Service
-                  </a>
+                  </Link>
                 </li>
               </ul>
             </div>
