@@ -190,7 +190,7 @@ export default function DocumentationPage() {
         </div>
       )}
 
-      <div className="container mx-auto px-4 py-12 max-w-5xl lg:ml-72">
+      <div className="container mx-auto px-4 py-12 max-w-5xl">
         {/* Hero Section */}
         <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 mb-4">
