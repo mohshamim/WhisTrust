@@ -72,7 +72,7 @@ export default function EssentialPlanPage() {
             </CardHeader>
             <CardContent>
               <Button className="w-full h-12" size="lg" asChild>
-                <Link href="/report">
+                <Link href="/demo">
                   Start Free Trial
                 </Link>
               </Button>
@@ -345,7 +345,7 @@ export default function EssentialPlanPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" asChild>
-                  <Link href="/report">Start Free Trial</Link>
+                  <Link href="/demo">Start Free Trial</Link>
                 </Button>
                 <Button variant="outline" size="lg" asChild>
                   <Link href="/#pricing">Compare All Plans</Link>

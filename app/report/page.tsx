@@ -197,9 +197,18 @@ export default function ReportPage() {
                   }
                   required
                 />
-                <p className="text-xs text-muted-foreground">
-                  Minimum 50 characters
-                </p>
+                <div className="flex justify-between items-center">
+                  <p className="text-xs text-muted-foreground">
+                    Minimum 50 characters
+                  </p>
+                  <p className={`text-xs font-medium ${
+                    formData.description.trim().length >= 50 
+                      ? 'text-green-600 dark:text-green-500' 
+                      : 'text-muted-foreground'
+                  }`}>
+                    {formData.description.trim().length}/50
+                  </p>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -301,7 +310,10 @@ export default function ReportPage() {
                   type="submit"
                   className="w-full h-12 text-base font-semibold shadow-sm hover:shadow-md transition-shadow"
                   disabled={
-                    isSubmitting || !formData.category || !formData.description
+                    isSubmitting || 
+                    !formData.category || 
+                    !formData.description || 
+                    formData.description.trim().length < 50
                   }
                 >
                   {isSubmitting ? (

@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/table";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -55,6 +56,7 @@ import {
   MessageSquare,
   File,
   Download,
+  X,
 } from "lucide-react";
 import { PriorityBadge } from "@/components/ui/priority-badge";
 import { CaseAssignmentSelect } from "@/components/ui/case-assignment-select";
@@ -720,7 +722,7 @@ function CasesPageContent() {
           >
             <SheetHeader className="border-b p-6 sticky top-0 bg-background z-10 shadow-sm">
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex-1">
                   <SheetTitle className="text-2xl flex items-center gap-2 animate-in fade-in slide-in-from-left-4 duration-300">
                     <div className="p-2 bg-primary/10 rounded-lg ring-1 ring-primary/20">
                       <FileSearch className="h-6 w-6 text-primary" />
@@ -731,7 +733,19 @@ function CasesPageContent() {
                     {selectedCase?.tracking_code}
                   </SheetDescription>
                 </div>
-                {selectedCase && getStatusBadge(selectedCase.status)}
+                <div className="flex items-center gap-3">
+                  {selectedCase && getStatusBadge(selectedCase.status)}
+                  <SheetClose asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 rounded-full hover:bg-muted"
+                      aria-label="Close drawer"
+                    >
+                      <X className="h-5 w-5" />
+                    </Button>
+                  </SheetClose>
+                </div>
               </div>
             </SheetHeader>
 

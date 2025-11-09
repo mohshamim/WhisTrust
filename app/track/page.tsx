@@ -203,15 +203,19 @@ function TrackPageContent() {
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Under Review":
-        return "bg-blue-500/15 text-blue-700 border-blue-500/30";
-      case "In Progress":
-        return "bg-amber-500/15 text-amber-700 border-amber-500/30";
-      case "Resolved":
-        return "bg-green-500/15 text-green-700 border-green-500/30";
+    switch (status.toLowerCase()) {
+      case "under review":
+        return "bg-blue-500/15 text-blue-700 border-blue-500/30 border-2";
+      case "in progress":
+        return "bg-amber-500/15 text-amber-700 border-amber-500/30 border-2";
+      case "resolved":
+        return "bg-green-500/15 text-green-700 border-green-500/30 border-2";
+      case "pending":
+        return "bg-yellow-500/15 text-yellow-700 border-yellow-500/50 border-2";
+      case "closed":
+        return "bg-gray-500/15 text-gray-700 border-gray-500/50 border-2";
       default:
-        return "bg-muted";
+        return "bg-slate-500/15 text-slate-700 border-slate-500/50 border-2";
     }
   };
 

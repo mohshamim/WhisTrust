@@ -758,7 +758,16 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-            © 2025 Aisar Technologies | All Rights Reserved.
+            © 2025{" "}
+            <a
+              href="http://aisar.sa/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-primary transition-colors underline-offset-4 hover:underline"
+            >
+              Aisar Technologies
+            </a>
+            {" "}| All Rights Reserved.
           </div>
         </div>
       </footer>

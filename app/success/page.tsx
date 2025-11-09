@@ -11,12 +11,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CheckCircle2, Copy, ExternalLink } from "lucide-react";
+import { CheckCircle2, Copy, ExternalLink, Check } from "lucide-react";
 import { toast } from "sonner";
 
 export default function SuccessPage() {
   const router = useRouter();
   const [trackingCode, setTrackingCode] = useState<string>("");
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     // Get tracking code from sessionStorage
@@ -34,7 +35,13 @@ export default function SuccessPage() {
   const handleCopyCode = async () => {
     if (trackingCode) {
       await navigator.clipboard.writeText(trackingCode);
+      setCopied(true);
       toast.success("Tracking code copied to clipboard!");
+      
+      // Reset copied state after 2 seconds
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
     }
   };
 
@@ -65,10 +72,21 @@ export default function SuccessPage() {
                   variant="ghost"
                   size="sm"
                   onClick={handleCopyCode}
-                  className="h-8"
+                  className={`h-8 transition-colors ${
+                    copied ? 'text-green-600 hover:text-green-600' : ''
+                  }`}
                 >
-                  <Copy className="h-4 w-4 mr-1" />
-                  Copy
+                  {copied ? (
+                    <>
+                      <Check className="h-4 w-4 mr-1" />
+                      Code Copied!
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="h-4 w-4 mr-1" />
+                      Copy
+                    </>
+                  )}
                 </Button>
               </div>
               <div className="flex items-center justify-center">

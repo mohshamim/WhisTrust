@@ -80,7 +80,7 @@ export default function EnterprisePlanPage() {
             </CardHeader>
             <CardContent>
               <Button className="w-full h-12" size="lg" variant="default" asChild>
-                <Link href="/report">Request Custom Quote</Link>
+                <Link href="/contact">Request Custom Quote</Link>
               </Button>
             </CardContent>
           </Card>
@@ -475,7 +475,7 @@ export default function EnterprisePlanPage() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Button size="lg" asChild>
-                  <Link href="/report">Request Custom Quote</Link>
+                  <Link href="/contact">Request Custom Quote</Link>
                 </Button>
                 <Button variant="outline" size="lg" asChild>
                   <Link href="/demo">Schedule Demo</Link>
