@@ -81,6 +81,12 @@ export default function Home() {
             >
               Pricing
             </Link>
+            <Link
+              href="/contact"
+              className="text-sm hover:text-primary transition-colors"
+            >
+              Contact
+            </Link>
             <Button variant="outline" size="sm" asChild>
               <Link href="/documentation">Documentation</Link>
             </Button>
@@ -132,6 +138,14 @@ export default function Home() {
                         className="flex items-center justify-between rounded-lg px-3 py-2 text-base hover:bg-muted transition"
                       >
                         Pricing
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/contact"
+                        className="flex items-center justify-between rounded-lg px-3 py-2 text-base hover:bg-muted transition"
+                      >
+                        Contact
                       </Link>
                     </li>
                     <li>
@@ -363,196 +377,25 @@ export default function Home() {
           </div>
 
           {/* Pricing Cards */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6 my-16">
-            {/* Free Plan */}
+          <div className="grid md:grid-cols-3 gap-8 my-16 max-w-6xl mx-auto">
+            {/* Essential Plan */}
             <Card className="card-enhanced hover-lift group relative flex flex-col">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Free</CardTitle>
-                <CardDescription className="text-sm">
-                  For individuals or small teams
+              <CardHeader className="pb-6">
+                <CardTitle className="text-2xl">Essential</CardTitle>
+                <CardDescription className="text-sm mt-2">
+                  Compliance Foundation
                 </CardDescription>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Small/Mid-sized companies requiring core legal compliance
+                </p>
                 <div className="mt-6">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold">$0</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">Forever</p>
-                </div>
-              </CardHeader>
-              <CardContent className="flex-grow flex flex-col gap-4">
-                <div className="space-y-3">
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Up to 2 reports/month</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Basic tracking</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Email support</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Anonymous reporting</span>
-                  </div>
-                </div>
-                <Button variant="outline" className="w-full mt-auto">
-                  Get Started
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Starter Plan */}
-            <Card className="card-enhanced hover-lift group relative flex flex-col">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Starter</CardTitle>
-                <CardDescription className="text-sm">
-                  For micro organizations
-                </CardDescription>
-                <div className="mt-6">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold">$29</span>
+                    <span className="text-5xl font-bold">$700</span>
                     <span className="text-muted-foreground">/mo</span>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">~109 SAR</p>
-                </div>
-              </CardHeader>
-              <CardContent className="flex-grow flex flex-col gap-4">
-                <div className="space-y-3">
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Up to 100 reports/month</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Case assignment</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Audit log</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">CSV export</span>
-                  </div>
-                </div>
-                <Button variant="outline" className="w-full mt-auto">
-                  Start Free Trial
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Pro Plan - Most Popular */}
-            <Card className="card-enhanced hover-lift group relative flex flex-col border-primary shadow-lg">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
-                <Badge className="bg-primary text-primary-foreground shadow-md">
-                  Most Popular
-                </Badge>
-              </div>
-              <CardHeader className="pb-4 pt-6">
-                <CardTitle className="text-xl">Pro</CardTitle>
-                <CardDescription className="text-sm">
-                  For small & medium organizations
-                </CardDescription>
-                <div className="mt-6">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold">$59</span>
-                    <span className="text-muted-foreground">/mo</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">~221 SAR</p>
-                </div>
-              </CardHeader>
-              <CardContent className="flex-grow flex flex-col gap-4">
-                <div className="space-y-3">
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Unlimited reports</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Encrypted messaging</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Labels & priorities</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Analytics dashboard</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">API access</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Role-based permissions</span>
-                  </div>
-                </div>
-                <Button className="w-full mt-auto shadow-md hover:shadow-lg">
-                  See Demo
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Business Plan */}
-            <Card className="card-enhanced hover-lift group relative flex flex-col">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Business</CardTitle>
-                <CardDescription className="text-sm">
-                  For large teams or compliance departments
-                </CardDescription>
-                <div className="mt-6">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold">$99</span>
-                    <span className="text-muted-foreground">/mo</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">~371 SAR</p>
-                </div>
-              </CardHeader>
-              <CardContent className="flex-grow flex flex-col gap-4">
-                <div className="space-y-3">
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Everything in Pro</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Advanced RBAC & SSO</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Custom branding</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Priority support</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Notification center</span>
-                  </div>
-                </div>
-                <Button variant="outline" className="w-full mt-auto">
-                  Contact Sales
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Enterprise Plan */}
-            <Card className="card-enhanced hover-lift group relative flex flex-col">
-              <CardHeader className="pb-4">
-                <CardTitle className="text-xl">Enterprise</CardTitle>
-                <CardDescription className="text-sm">
-                  For large organizations & government entities
-                </CardDescription>
-                <div className="mt-6">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold">Custom</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    from $149+/mo
+                  <p className="text-sm text-muted-foreground mt-2">
+                    <Users className="h-3 w-3 inline mr-1" />
+                    Up to 500 employees
                   </p>
                 </div>
               </CardHeader>
@@ -560,23 +403,167 @@ export default function Home() {
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">On-prem / Data residency</span>
+                    <span className="text-sm">
+                      Secure anonymous reporting with tracking codes
+                    </span>
                   </div>
                   <div className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Dedicated support & SLA</span>
+                    <span className="text-sm">
+                      End-to-End Encryption & basic attachments
+                    </span>
                   </div>
                   <div className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Data retention & DPA</span>
+                    <span className="text-sm">
+                      Single gatekeeper access with audit log
+                    </span>
                   </div>
                   <div className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Custom integrations</span>
+                    <span className="text-sm">Standard email support</span>
                   </div>
                 </div>
-                <Button variant="outline" className="w-full mt-auto">
-                  Request Quote
+                <Button
+                  variant="outline"
+                  className="w-full mt-auto h-11"
+                  asChild
+                >
+                  <Link href="/plan-details/essential">
+                    See Details
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Professional Plan - Most Popular */}
+            <Card className="card-enhanced hover-lift group relative flex flex-col border-primary shadow-lg">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 z-10">
+                <Badge className="bg-primary text-primary-foreground shadow-md">
+                  Most Popular
+                </Badge>
+              </div>
+              <CardHeader className="pb-6 pt-6">
+                <CardTitle className="text-2xl">Professional</CardTitle>
+                <CardDescription className="text-sm mt-2">
+                  Advanced Investigation
+                </CardDescription>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Mid-to-Large organizations needing advanced investigation
+                  tools
+                </p>
+                <div className="mt-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-5xl font-bold">$1,200</span>
+                    <span className="text-muted-foreground">/mo</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    <Users className="h-3 w-3 inline mr-1" />
+                    501 – 2,500 employees
+                  </p>
+                </div>
+              </CardHeader>
+              <CardContent className="flex-grow flex flex-col gap-4">
+                <div className="space-y-3">
+                  <div className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <span className="text-sm font-medium">
+                      All Essential features
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <span className="text-sm">
+                      Encrypted two-way anonymous messaging
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <span className="text-sm">
+                      Delegation & workflow automation
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <span className="text-sm">Multi-language & mobile apps</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <span className="text-sm">
+                      Priority support & admin training
+                    </span>
+                  </div>
+                </div>
+                <Button className="w-full mt-auto h-11 shadow-md" asChild>
+                  <Link href="/plan-details/professional">
+                    See Details
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Enterprise Plan */}
+            <Card className="card-enhanced hover-lift group relative flex flex-col">
+              <CardHeader className="pb-6">
+                <CardTitle className="text-2xl">Enterprise</CardTitle>
+                <CardDescription className="text-sm mt-2">
+                  Ultimate Security & Customization
+                </CardDescription>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Large international organizations needing full compliance
+                </p>
+                <div className="mt-6">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold">Custom Quote</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-2">
+                    <Users className="h-3 w-3 inline mr-1" />
+                    2,500+ employees
+                  </p>
+                </div>
+              </CardHeader>
+              <CardContent className="flex-grow flex flex-col gap-4">
+                <div className="space-y-3">
+                  <div className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <span className="text-sm font-medium">
+                      All Professional features
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <span className="text-sm">
+                      SSO, IP control, SOC 2 & ISO 27001
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <span className="text-sm">
+                      Advanced RBAC & reporting dashboards
+                    </span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <span className="text-sm">API & Webhooks integration</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+                    <span className="text-sm">
+                      Dedicated CSM & 24/7 support with SLA
+                    </span>
+                  </div>
+                </div>
+                <Button
+                  variant="outline"
+                  className="w-full mt-auto h-11"
+                  asChild
+                >
+                  <Link href="/plan-details/enterprise">
+                    See Details
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
                 </Button>
               </CardContent>
             </Card>
@@ -731,6 +718,14 @@ export default function Home() {
                   </Link>
                 </li>
                 <li>
+                  <Link
+                    href="/contact"
+                    className="text-muted-foreground hover:text-primary"
+                  >
+                    Contact
+                  </Link>
+                </li>
+                <li>
                   <a
                     href="#"
                     className="text-muted-foreground hover:text-primary"
@@ -763,7 +758,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-            © 2024 WhisTrust. All rights reserved.
+            © 2025 Aisar Technologies | All Rights Reserved.
           </div>
         </div>
       </footer>

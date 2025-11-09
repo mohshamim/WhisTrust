@@ -550,14 +550,14 @@ export default function TermsOfServicePage() {
             <div className="bg-muted/50 p-4 rounded-lg space-y-2">
               <p className="text-sm">
                 <strong>Email:</strong>{" "}
-                <a href="mailto:legal@whistrust.com" className="text-primary hover:underline">
-                  legal@whistrust.com
+                <a href="mailto:info@aisar.sa" className="text-primary hover:underline">
+                  info@aisar.sa
                 </a>
               </p>
               <p className="text-sm">
                 <strong>Support:</strong>{" "}
-                <a href="mailto:support@whistrust.com" className="text-primary hover:underline">
-                  support@whistrust.com
+                <a href="mailto:info@aisar.sa" className="text-primary hover:underline">
+                  info@aisar.sa
                 </a>
               </p>
               <p className="text-sm">

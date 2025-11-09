@@ -108,8 +108,8 @@ export default function PrivacyPolicyPage() {
             <div className="bg-muted/50 p-4 rounded-lg">
               <p className="font-semibold mb-2">Contact Information:</p>
               <ul className="space-y-1 text-sm text-muted-foreground">
-                <li>Email: privacy@whistrust.com</li>
-                <li>Data Protection Officer: dpo@whistrust.com</li>
+                <li>Email: info@aisar.sa</li>
+                <li>Data Protection Officer: info@aisar.sa</li>
                 <li>Website: www.whistrust.com</li>
               </ul>
             </div>
@@ -311,8 +311,8 @@ export default function PrivacyPolicyPage() {
             </div>
             <p className="text-sm text-muted-foreground mt-4">
               To exercise these rights, contact us at{" "}
-              <a href="mailto:privacy@whistrust.com" className="text-primary hover:underline">
-                privacy@whistrust.com
+              <a href="mailto:info@aisar.sa" className="text-primary hover:underline">
+                info@aisar.sa
               </a>
             </p>
           </CardContent>
@@ -452,14 +452,14 @@ export default function PrivacyPolicyPage() {
             <div className="bg-muted/50 p-4 rounded-lg space-y-2">
               <p className="text-sm">
                 <strong>Email:</strong>{" "}
-                <a href="mailto:privacy@whistrust.com" className="text-primary hover:underline">
-                  privacy@whistrust.com
+                <a href="mailto:info@aisar.sa" className="text-primary hover:underline">
+                  info@aisar.sa
                 </a>
               </p>
               <p className="text-sm">
                 <strong>Data Protection Officer:</strong>{" "}
-                <a href="mailto:dpo@whistrust.com" className="text-primary hover:underline">
-                  dpo@whistrust.com
+                <a href="mailto:info@aisar.sa" className="text-primary hover:underline">
+                  info@aisar.sa
                 </a>
               </p>
             </div>
