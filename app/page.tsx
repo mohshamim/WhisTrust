@@ -761,12 +761,12 @@ export default function Home() {
             © 2025{" "}
             <a
               href="http://aisar.sa/"
-              target="_blank"
-              rel="noopener noreferrer"
+            target="_blank"
+            rel="noopener noreferrer"
               className="hover:text-primary transition-colors underline-offset-4 hover:underline"
-            >
+          >
               Aisar Technologies
-            </a>
+          </a>
             {" "}| All Rights Reserved.
           </div>
         </div>

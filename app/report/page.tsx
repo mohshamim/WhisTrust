@@ -40,6 +40,13 @@ export default function ReportPage() {
   });
   const [uploadProgress, setUploadProgress] = useState(0);
 
+  // Form validation helper
+  const isFormValid = () => {
+    const hasCategory = formData.category && formData.category.trim().length > 0;
+    const hasDescription = formData.description && formData.description.trim().length >= 50;
+    return hasCategory && hasDescription;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -309,12 +316,7 @@ export default function ReportPage() {
                 <Button
                   type="submit"
                   className="w-full h-12 text-base font-semibold shadow-sm hover:shadow-md transition-shadow"
-                  disabled={
-                    isSubmitting || 
-                    !formData.category || 
-                    !formData.description || 
-                    formData.description.trim().length < 50
-                  }
+                  disabled={isSubmitting || !isFormValid()}
                 >
                   {isSubmitting ? (
                     <>
@@ -325,6 +327,16 @@ export default function ReportPage() {
                     "Submit Report"
                   )}
                 </Button>
+                
+                {/* Validation feedback for debugging */}
+                {!isFormValid() && !isSubmitting && (
+                  <p className="text-xs text-center text-muted-foreground">
+                    {!formData.category && "Please select a category. "}
+                    {formData.description.trim().length < 50 && 
+                      `Please provide at least ${50 - formData.description.trim().length} more characters in the description.`
+                    }
+                  </p>
+                )}
 
                 <p className="text-xs text-center text-muted-foreground">
                   By submitting, you agree to our{" "}

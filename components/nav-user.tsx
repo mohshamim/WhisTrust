@@ -8,6 +8,7 @@ import {
   LogOut,
   Sparkles,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -39,6 +40,25 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar();
   const { role } = useUserRole();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      const { signOutAdmin } = await import("@/lib/services/auth");
+      const result = await signOutAdmin();
+      
+      if (result.success) {
+        router.push("/admin/login");
+        router.refresh();
+      } else {
+        console.error("Logout failed:", result.error);
+        alert("Failed to logout. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+      alert("An error occurred during logout.");
+    }
+  };
 
   const getRoleBadgeVariant = (role: string | null) => {
     switch (role) {
@@ -141,7 +161,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={handleLogout} className="cursor-pointer">
               <LogOut />
               Log out
             </DropdownMenuItem>

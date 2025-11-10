@@ -55,9 +55,9 @@ export default function AdminLoginPage() {
             <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-4">
               <Shield className="h-8 w-8 text-primary" />
             </div>
-            <CardTitle className="text-3xl font-bold">Admin Portal</CardTitle>
+            <CardTitle className="text-3xl font-bold">WhisTrust Portal</CardTitle>
             <CardDescription className="text-base">
-              Sign in to access the compliance dashboard
+              Staff login - Secure access to compliance dashboard
             </CardDescription>
           </CardHeader>
 
