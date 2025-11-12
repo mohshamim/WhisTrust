@@ -26,14 +26,25 @@ export function getEnvironment(hostname?: string, pathname?: string): Environmen
   const host = hostname || (typeof window !== 'undefined' ? window.location.hostname : '');
   const path = pathname || (typeof window !== 'undefined' ? window.location.pathname : '');
   
-  // Demo environment detection
-  const isDemoHostname = host === 'demo.whistrust.com' || host === 'localhost' || host.includes('127.0.0.1');
-  const isDemoPath = path.startsWith('/demo');
-  
-  if (isDemoHostname || isDemoPath) {
+  // PATH-BASED DETECTION (highest priority)
+  // /demo path always uses Demo Supabase
+  if (path.startsWith('/demo')) {
     return 'demo';
   }
   
+  // /superadmin, /test, or any other path uses Production Supabase
+  if (path.startsWith('/superadmin') || path.startsWith('/test/connection')) {
+    return 'production';
+  }
+  
+  // HOSTNAME-BASED DETECTION
+  // demo.whistrust.com always uses Demo Supabase
+  if (host === 'demo.whistrust.com') {
+    return 'demo';
+  }
+  
+  // For localhost, default to Production (safer for multi-tenant development)
+  // Demo is explicitly accessed via /demo path
   // Everything else is production (multi-tenant)
   return 'production';
 }
