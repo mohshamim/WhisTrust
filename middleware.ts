@@ -1,116 +1,88 @@
-import { createServerClient } from "@supabase/ssr";
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-export async function middleware(request: NextRequest) {
-  // Create a response object to handle redirects
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
-
-  // Create Supabase client with cookie handling
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) => {
-            request.cookies.set(name, value);
-          });
-          response = NextResponse.next({
-            request,
-          });
-          cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
-          });
-        },
-      },
-    }
-  );
-
-  // Check if the path starts with /admin (but not /admin/login)
-  const { pathname } = request.nextUrl;
-  const isAdminRoute = pathname.startsWith("/admin") && pathname !== "/admin/login";
-
-  if (isAdminRoute) {
-    // Get the current user session
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    // If no user, redirect to login
-    if (!user) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/admin/login";
-      return NextResponse.redirect(url);
-    }
-
-    // Fetch admin profile with role
-    const { data: profile } = await supabase
-      .from("admin_profiles")
-      .select("id, role")
-      .eq("id", user.id)
-      .single();
-
-    if (!profile) {
-      // User exists but not in admin_profiles - unauthorized
-      const url = request.nextUrl.clone();
-      url.pathname = "/admin/login";
-      return NextResponse.redirect(url);
-    }
-    // Role-based route restrictions
-    if (profile) {
-      const restrictedAnalytics = pathname === "/admin/analytics";
-      const restrictedAuditLogs = pathname === "/admin/audit-logs";
-      const restrictedUsers = pathname.startsWith("/admin/users");
-
-      // Only admin/manager: analytics, audit logs
-      if ((restrictedAnalytics || restrictedAuditLogs) && !["admin", "manager"].includes(profile.role)) {
-        const url = request.nextUrl.clone();
-        url.pathname = "/admin/access-denied";
-        return NextResponse.redirect(url);
+export function middleware(request: NextRequest) {
+  const hostname = request.headers.get('host') || '';
+  const pathname = request.nextUrl.pathname;
+  
+  // Extract subdomain
+  const subdomain = extractSubdomain(hostname);
+  
+  // Skip middleware for certain paths
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/static') ||
+    pathname.includes('.') // Files (favicon, images, etc.)
+  ) {
+    return NextResponse.next();
+  }
+  
+  // Handle subdomains
+  if (subdomain) {
+    // Demo subdomain → /demo
+    if (subdomain === 'demo') {
+      if (!pathname.startsWith('/demo')) {
+        return NextResponse.rewrite(new URL(`/demo${pathname}`, request.url));
       }
-
-      // Only admin: user management
-      if (restrictedUsers && profile.role !== "admin") {
-        const url = request.nextUrl.clone();
-        url.pathname = "/admin/access-denied";
-        return NextResponse.redirect(url);
+      return NextResponse.next();
+    }
+    
+    // Super Admin subdomain → /superadmin
+    if (subdomain === 'superadmin') {
+      if (!pathname.startsWith('/superadmin')) {
+        return NextResponse.rewrite(new URL(`/superadmin${pathname}`, request.url));
       }
+      return NextResponse.next();
+    }
+    
+    // Client tenant subdomain → /org/[subdomain]
+    // Example: acme.whistrust.app → /org/acme
+    if (!pathname.startsWith('/org/')) {
+      return NextResponse.rewrite(
+        new URL(`/org/${subdomain}${pathname}`, request.url)
+      );
     }
   }
+  
+  return NextResponse.next();
+}
 
-  // Check if user is trying to access /admin/login while already logged in
-  if (pathname === "/admin/login") {
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (user) {
-      // Already logged in, redirect to dashboard
-      const url = request.nextUrl.clone();
-      url.pathname = "/admin/dashboard";
-      return NextResponse.redirect(url);
-    }
+function extractSubdomain(hostname: string): string | null {
+  const host = hostname.split(':')[0];
+  
+  // Main domains (no subdomain)
+  const mainDomains = [
+    'whistrust.com',
+    'www.whistrust.com',
+    'whistrust.app',
+    'www.whistrust.app',
+    'localhost',
+  ];
+  
+  if (mainDomains.includes(host)) {
+    return null;
   }
-
-  return response;
+  
+  // Extract subdomain
+  const parts = host.split('.');
+  
+  if (parts.length >= 2) {
+    return parts[0];
+  }
+  
+  return null;
 }
 
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
+     * Match all request paths except:
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
      */
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    '/((?!_next/static|_next/image|favicon.ico|.*\\..*|api).*)',
   ],
 };
