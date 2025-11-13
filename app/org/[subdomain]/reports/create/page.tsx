@@ -176,7 +176,18 @@ export default function CreateCasePage() {
   if (success && createdCase) {
     return (
       <SidebarProvider>
-        <ClientSidebar subdomain={subdomain} user={user} organization={organization} />
+        <ClientSidebar 
+          user={{
+            name: user.full_name || user.email,
+            email: user.email,
+            avatar: user.avatar_url || "",
+          }}
+          organization={{
+            name: organization.name,
+            subdomain: organization.subdomain,
+          }}
+          userRole={user.role || "admin"}
+        />
         <SidebarInset>
           <div className="flex h-screen items-center justify-center p-6">
             <Card className="max-w-2xl w-full">
@@ -238,7 +249,18 @@ export default function CreateCasePage() {
 
   return (
     <SidebarProvider>
-      <ClientSidebar subdomain={subdomain} user={user} organization={organization} />
+      <ClientSidebar 
+        user={{
+          name: user.full_name || user.email,
+          email: user.email,
+          avatar: user.avatar_url || "",
+        }}
+        organization={{
+          name: organization.name,
+          subdomain: organization.subdomain,
+        }}
+        userRole={user.role || "admin"}
+      />
       <SidebarInset>
         <div className="flex flex-col">
           {/* Header */}
