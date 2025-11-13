@@ -36,7 +36,8 @@ export async function getReportMessages(
   reportId: string
 ): Promise<GetMessagesResult> {
   try {
-    const supabase = createServiceClient();
+    // Use client instead of service client (can be called from browser)
+    const supabase = createClient();
 
     const { data, error } = await supabase
       .from("messages")
@@ -81,7 +82,8 @@ export async function sendReporterMessage(
       };
     }
 
-    const supabase = createServiceClient();
+    // Use anonymous client for reporter messages (client-side)
+    const supabase = createClient();
 
     // Verify report exists
     const { data: report, error: reportError } = await supabase
