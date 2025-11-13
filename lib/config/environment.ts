@@ -57,11 +57,15 @@ export function getSupabaseConfig(environment?: Environment): SupabaseConfig {
   
   if (env === 'demo') {
     // Demo Supabase (existing/current Supabase project)
+    // Falls back to main Supabase if DEMO variables not set
     const url = process.env.NEXT_PUBLIC_DEMO_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
     const key = process.env.NEXT_PUBLIC_DEMO_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     
     if (!url || !key) {
-      throw new Error('Missing Demo Supabase credentials. Please set NEXT_PUBLIC_DEMO_SUPABASE_URL and NEXT_PUBLIC_DEMO_SUPABASE_ANON_KEY');
+      console.error('❌ Missing Demo Supabase credentials!');
+      console.error('NEXT_PUBLIC_DEMO_SUPABASE_URL:', !!process.env.NEXT_PUBLIC_DEMO_SUPABASE_URL);
+      console.error('NEXT_PUBLIC_SUPABASE_URL:', !!process.env.NEXT_PUBLIC_SUPABASE_URL);
+      throw new Error('Missing Demo Supabase credentials. Please set NEXT_PUBLIC_DEMO_SUPABASE_URL and NEXT_PUBLIC_DEMO_SUPABASE_ANON_KEY, or NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY');
     }
     
     return {
@@ -71,11 +75,15 @@ export function getSupabaseConfig(environment?: Environment): SupabaseConfig {
     };
   } else {
     // Production Supabase (new multi-tenant Supabase project)
-    const url = process.env.NEXT_PUBLIC_PROD_SUPABASE_URL;
-    const key = process.env.NEXT_PUBLIC_PROD_SUPABASE_ANON_KEY;
+    // Falls back to main Supabase if PROD variables not set
+    const url = process.env.NEXT_PUBLIC_PROD_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const key = process.env.NEXT_PUBLIC_PROD_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     
     if (!url || !key) {
-      throw new Error('Missing Production Supabase credentials. Please set NEXT_PUBLIC_PROD_SUPABASE_URL and NEXT_PUBLIC_PROD_SUPABASE_ANON_KEY');
+      console.error('❌ Missing Supabase credentials!');
+      console.error('NEXT_PUBLIC_PROD_SUPABASE_URL:', !!process.env.NEXT_PUBLIC_PROD_SUPABASE_URL);
+      console.error('NEXT_PUBLIC_SUPABASE_URL:', !!process.env.NEXT_PUBLIC_SUPABASE_URL);
+      throw new Error('Missing Production Supabase credentials. Please set NEXT_PUBLIC_PROD_SUPABASE_URL and NEXT_PUBLIC_PROD_SUPABASE_ANON_KEY, or NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY');
     }
     
     return {
