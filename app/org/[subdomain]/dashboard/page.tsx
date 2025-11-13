@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getCurrentClientAdmin } from "@/lib/services/client-auth";
 import { ClientSidebar } from "@/components/client-sidebar";
+import { NotificationsDropdown } from "@/components/notifications-dropdown";
 import {
   SidebarInset,
   SidebarProvider,
@@ -137,7 +138,7 @@ export default function ClientDashboardPage() {
       />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear">
-          <div className="flex items-center gap-2 px-4">
+          <div className="flex items-center gap-2 px-4 w-full">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
             <div className="flex-1 flex items-center justify-between">
@@ -148,6 +149,7 @@ export default function ClientDashboardPage() {
                 </p>
               </div>
               <div className="flex items-center gap-2">
+                <NotificationsDropdown userId={user.id} organizationId={organization.id} />
                 <Badge variant="outline" className="capitalize">{user.role}</Badge>
                 {organization.status === 'trial' && (
                   <Badge variant="outline" className="bg-amber-500/10 text-amber-600 border-amber-500/20">
