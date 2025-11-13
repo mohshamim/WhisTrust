@@ -159,14 +159,19 @@ function TrackPageContent() {
     setIsSending(true);
 
     try {
-      const { sendMessage } = await import("@/lib/services/messages");
+      const { sendReporterMessage } = await import("@/lib/services/messages");
       const messageText = newMessageText.trim();
 
-      const result = await sendMessage({
-        report_id: caseData.reportId,
-        sender_type: "reporter",
-        content: messageText,
-      });
+      if (!caseData.reportId) {
+        alert("Report ID not found");
+        setIsSending(false);
+        return;
+      }
+
+      const result = await sendReporterMessage(
+        caseData.reportId,
+        messageText
+      );
 
       if (result.success) {
         // Immediately add the message to the UI for instant feedback
