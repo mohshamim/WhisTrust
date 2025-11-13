@@ -368,9 +368,9 @@ export default function ClientReportsPage() {
   const handleDownload = async (attachment: any) => {
     try {
       const result = await downloadFile(attachment.file_path);
-      if (result.success && result.blob) {
+      if (result.success && result.data) {
         // Create download link
-        const url = window.URL.createObjectURL(result.blob);
+        const url = window.URL.createObjectURL(result.data);
         const a = document.createElement('a');
         a.href = url;
         a.download = attachment.file_name;
