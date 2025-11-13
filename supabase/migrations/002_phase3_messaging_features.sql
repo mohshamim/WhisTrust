@@ -16,13 +16,10 @@ CREATE TABLE IF NOT EXISTS messages (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     report_id UUID NOT NULL REFERENCES reports(id) ON DELETE CASCADE,
     sender_type TEXT NOT NULL CHECK (sender_type IN ('reporter', 'admin')),
+    sender_id UUID REFERENCES admin_profiles(id), -- admin user id if sender_type is admin
     content TEXT NOT NULL,
     is_encrypted BOOLEAN DEFAULT false,
-    created_at TIMESTAMPTZ DEFAULT NOW(),
-    created_by UUID REFERENCES admin_profiles(id),
-    
-    -- Index for fast lookups
-    CONSTRAINT messages_sender_type_check CHECK (sender_type IN ('reporter', 'admin'))
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Indexes for messages

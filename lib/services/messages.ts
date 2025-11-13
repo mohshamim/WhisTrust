@@ -10,10 +10,10 @@ export interface Message {
   id: string;
   report_id: string;
   sender_type: "reporter" | "admin";
+  sender_id: string | null; // admin user id if sender_type is admin
   content: string;
   is_encrypted: boolean;
   created_at: string;
-  created_by: string | null;
 }
 
 export interface GetMessagesResult {
@@ -103,9 +103,9 @@ export async function sendReporterMessage(
       .insert({
         report_id: reportId,
         sender_type: "reporter",
+        sender_id: null, // Anonymous reporter
         content: content.trim(),
         is_encrypted: false,
-        created_by: null, // Anonymous
       })
       .select()
       .single();
@@ -191,9 +191,9 @@ export async function sendAdminMessage(
       .insert({
         report_id: reportId,
         sender_type: "admin",
+        sender_id: userId, // Admin user ID
         content: content.trim(),
         is_encrypted: false,
-        created_by: userId,
       })
       .select()
       .single();
