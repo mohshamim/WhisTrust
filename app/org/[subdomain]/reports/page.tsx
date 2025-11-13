@@ -367,7 +367,20 @@ export default function ClientReportsPage() {
 
   const handleDownload = async (attachment: any) => {
     try {
-      await downloadFile(attachment.file_path, attachment.file_name);
+      const result = await downloadFile(attachment.file_path);
+      if (result.success && result.blob) {
+        // Create download link
+        const url = window.URL.createObjectURL(result.blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = attachment.file_name;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } else {
+        throw new Error('Failed to download file');
+      }
     } catch (error) {
       console.error("Download error:", error);
       alert("Failed to download file. Please try again.");
