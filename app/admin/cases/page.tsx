@@ -307,30 +307,24 @@ function CasesPageContent() {
 
     try {
       setIsSending(true);
-      const { sendMessage } = await import("@/lib/services/messages");
-      const { assignCase } = await import("@/lib/services/reports");
-      const { getCurrentAdmin } = await import("@/lib/services/auth");
-      // Auto-assign if unassigned
-      if (!selectedCase.assigned_to) {
-        const current = await getCurrentAdmin();
-        if (current.success && current.user) {
-          await assignCase(selectedCase.id, current.user.id);
-          setSelectedCase({ ...selectedCase, assigned_to: current.user.id });
-          setCases((prev) =>
-            prev.map((c) =>
-              c.id === selectedCase.id
-                ? { ...c, assigned_to: current.user!.id }
-                : c
-            )
-          );
-        }
+      const { sendAdminMessage } = await import("@/lib/services/messages");
+      const { createClient } = await import("@/lib/supabase/client");
+      
+      // Get current user ID
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        alert("You must be logged in to send messages");
+        setIsSending(false);
+        return;
       }
-      const result = await sendMessage({
-        report_id: selectedCase.id,
-        sender_type: "admin",
-        sender_id: undefined,
-        content: newMessage.trim(),
-      });
+
+      const result = await sendAdminMessage(
+        selectedCase.id,
+        newMessage.trim(),
+        user.id
+      );
 
       if (result.success) {
         setNewMessage("");
