@@ -314,8 +314,10 @@ export default function ClientReportsPage() {
 
   const loadMessages = async (reportId: string) => {
     try {
-      const data = await getReportMessages(reportId);
-      setMessages(data);
+      const result = await getReportMessages(reportId);
+      if (result.success && result.messages) {
+        setMessages(result.messages);
+      }
     } catch (error) {
       console.error("Failed to load messages:", error);
     }
