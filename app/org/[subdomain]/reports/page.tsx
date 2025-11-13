@@ -14,7 +14,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -42,6 +42,8 @@ import {
   Tag,
   Plus,
   Trash2,
+  Calendar,
+  User,
 } from "lucide-react";
 
 interface Report {
@@ -120,7 +122,10 @@ export default function ClientReportsPage() {
   const [savingLabels, setSavingLabels] = useState(false);
   
   // Real-time messages
-  const realtimeMessages = useRealtimeMessages(selectedReport?.id || "");
+  const realtimeMessages = useRealtimeMessages({
+    reportId: selectedReport?.id || null,
+    enabled: !!selectedReport?.id,
+  });
 
   // Apply status filter from URL params
   useEffect(() => {
@@ -704,63 +709,132 @@ export default function ClientReportsPage() {
 
       {/* Case Details Drawer */}
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <SheetContent className="sm:max-w-2xl overflow-y-auto">
+        <SheetContent 
+          side="right"
+          className="w-full sm:max-w-2xl overflow-y-auto p-0 animate-in slide-in-from-right-full duration-300"
+        >
           {selectedReport && (
             <>
-              <SheetHeader>
-                <SheetTitle>Case Details</SheetTitle>
-                <SheetDescription>
-                  View and update report information
-                </SheetDescription>
-              </SheetHeader>
-
-              <div className="space-y-6 py-6">
-                {/* Case Header */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold text-lg">{selectedReport.case_number}</h3>
+              <SheetHeader className="border-b p-6 sticky top-0 bg-background z-10 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div className="flex-1">
+                    <SheetTitle className="text-2xl flex items-center gap-2 animate-in fade-in slide-in-from-left-4 duration-300">
+                      <div className="p-2 bg-primary/10 rounded-lg ring-1 ring-primary/20">
+                        <FileText className="h-6 w-6 text-primary" />
+                      </div>
+                      Case Details
+                    </SheetTitle>
+                    <SheetDescription className="mt-2 text-base font-mono font-semibold">
+                      {selectedReport.tracking_code}
+                    </SheetDescription>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {getStatusBadge(selectedReport.status)}
                     {selectedReport.is_anonymous && (
                       <Badge variant="outline">Anonymous</Badge>
                     )}
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    Tracking Code: {selectedReport.tracking_code}
-                  </p>
                 </div>
+              </SheetHeader>
 
-                <Separator />
+              <div className="p-6 space-y-6 animate-in fade-in duration-300">
 
-                {/* Status & Priority */}
-                <div className={permissions?.canEditPriority ? "grid grid-cols-2 gap-4" : ""}>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold">Status</label>
-                    {permissions?.canEditStatus ? (
+                {/* Case Information */}
+                <Card className="hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-primary" />
+                      Case Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                        <p className="text-sm font-medium text-muted-foreground mb-1">
+                          Category
+                        </p>
+                        <p className="font-semibold capitalize">{selectedReport.category.replace('_', ' ')}</p>
+                      </div>
+                      <div className="p-3 rounded-lg bg-muted/50 hover:bg-muted transition-colors">
+                        <p className="text-sm font-medium text-muted-foreground mb-1">
+                          Created At
+                        </p>
+                        <p className="font-semibold flex items-center gap-1">
+                          <Calendar className="h-4 w-4" />
+                          {new Date(selectedReport.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-muted-foreground">Title</p>
+                      <p className="font-semibold">{selectedReport.title}</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium text-muted-foreground">Description</p>
+                      <p className="text-sm leading-relaxed">{selectedReport.description}</p>
+                    </div>
+
+                    {!selectedReport.is_anonymous && selectedReport.reporter_email && (
+                      <div className="p-3 rounded-lg bg-muted/50">
+                        <p className="text-sm font-medium text-muted-foreground mb-1">Reporter Email</p>
+                        <p className="font-semibold">{selectedReport.reporter_email}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Assignment Card */}
+                {permissions?.canAssignCases && (
+                  <Card className="hover:shadow-md transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <User className="h-5 w-5 text-primary" />
+                        Assignment
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
                       <Select
-                        value={editData.status}
+                        value={editData.assigned_to || "unassigned"}
                         onValueChange={(value) =>
-                          setEditData({ ...editData, status: value })
+                          setEditData({ ...editData, assigned_to: value === "unassigned" ? "" : value })
                         }
                       >
                         <SelectTrigger>
-                          <SelectValue />
+                          <SelectValue placeholder="Select admin...">
+                            <div className="flex items-center gap-2">
+                              <User className="h-4 w-4" />
+                              {editData.assigned_to 
+                                ? adminUsers.find(a => a.id === editData.assigned_to)?.full_name || "Assigned"
+                                : "Unassigned"}
+                            </div>
+                          </SelectValue>
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="submitted">Submitted</SelectItem>
-                          <SelectItem value="under_review">Under Review</SelectItem>
-                          <SelectItem value="investigating">Investigating</SelectItem>
-                          <SelectItem value="resolved">Resolved</SelectItem>
-                          <SelectItem value="closed">Closed</SelectItem>
-                          <SelectItem value="dismissed">Dismissed</SelectItem>
+                          <SelectItem value="unassigned">Unassigned</SelectItem>
+                          {adminUsers.map((admin) => (
+                            <SelectItem key={admin.id} value={admin.id}>
+                              {admin.full_name} ({admin.role})
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
-                    ) : (
-                      <p className="text-sm capitalize">{selectedReport.status.replace('_', ' ')}</p>
-                    )}
-                  </div>
+                    </CardContent>
+                  </Card>
+                )}
 
-                  {permissions?.canEditPriority && (
-                    <div className="space-y-2">
-                      <label className="text-sm font-semibold">Priority</label>
+                {/* Priority Card */}
+                {permissions?.canEditPriority && (
+                  <Card className="hover:shadow-md transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Tag className="h-5 w-5 text-primary" />
+                        Priority
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                      <p className="text-sm text-muted-foreground">Update Priority</p>
                       <Select
                         value={editData.priority}
                         onValueChange={(value) =>
@@ -777,297 +851,249 @@ export default function ClientReportsPage() {
                           <SelectItem value="critical">Critical</SelectItem>
                         </SelectContent>
                       </Select>
-                    </div>
-                  )}
-                </div>
-
-                {/* Priority (Read-only for non-privileged users) */}
-                {!permissions?.canEditPriority && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold">Priority</label>
-                    <Badge className={getPriorityBadge(selectedReport.priority).props.className}>
-                      {selectedReport.priority}
-                    </Badge>
-                  </div>
+                    </CardContent>
+                  </Card>
                 )}
 
-                {/* Assignment */}
-                {permissions?.canAssignCases ? (
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold">Assigned To</label>
-                    <Select
-                      value={editData.assigned_to || "unassigned"}
-                      onValueChange={(value) =>
-                        setEditData({ ...editData, assigned_to: value === "unassigned" ? "" : value })
+                {/* Internal Notes Card */}
+                <Card className="hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <FileText className="h-5 w-5 text-primary" />
+                      Internal Notes
+                    </CardTitle>
+                    <CardDescription>
+                      These notes are only visible to administrators
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Textarea
+                      placeholder="Add internal notes (not visible to reporter)..."
+                      value={editData.internal_notes}
+                      onChange={(e) =>
+                        setEditData({ ...editData, internal_notes: e.target.value })
                       }
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select admin..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="unassigned">Unassigned</SelectItem>
-                        {adminUsers.map((admin) => (
-                          <SelectItem key={admin.id} value={admin.id}>
-                            {admin.full_name} ({admin.role})
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <p className="text-xs text-muted-foreground">
-                      {editData.assigned_to && editData.assigned_to !== selectedReport?.assigned_to
-                        ? "A notification will be sent to the assigned admin"
-                        : "Assign a team member to this case"}
-                    </p>
-                  </div>
-                ) : selectedReport?.assigned_to && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold">Assigned To</label>
-                    <p className="text-sm">
-                      {adminUsers.find(a => a.id === selectedReport.assigned_to)?.full_name || "Assigned"}
-                    </p>
-                  </div>
-                )}
+                      className="min-h-[120px]"
+                    />
+                  </CardContent>
+                </Card>
 
-                {/* Category & Title */}
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold">Category</label>
-                  <p className="text-sm capitalize">{selectedReport.category.replace('_', ' ')}</p>
-                </div>
+                {/* Messages Card */}
+                <Card className="hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <MessageSquare className="h-5 w-5 text-primary" />
+                      Messages
+                    </CardTitle>
+                    <CardDescription>
+                      Communication history for this case
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {/* Messages List */}
+                    <div className="border rounded-lg max-h-[300px] overflow-y-auto">
+                      {!messages || messages.length === 0 ? (
+                        <div className="p-8 text-center">
+                          <MessageSquare className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-50" />
+                          <p className="text-sm text-muted-foreground font-medium">No messages yet</p>
+                          <p className="text-xs text-muted-foreground mt-1">Start a conversation with the reporter</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3 p-4">
+                          {Array.isArray(messages) && messages.map((msg) => (
+                            <div
+                              key={msg.id}
+                              className={`p-4 rounded-lg ${
+                                msg.sender_type === "admin"
+                                  ? "bg-primary/10 ml-8 border border-primary/20"
+                                  : "bg-muted mr-8"
+                              }`}
+                            >
+                              <div className="flex items-start justify-between mb-2">
+                                <span className="text-xs font-bold uppercase tracking-wide">
+                                  {msg.sender_type === "admin" ? "Admin" : "Reporter"}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {new Date(msg.created_at).toLocaleString()}
+                                </span>
+                              </div>
+                              <p className="text-sm leading-relaxed">{msg.content}</p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
 
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold">Title</label>
-                  <p className="text-sm">{selectedReport.title}</p>
-                </div>
+                    {/* Send Message Form */}
+                    <form onSubmit={handleSendMessage} className="flex gap-2">
+                      <Input
+                        placeholder="Write a message..."
+                        value={newMessage}
+                        onChange={(e) => setNewMessage(e.target.value)}
+                        disabled={sendingMessage}
+                        className="flex-1"
+                      />
+                      <Button type="submit" disabled={sendingMessage || !newMessage.trim()}>
+                        {sendingMessage ? "Sending..." : "Send"}
+                      </Button>
+                    </form>
+                  </CardContent>
+                </Card>
 
-                {/* Description */}
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold">Description</label>
-                  <div className="p-3 bg-muted rounded-md">
-                    <p className="text-sm whitespace-pre-wrap">{selectedReport.description}</p>
-                  </div>
-                </div>
-
-                {/* Reporter Info */}
-                {!selectedReport.is_anonymous && selectedReport.reporter_email && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold">Reporter Email</label>
-                    <p className="text-sm">{selectedReport.reporter_email}</p>
-                  </div>
-                )}
-
-                <Separator />
-
-                {/* Internal Notes */}
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold">Internal Notes</label>
-                  <Textarea
-                    placeholder="Add internal notes (not visible to reporter)..."
-                    value={editData.internal_notes}
-                    onChange={(e) =>
-                      setEditData({ ...editData, internal_notes: e.target.value })
-                    }
-                    className="min-h-[120px]"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    These notes are only visible to administrators
-                  </p>
-                </div>
-
-                <Separator />
-
-                {/* Messages Section */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="w-4 h-4" />
-                    <label className="text-sm font-semibold">Messages ({messages.length})</label>
-                  </div>
-                  
-                  {/* Messages List */}
-                  <div className="border rounded-md max-h-[300px] overflow-y-auto">
-                    {!messages || messages.length === 0 ? (
-                      <div className="p-6 text-center">
-                        <MessageSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                        <p className="text-sm text-muted-foreground">No messages yet</p>
+                {/* Attachments Card */}
+                <Card className="hover:shadow-md transition-shadow">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Paperclip className="h-5 w-5 text-primary" />
+                      Attachments
+                    </CardTitle>
+                    <CardDescription>
+                      Documents and files uploaded with this report
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {loadingAttachments ? (
+                      <div className="p-8 text-center">
+                        <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+                        <p className="text-sm text-muted-foreground mt-3">Loading attachments...</p>
+                      </div>
+                    ) : attachments.length === 0 ? (
+                      <div className="p-8 text-center">
+                        <Paperclip className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-50" />
+                        <p className="text-sm text-muted-foreground font-medium">No attachments</p>
                       </div>
                     ) : (
-                      <div className="space-y-3 p-3">
-                        {Array.isArray(messages) && messages.map((msg) => (
+                      <div className="space-y-2">
+                        {attachments.map((attachment) => (
                           <div
-                            key={msg.id}
-                            className={`p-3 rounded-lg ${
-                              msg.sender_type === "admin"
-                                ? "bg-primary/10 ml-8"
-                                : "bg-muted mr-8"
-                            }`}
+                            key={attachment.id}
+                            className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-all hover:shadow-sm"
                           >
-                            <div className="flex items-start justify-between mb-1">
-                              <span className="text-xs font-semibold">
-                                {msg.sender_type === "admin" ? "Admin" : "Reporter"}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {new Date(msg.created_at).toLocaleString()}
-                              </span>
+                            <div className="flex items-center gap-3 flex-1 min-w-0">
+                              <File className="w-5 h-5 flex-shrink-0 text-primary" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold truncate">{attachment.file_name}</p>
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                                  <span>{formatFileSize(attachment.file_size)}</span>
+                                  <span>•</span>
+                                  <span>{new Date(attachment.created_at).toLocaleDateString()}</span>
+                                </div>
+                              </div>
                             </div>
-                            <p className="text-sm">{msg.content}</p>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleDownload(attachment)}
+                              className="flex-shrink-0"
+                            >
+                              <Download className="w-4 h-4 mr-2" />
+                              Download
+                            </Button>
                           </div>
                         ))}
                       </div>
                     )}
-                  </div>
+                  </CardContent>
+                </Card>
 
-                  {/* Send Message Form */}
-                  <form onSubmit={handleSendMessage} className="flex gap-2 mt-2">
-                    <Input
-                      placeholder="Type your response..."
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      disabled={sendingMessage}
-                    />
-                    <Button type="submit" disabled={sendingMessage || !newMessage.trim()}>
-                      {sendingMessage ? "Sending..." : "Send"}
-                    </Button>
-                  </form>
-                </div>
-
-                <Separator />
-
-                {/* Attachments Section */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Paperclip className="w-4 h-4" />
-                    <label className="text-sm font-semibold">Attachments ({attachments.length})</label>
-                  </div>
-
-                  {loadingAttachments ? (
-                    <div className="p-6 text-center">
-                      <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-                      <p className="text-sm text-muted-foreground mt-2">Loading attachments...</p>
-                    </div>
-                  ) : attachments.length === 0 ? (
-                    <div className="p-6 bg-muted rounded-md text-center">
-                      <Paperclip className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      <p className="text-sm text-muted-foreground">No attachments</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {attachments.map((attachment) => (
-                        <div
-                          key={attachment.id}
-                          className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
-                        >
-                          <div className="flex items-center gap-3 flex-1 min-w-0">
-                            <File className="w-5 h-5 flex-shrink-0 text-muted-foreground" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium truncate">{attachment.file_name}</p>
-                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                <span>{formatFileSize(attachment.file_size)}</span>
-                                <span>•</span>
-                                <span>{new Date(attachment.created_at).toLocaleDateString()}</span>
-                              </div>
-                            </div>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDownload(attachment)}
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <Separator />
-
-                {/* Labels Section */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <Tag className="w-4 h-4" />
-                    <label className="text-sm font-semibold">Labels ({reportLabels.length})</label>
-                  </div>
-
-                  {/* Current Labels */}
-                  {reportLabels.length > 0 && (
-                    <div className="flex flex-wrap gap-2 mb-3">
-                      {reportLabels.map((label) => (
-                        <Badge
-                          key={label.id}
-                          className={`${label.label_color} text-white border-0 flex items-center gap-1`}
-                        >
-                          {label.label_name}
-                          {permissions?.canAddLabels && (
-                            <button
-                              onClick={() => handleRemoveLabel(label.id)}
-                              className="ml-1 hover:opacity-75"
-                              disabled={savingLabels}
+                {/* Labels Card */}
+                {permissions?.canAddLabels && (
+                  <Card className="hover:shadow-md transition-shadow">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <Tag className="h-5 w-5 text-primary" />
+                        Labels
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                      {/* Current Labels */}
+                      {reportLabels.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {reportLabels.map((label) => (
+                            <Badge
+                              key={label.id}
+                              className={`${label.label_color} text-white border-0 flex items-center gap-1.5 px-3 py-1.5`}
                             >
-                              <X className="w-3 h-3" />
-                            </button>
-                          )}
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Add Label Options */}
-                  {permissions?.canAddLabels && (
-                    <div className="space-y-2">
-                      <p className="text-xs text-muted-foreground">Add labels:</p>
-                      <div className="flex flex-wrap gap-2">
-                        {availableLabels
-                          .filter(al => !reportLabels.some(rl => rl.label_name === al.name))
-                          .map((label) => (
-                            <Button
-                              key={label.name}
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleAddLabel(label.name, label.color)}
-                              disabled={savingLabels}
-                              className="text-xs h-7"
-                            >
-                              <Plus className="w-3 h-3 mr-1" />
-                              {label.name}
-                            </Button>
+                              {label.label_name}
+                              <button
+                                onClick={() => handleRemoveLabel(label.id)}
+                                className="ml-1 hover:opacity-75 transition-opacity"
+                                disabled={savingLabels}
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </Badge>
                           ))}
-                      </div>
-                      {reportLabels.length === availableLabels.length && (
-                        <p className="text-xs text-muted-foreground italic">All labels have been added</p>
+                        </div>
                       )}
-                    </div>
+
+                      {/* Add Label Button */}
+                      {availableLabels.filter(al => !reportLabels.some(rl => rl.label_name === al.name)).length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {availableLabels
+                            .filter(al => !reportLabels.some(rl => rl.label_name === al.name))
+                            .map((label) => (
+                              <Button
+                                key={label.name}
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleAddLabel(label.name, label.color)}
+                                disabled={savingLabels}
+                                className="text-xs h-8"
+                              >
+                                <Plus className="w-3.5 h-3.5 mr-1.5" />
+                                {label.name}
+                              </Button>
+                            ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-muted-foreground text-center py-2">
+                          All labels have been added
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                )}
+
+              </div>
+
+              {/* Bottom Status Update Bar */}
+              <div className="border-t p-6 sticky bottom-0 bg-background shadow-[0_-4px_6px_-1px_rgb(0_0_0_/0.1)]">
+                <div className="flex items-center gap-3">
+                  {permissions?.canEditStatus && (
+                    <>
+                      <Select
+                        value={editData.status}
+                        onValueChange={(value) =>
+                          setEditData({ ...editData, status: value })
+                        }
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="submitted">Submitted</SelectItem>
+                          <SelectItem value="under_review">Under Review</SelectItem>
+                          <SelectItem value="investigating">Investigating</SelectItem>
+                          <SelectItem value="resolved">Resolved</SelectItem>
+                          <SelectItem value="closed">Closed</SelectItem>
+                          <SelectItem value="dismissed">Dismissed</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        onClick={handleSaveReport}
+                        disabled={saving}
+                        className="flex-1"
+                      >
+                        <Save className="w-4 h-4 mr-2" />
+                        {saving ? "Saving..." : "Save Changes"}
+                      </Button>
+                    </>
                   )}
-                </div>
-
-                <Separator />
-
-                {/* Timestamps */}
-                <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-muted-foreground">Created</p>
-                    <p className="font-medium">{new Date(selectedReport.created_at).toLocaleString()}</p>
-                  </div>
-                  <div>
-                    <p className="text-muted-foreground">Last Updated</p>
-                    <p className="font-medium">{new Date(selectedReport.updated_at).toLocaleString()}</p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    onClick={handleSaveReport}
-                    disabled={saving}
-                    className="flex-1"
-                  >
-                    <Save className="w-4 h-4 mr-2" />
-                    {saving ? "Saving..." : "Save Changes"}
-                  </Button>
                   <Button
                     onClick={() => setIsDrawerOpen(false)}
                     variant="outline"
                   >
-                    <X className="w-4 h-4 mr-2" />
                     Close
                   </Button>
                 </div>
