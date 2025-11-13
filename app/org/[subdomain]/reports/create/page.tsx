@@ -138,8 +138,8 @@ export default function CreateCasePage() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include", // Ensure cookies are sent with the request
         body: JSON.stringify({
-          userId: user?.id,
           category: formData.category,
           title: formData.title,
           description: formData.description,
