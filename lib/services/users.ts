@@ -1,138 +1,149 @@
-import { createClient } from "@/lib/supabase/client";
-import type { AdminUser } from "@/lib/types/database";
-import { logAuditEvent } from "@/lib/services/audit";
+/**
+ * Users Management Service
+ * Handles CRUD operations for admin profiles
+ */
 
-export async function listAdminUsers(): Promise<{ success: boolean; users?: AdminUser[]; error?: string }> {
-  try {
-    const supabase = createClient();
-    const { data, error } = await supabase.from("admin_profiles").select("*").order("full_name", { ascending: true });
-    if (error) return { success: false, error: error.message };
-    return { success: true, users: (data as unknown as AdminUser[]) || [] };
-  } catch (e) {
-    return { success: false, error: "Failed to load users" };
-  }
+import { createServiceClient } from "@/lib/supabase/service-client";
+
+export interface AdminUser {
+  id: string;
+  organization_id: string;
+  email: string;
+  full_name: string;
+  role: "admin" | "manager" | "investigator";
+  department: string | null;
+  avatar_url: string | null;
+  is_active: boolean;
+  last_login_at: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
-export async function updateAdminRole(userId: string, newRole: AdminUser["role"], oldRole?: string): Promise<{ success: boolean; error?: string }> {
-  try {
-    const supabase = createClient();
-    
-    // Check permission via RPC
-    const { data: canManage } = await supabase.rpc("has_permission", { p_permission: "manage_users" });
-    if (!canManage) return { success: false, error: "Permission denied" };
-
-    // 🛡️ SECURITY: Get current user
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated" };
-
-    // 🛡️ SECURITY: Prevent self-demotion from admin
-    if (userId === user.id && oldRole === 'admin' && newRole !== 'admin') {
-      return { 
-        success: false, 
-        error: "Cannot demote yourself from admin role. Ask another admin to change your role." 
-      };
-    }
-
-    // 🛡️ SECURITY: Prevent removing the last admin
-    if (oldRole === 'admin' && newRole !== 'admin') {
-      const { count } = await supabase
-        .from('admin_profiles')
-        .select('id', { count: 'exact', head: true })
-        .eq('role', 'admin')
-        .eq('is_active', true);
-      
-      if ((count || 0) <= 1) {
-        return { 
-          success: false, 
-          error: "Cannot remove the last admin. Promote another user to admin first." 
-        };
-      }
-    }
-
-    const { error } = await supabase.from("admin_profiles").update({ role: newRole }).eq("id", userId);
-    if (error) return { success: false, error: error.message };
-
-    // Log audit event
-    await logAuditEvent({
-      action: "user_role_updated",
-      resourceType: "admin_profiles",
-      resourceId: userId,
-      details: {
-        old_role: oldRole || null,
-        new_role: newRole,
-        target_user_id: userId,
-        changed_by: user.id,
-      },
-    });
-
-    return { success: true };
-  } catch (e) {
-    return { success: false, error: "Failed to update role" };
-  }
+export interface CreateUserData {
+  email: string;
+  full_name: string;
+  password: string;
+  role: "admin" | "manager" | "investigator";
+  department?: string;
 }
 
-export async function updateAdminActive(userId: string, isActive: boolean): Promise<{ success: boolean; error?: string }> {
+export interface UpdateUserData {
+  full_name?: string;
+  role?: "admin" | "manager" | "investigator";
+  department?: string;
+  is_active?: boolean;
+}
+
+/**
+ * Get all users for an organization
+ */
+export async function getOrganizationUsers(
+  organizationId: string
+): Promise<{ success: boolean; data?: AdminUser[]; error?: string }> {
   try {
-    const supabase = createClient();
-    const { data: canManage } = await supabase.rpc("has_permission", { p_permission: "manage_users" });
-    if (!canManage) return { success: false, error: "Permission denied" };
+    const supabase = createServiceClient();
 
-    // 🛡️ SECURITY: Get current user
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, error: "Not authenticated" };
-
-    // Get user info for audit log
-    const { data: userData } = await supabase
+    const { data, error } = await supabase
       .from("admin_profiles")
-      .select("full_name, email, role")
+      .select("*")
+      .eq("organization_id", organizationId)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    return { success: true, data: data || [] };
+  } catch (error) {
+    console.error("Error fetching users:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to fetch users",
+    };
+  }
+}
+
+/**
+ * Get user by ID
+ */
+export async function getUserById(
+  userId: string
+): Promise<{ success: boolean; data?: AdminUser; error?: string }> {
+  try {
+    const supabase = createServiceClient();
+
+    const { data, error } = await supabase
+      .from("admin_profiles")
+      .select("*")
       .eq("id", userId)
       .single();
 
-    // 🛡️ SECURITY: Prevent self-deactivation
-    if (userId === user.id && !isActive) {
-      return { 
-        success: false, 
-        error: "Cannot deactivate yourself. Ask another admin to deactivate your account." 
-      };
-    }
+    if (error) throw error;
 
-    // 🛡️ SECURITY: Prevent deactivating the last admin
-    if (userData?.role === 'admin' && !isActive) {
-      const { count } = await supabase
-        .from('admin_profiles')
-        .select('id', { count: 'exact', head: true })
-        .eq('role', 'admin')
-        .eq('is_active', true);
-      
-      if ((count || 0) <= 1) {
-        return { 
-          success: false, 
-          error: "Cannot deactivate the last admin. Promote another user to admin first." 
-        };
-      }
-    }
-
-    const { error } = await supabase.from("admin_profiles").update({ is_active: isActive }).eq("id", userId);
-    if (error) return { success: false, error: error.message };
-
-    // Log audit event
-    await logAuditEvent({
-      action: isActive ? "user_activated" : "user_deactivated",
-      resourceType: "admin_profiles",
-      resourceId: userId,
-      details: {
-        user_email: userData?.email || null,
-        user_name: userData?.full_name || null,
-        user_role: userData?.role || null,
-        is_active: isActive,
-        changed_by: user.id,
-      },
-    });
-
-    return { success: true };
-  } catch (e) {
-    return { success: false, error: "Failed to update activation" };
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to fetch user",
+    };
   }
 }
 
+/**
+ * Check if email is already used in organization
+ */
+export async function checkEmailExists(
+  organizationId: string,
+  email: string
+): Promise<boolean> {
+  try {
+    const supabase = createServiceClient();
 
+    const { data, error } = await supabase
+      .from("admin_profiles")
+      .select("id")
+      .eq("organization_id", organizationId)
+      .eq("email", email)
+      .maybeSingle();
+
+    return !!data;
+  } catch (error) {
+    console.error("Error checking email:", error);
+    return false;
+  }
+}
+
+/**
+ * Get user's assigned cases count
+ */
+export async function getUserCasesCount(userId: string): Promise<number> {
+  try {
+    const supabase = createServiceClient();
+
+    const { count, error } = await supabase
+      .from("reports")
+      .select("*", { count: "exact", head: true })
+      .eq("assigned_to", userId)
+      .in("status", ["submitted", "under_review", "investigating"]);
+
+    return count || 0;
+  } catch (error) {
+    console.error("Error fetching user cases count:", error);
+    return 0;
+  }
+}
+
+/**
+ * Update user's last login timestamp
+ */
+export async function updateLastLogin(userId: string): Promise<void> {
+  try {
+    const supabase = createServiceClient();
+
+    await supabase
+      .from("admin_profiles")
+      .update({ last_login_at: new Date().toISOString() })
+      .eq("id", userId);
+  } catch (error) {
+    console.error("Error updating last login:", error);
+  }
+}
