@@ -99,6 +99,33 @@ export default function CreateOrganizationPage() {
         return;
       }
 
+      // Check for name and subdomain uniqueness
+      const supabase = createMultiTenantClient();
+      
+      const { data: existingByName } = await supabase
+        .from("organizations")
+        .select("id, name")
+        .eq("name", formData.name)
+        .maybeSingle();
+
+      if (existingByName) {
+        setError(`Organization name "${formData.name}" already exists. Please choose a different name.`);
+        setIsSubmitting(false);
+        return;
+      }
+
+      const { data: existingBySubdomain } = await supabase
+        .from("organizations")
+        .select("id, subdomain")
+        .eq("subdomain", formData.subdomain)
+        .maybeSingle();
+
+      if (existingBySubdomain) {
+        setError(`Subdomain "${formData.subdomain}" is already taken. Please choose a different subdomain.`);
+        setIsSubmitting(false);
+        return;
+      }
+
       const response = await fetch("/api/superadmin/organizations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },

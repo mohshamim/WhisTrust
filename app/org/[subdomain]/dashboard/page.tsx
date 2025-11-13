@@ -12,6 +12,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   FileText,
   AlertCircle,
@@ -83,7 +84,7 @@ export default function ClientDashboardPage() {
         .from("reports")
         .select("*", { count: 'exact', head: true })
         .eq("organization_id", organizationId)
-        .in("status", ["submitted", "under_review"]);
+        .in("status", ["submitted", "under_review", "investigating"]);
 
       const { count: resolvedReports } = await supabase
         .from("reports")
@@ -162,7 +163,7 @@ export default function ClientDashboardPage() {
 
         {/* Stats Grid */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
+          <Card className="shadow-md hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Total Reports
@@ -177,7 +178,7 @@ export default function ClientDashboardPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-md hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Pending
@@ -192,7 +193,7 @@ export default function ClientDashboardPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-md hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Resolved</CardTitle>
               <CheckCircle2 className="h-4 w-4 text-green-500" />
@@ -203,7 +204,7 @@ export default function ClientDashboardPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-md hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
                 Active Users
@@ -220,7 +221,7 @@ export default function ClientDashboardPage() {
         </div>
 
         {/* Organization Info & Welcome */}
-        <Card>
+        <Card className="shadow-lg">
           <CardHeader>
             <CardTitle>Welcome to Your Compliance Dashboard</CardTitle>
             <CardDescription>
@@ -230,23 +231,23 @@ export default function ClientDashboardPage() {
           <CardContent>
             <div className="space-y-3 text-sm">
               <div className="grid gap-3 sm:grid-cols-2">
-                <div className="flex justify-between p-3 rounded-lg bg-muted">
+                <div className="flex justify-between p-3 rounded-lg bg-muted/50">
                   <span className="text-muted-foreground">Plan:</span>
                   <span className="font-medium capitalize">{organization.plan}</span>
                 </div>
-                <div className="flex justify-between p-3 rounded-lg bg-muted">
+                <div className="flex justify-between p-3 rounded-lg bg-muted/50">
                   <span className="text-muted-foreground">Status:</span>
                   <Badge variant={organization.status === 'active' ? 'default' : 'secondary'}>
                     {organization.status}
                   </Badge>
                 </div>
-                <div className="flex justify-between p-3 rounded-lg bg-muted">
+                <div className="flex justify-between p-3 rounded-lg bg-muted/50">
                   <span className="text-muted-foreground">Users:</span>
                   <span className="font-medium">
                     {organization.current_admin_users} / {organization.max_admin_users}
                   </span>
                 </div>
-                <div className="flex justify-between p-3 rounded-lg bg-muted">
+                <div className="flex justify-between p-3 rounded-lg bg-muted/50">
                   <span className="text-muted-foreground">Reports this month:</span>
                   <span className="font-medium">
                     {organization.current_reports_count} / {organization.max_reports_per_month}
@@ -261,11 +262,12 @@ export default function ClientDashboardPage() {
               )}
               
               {stats.pendingReports > 0 && (
-                <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 mt-3">
-                  <p className="font-medium text-amber-600">
-                    ⚠️ You have {stats.pendingReports} pending report{stats.pendingReports !== 1 ? 's' : ''} requiring attention.
-                  </p>
-                </div>
+                <Alert className="border-amber-200 bg-amber-50 dark:bg-amber-950/20 mt-3">
+                  <AlertCircle className="h-4 w-4 text-amber-600" />
+                  <AlertDescription className="text-sm text-amber-800 dark:text-amber-200">
+                    <strong className="font-semibold">Action Required:</strong> You have {stats.pendingReports} pending report{stats.pendingReports !== 1 ? 's' : ''} requiring attention.
+                  </AlertDescription>
+                </Alert>
               )}
             </div>
           </CardContent>

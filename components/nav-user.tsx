@@ -8,7 +8,7 @@ import {
   LogOut,
   Sparkles,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -41,18 +41,37 @@ export function NavUser({
   const { isMobile } = useSidebar();
   const { role } = useUserRole();
   const router = useRouter();
+  const params = useParams();
 
   const handleLogout = async () => {
     try {
-      const { signOutAdmin } = await import("@/lib/services/auth");
-      const result = await signOutAdmin();
+      // Check if we're in a client organization context or admin context
+      const subdomain = params?.subdomain as string | undefined;
       
-      if (result.success) {
-        router.push("/admin/login");
-        router.refresh();
+      if (subdomain) {
+        // Client organization logout
+        const { signOutClient } = await import("@/lib/services/client-auth");
+        const result = await signOutClient();
+        
+        if (result.success) {
+          router.push(`/org/${subdomain}/login`);
+          router.refresh();
+        } else {
+          console.error("Logout failed:", result.error);
+          alert("Failed to logout. Please try again.");
+        }
       } else {
-        console.error("Logout failed:", result.error);
-        alert("Failed to logout. Please try again.");
+        // Super admin logout
+        const { signOutAdmin } = await import("@/lib/services/auth");
+        const result = await signOutAdmin();
+        
+        if (result.success) {
+          router.push("/admin/login");
+          router.refresh();
+        } else {
+          console.error("Logout failed:", result.error);
+          alert("Failed to logout. Please try again.");
+        }
       }
     } catch (error) {
       console.error("Error during logout:", error);

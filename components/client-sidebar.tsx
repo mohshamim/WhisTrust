@@ -51,9 +51,11 @@ function buildNav(subdomain: string, role: string) {
       icon: FileSearch,
       items: [
         { title: "All Reports", url: `${baseUrl}/reports` },
-        { title: "Pending", url: `${baseUrl}/reports?status=pending` },
-        { title: "In Review", url: `${baseUrl}/reports?status=in_review` },
+        { title: "Submitted", url: `${baseUrl}/reports?status=submitted` },
+        { title: "Under Review", url: `${baseUrl}/reports?status=under_review` },
+        { title: "Investigating", url: `${baseUrl}/reports?status=investigating` },
         { title: "Resolved", url: `${baseUrl}/reports?status=resolved` },
+        { title: "Closed", url: `${baseUrl}/reports?status=closed` },
       ],
     },
   ];

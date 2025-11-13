@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Shield, Building2 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Shield, Building2, Lock, ArrowRight, AlertCircle } from "lucide-react";
 import { signInClient, getOrganizationBySubdomain } from "@/lib/services/client-auth";
 import type { ClientOrganization } from "@/lib/services/client-auth";
 
@@ -38,7 +39,6 @@ export default function ClientLoginPage() {
         return;
       }
 
-      // Check if organization is accessible
       if (result.organization.status === 'cancelled') {
         setError("This organization is no longer active. Please contact support.");
         setLoading(false);
@@ -68,9 +68,6 @@ export default function ClientLoginPage() {
         return;
       }
 
-      console.log("✅ Client admin logged in successfully");
-
-      // Redirect to organization dashboard
       router.push(`/org/${subdomain}/dashboard`);
       router.refresh();
     } catch (err: any) {
@@ -82,9 +79,9 @@ export default function ClientLoginPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-muted/50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
         <div className="text-center">
-          <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="h-10 w-10 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
           <p className="text-sm text-muted-foreground mt-4">Loading...</p>
         </div>
       </div>
@@ -93,17 +90,19 @@ export default function ClientLoginPage() {
 
   if (!organization) {
     return (
-      <div className="min-h-screen bg-muted/50 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md shadow-lg">
-          <CardHeader className="text-center">
-            <div className="mx-auto w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center mb-4">
-              <Building2 className="h-8 w-8 text-destructive" />
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <Card className="w-full max-w-md border-2">
+          <CardHeader className="text-center space-y-4">
+            <div className="mx-auto w-16 h-16 bg-destructive/10 rounded-full flex items-center justify-center">
+              <AlertCircle className="h-8 w-8 text-destructive" />
             </div>
-            <CardTitle className="text-2xl font-bold">Organization Not Found</CardTitle>
-            <CardDescription>{error || "The organization you're looking for doesn't exist."}</CardDescription>
+            <div className="space-y-2">
+              <CardTitle className="text-2xl font-bold">Organization Not Found</CardTitle>
+              <CardDescription>{error || "The organization you're looking for doesn't exist."}</CardDescription>
+            </div>
           </CardHeader>
           <CardContent className="text-center">
-            <p className="text-sm text-muted-foreground mb-4">
+            <p className="text-sm text-muted-foreground">
               Please check the URL and try again, or contact your administrator.
             </p>
           </CardContent>
@@ -112,19 +111,22 @@ export default function ClientLoginPage() {
     );
   }
 
-  // Use organization branding if available
-  const primaryColor = organization.branding?.primary_color || '#3b82f6';
-
   return (
-    <div className="min-h-screen bg-muted/50 flex items-center justify-center p-4 md:p-6">
-      <div className="w-full max-w-md">
-        <Card className="shadow-lg">
-          <CardHeader className="text-center space-y-2 pb-6">
-            {/* Organization Logo or Icon */}
-            <div 
-              className="mx-auto w-16 h-16 rounded-full flex items-center justify-center mb-4"
-              style={{ backgroundColor: `${primaryColor}15` }}
-            >
+    <div className="min-h-screen bg-background flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8">
+        {/* Header */}
+        <div className="text-center space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-full border border-primary/20">
+            <Lock className="h-4 w-4 text-primary" />
+            <span className="text-sm font-medium">Secure Staff Portal</span>
+          </div>
+        </div>
+
+        {/* Login Card */}
+        <Card className="border-2 border-primary/20">
+          <CardHeader className="text-center space-y-4">
+            {/* Organization Logo */}
+            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
               {organization.branding?.logo_url ? (
                 <img 
                   src={organization.branding.logo_url} 
@@ -132,42 +134,54 @@ export default function ClientLoginPage() {
                   className="w-12 h-12 object-contain"
                 />
               ) : (
-                <Building2 className="h-8 w-8" style={{ color: primaryColor }} />
+                <Building2 className="h-8 w-8 text-primary" />
               )}
             </div>
 
-            <CardTitle className="text-3xl font-bold">{organization.name}</CardTitle>
-            <CardDescription className="text-base">
-              Staff Portal - Secure Access
-            </CardDescription>
+            {/* Organization Title */}
+            <div className="space-y-2">
+              <CardTitle className="text-3xl font-bold">{organization.name}</CardTitle>
+              <CardDescription className="text-base">
+                Staff Portal - Secure Access
+              </CardDescription>
+            </div>
 
-            {/* Status indicators */}
+            {/* Status Badges */}
             {organization.status === 'trial' && (
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 text-xs">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-medium">
                 Trial Account
-              </div>
+              </span>
             )}
             {organization.status === 'suspended' && (
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-500/10 border border-red-500/20 text-red-600 text-xs">
-                Account Suspended - Contact Administrator
-              </div>
+              <Alert variant="destructive">
+                <AlertDescription className="text-sm">
+                  Account Suspended - Contact Administrator
+                </AlertDescription>
+              </Alert>
             )}
           </CardHeader>
 
           <CardContent>
             {error && (
-              <div className="mb-4 p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-sm">
-                {error}
-              </div>
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="text-sm">{error}</AlertDescription>
+              </Alert>
             )}
 
             {organization.status === 'suspended' ? (
-              <div className="text-center py-6 text-muted-foreground">
-                <p className="mb-2">This organization account has been suspended.</p>
-                <p className="text-sm">Please contact your administrator for assistance.</p>
+              <div className="text-center py-8 space-y-3">
+                <div className="mx-auto w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center">
+                  <AlertCircle className="h-6 w-6 text-destructive" />
+                </div>
+                <div className="space-y-1">
+                  <p className="font-medium text-destructive">Account Suspended</p>
+                  <p className="text-sm text-muted-foreground">Please contact your administrator for assistance.</p>
+                </div>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {/* Email Input */}
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input
@@ -175,47 +189,62 @@ export default function ClientLoginPage() {
                     type="email"
                     placeholder="your.email@company.com"
                     value={formData.email}
-                    onChange={(e) =>
-                      setFormData({ ...formData, email: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     required
                     disabled={isLoading}
+                    className="h-11"
                   />
                 </div>
 
+                {/* Password Input */}
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
                   <Input
                     id="password"
                     type="password"
                     value={formData.password}
-                    onChange={(e) =>
-                      setFormData({ ...formData, password: e.target.value })
-                    }
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                     required
                     disabled={isLoading}
+                    className="h-11"
                   />
                 </div>
 
+                {/* Submit Button */}
                 <Button
                   type="submit"
-                  className="w-full h-11"
+                  size="lg"
+                  className="w-full h-12"
                   disabled={isLoading}
-                  style={{ backgroundColor: primaryColor }}
                 >
-                  {isLoading ? "Signing in..." : "Sign In"}
+                  {isLoading ? "Signing in..." : (
+                    <>
+                      Sign In
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </>
+                  )}
                 </Button>
               </form>
             )}
 
-            <div className="mt-6 pt-4 border-t text-center text-xs text-muted-foreground">
-              <p>Secure access to {organization.name} compliance portal</p>
-              <p className="mt-1">Powered by WhisTrust</p>
+            {/* Footer */}
+            <div className="mt-6 pt-6 border-t space-y-2 text-center">
+              <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
+                <Shield className="h-3.5 w-3.5 text-primary" />
+                <span>Secure access to {organization.name} compliance portal</span>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Powered by <strong className="font-semibold">WhisTrust</strong>
+              </p>
             </div>
           </CardContent>
         </Card>
+
+        {/* Help Text */}
+        <p className="text-sm text-muted-foreground text-center">
+          Need help? Contact your organization administrator
+        </p>
       </div>
     </div>
   );
 }
-

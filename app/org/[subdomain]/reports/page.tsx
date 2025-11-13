@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { getCurrentClientAdmin } from "@/lib/services/client-auth";
 import { ClientSidebar } from "@/components/client-sidebar";
 import {
@@ -25,20 +25,23 @@ import {
 interface Report {
   id: string;
   case_number: string;
+  tracking_code: string;
   title: string;
   description: string;
   category: string;
   status: string;
   priority: string;
   is_anonymous: boolean;
-  reporter_name: string | null;
+  reporter_email: string | null;
   created_at: string;
+  updated_at: string;
   assigned_to: string | null;
 }
 
 export default function ClientReportsPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const subdomain = params.subdomain as string;
   
   const [user, setUser] = useState<any>(null);
@@ -48,6 +51,14 @@ export default function ClientReportsPage() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+
+  // Apply status filter from URL params
+  useEffect(() => {
+    const statusParam = searchParams.get('status');
+    if (statusParam) {
+      setStatusFilter(statusParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     checkAuth();
@@ -124,8 +135,8 @@ export default function ClientReportsPage() {
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; className: string }> = {
       submitted: { label: "Submitted", className: "bg-blue-500/10 text-blue-600 border-blue-500/20" },
-      under_review: { label: "Under Review", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
-      investigating: { label: "Investigating", className: "bg-purple-500/10 text-purple-600 border-purple-500/20" },
+      under_review: { label: "Under Review", className: "bg-purple-500/10 text-purple-600 border-purple-500/20" },
+      investigating: { label: "Investigating", className: "bg-amber-500/10 text-amber-600 border-amber-500/20" },
       resolved: { label: "Resolved", className: "bg-green-500/10 text-green-600 border-green-500/20" },
       closed: { label: "Closed", className: "bg-slate-500/10 text-slate-600 border-slate-500/20" },
       dismissed: { label: "Dismissed", className: "bg-red-500/10 text-red-600 border-red-500/20" },
@@ -185,7 +196,7 @@ export default function ClientReportsPage() {
 
         <div className="flex flex-1 flex-col gap-4 p-4">
           {/* Filters */}
-          <Card>
+          <Card className="shadow-md">
             <CardContent className="pt-6">
               <div className="flex flex-col sm:flex-row gap-4">
                 <div className="relative flex-1">
@@ -194,12 +205,12 @@ export default function ClientReportsPage() {
                     placeholder="Search by case number, title, or category..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+                    className="pl-10 h-11"
                   />
                 </div>
                 <div className="sm:w-48">
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-11">
                       <Filter className="w-4 h-4 mr-2" />
                       <SelectValue />
                     </SelectTrigger>
@@ -210,6 +221,7 @@ export default function ClientReportsPage() {
                       <SelectItem value="investigating">Investigating</SelectItem>
                       <SelectItem value="resolved">Resolved</SelectItem>
                       <SelectItem value="closed">Closed</SelectItem>
+                      <SelectItem value="dismissed">Dismissed</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -219,7 +231,7 @@ export default function ClientReportsPage() {
 
           {/* Reports List */}
           {filteredReports.length === 0 ? (
-            <Card>
+            <Card className="shadow-lg">
               <CardContent className="py-12 text-center">
                 <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4 opacity-50" />
                 <h3 className="text-lg font-semibold mb-2">
@@ -233,7 +245,7 @@ export default function ClientReportsPage() {
               </CardContent>
             </Card>
           ) : (
-            <Card>
+            <Card className="shadow-lg">
               <CardHeader>
                 <CardTitle>All Reports</CardTitle>
               </CardHeader>
@@ -242,27 +254,36 @@ export default function ClientReportsPage() {
                   {filteredReports.map((report) => (
                     <div
                       key={report.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 hover:shadow-sm transition-all cursor-pointer"
+                      onClick={() => router.push(`/org/${subdomain}/reports/${report.id}`)}
                     >
                       <div className="flex-1 space-y-1">
                         <div className="flex items-center gap-2">
-                          <p className="font-medium">{report.case_number}</p>
+                          <p className="font-semibold">{report.case_number}</p>
                           {report.is_anonymous && (
                             <Badge variant="outline" className="text-xs">Anonymous</Badge>
                           )}
+                          <Badge variant="outline" className="text-xs capitalize">
+                            {report.category.replace('_', ' ')}
+                          </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          {report.title || report.category}
-                        </p>
+                        <p className="text-sm font-medium">{report.title}</p>
                         <p className="text-xs text-muted-foreground">
-                          {new Date(report.created_at).toLocaleDateString()} 
-                          {!report.is_anonymous && report.reporter_name && ` • ${report.reporter_name}`}
+                          Submitted {new Date(report.created_at).toLocaleDateString()} 
+                          {!report.is_anonymous && report.reporter_email && ` • ${report.reporter_email}`}
                         </p>
                       </div>
                       <div className="flex items-center gap-3">
                         {getPriorityBadge(report.priority)}
                         {getStatusBadge(report.status)}
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/org/${subdomain}/reports/${report.id}`);
+                          }}
+                        >
                           <Eye className="w-4 h-4 mr-2" />
                           View
                         </Button>
