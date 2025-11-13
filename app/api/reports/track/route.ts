@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     // Find report by tracking code
     const { data: report, error: reportError } = await supabase
       .from("reports")
-      .select("case_number, tracking_code, category, title, status, priority, created_at, updated_at")
+      .select("id, case_number, tracking_code, category, title, description, status, priority, created_at, updated_at")
       .eq("organization_id", org.id)
       .eq("tracking_code", trackingCode.toUpperCase())
       .maybeSingle();

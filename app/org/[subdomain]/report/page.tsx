@@ -38,6 +38,7 @@ export default function AnonymousReportPage() {
   });
   
   const [error, setError] = useState("");
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const copyToClipboard = async (text: string) => {
     try {
@@ -89,8 +90,10 @@ export default function AnonymousReportPage() {
     e.preventDefault();
     setError("");
     setSubmitting(true);
+    setUploadProgress(0);
 
     try {
+      // Step 1: Submit the report
       const response = await fetch('/api/reports/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -109,11 +112,42 @@ export default function AnonymousReportPage() {
         throw new Error(data.error || 'Failed to submit report');
       }
 
-      setTrackingCode(data.trackingCode);
+      // Step 2: Upload file if present
+      if (formData.file && data.reportId) {
+        setUploadProgress(10);
+        
+        // Dynamic import of upload service
+        const { uploadFile } = await import('@/lib/services/storage');
+        
+        const uploadResult = await uploadFile({
+          reportId: data.reportId,
+          file: formData.file,
+          onProgress: (progress) => {
+            setUploadProgress(progress);
+          },
+        });
+
+        if (!uploadResult.success) {
+          console.error('File upload failed:', uploadResult.error);
+          // Report was submitted but file upload failed
+          // Show warning but still show tracking code
+          setError(`Report submitted successfully, but file upload failed: ${uploadResult.error}`);
+        }
+      }
+
+      // Store tracking code and case number in session storage
+      sessionStorage.setItem("trackingCode", data.trackingCode);
+      if (data.caseNumber) {
+        sessionStorage.setItem("caseNumber", data.caseNumber);
+      }
+
+      // Redirect to success page
+      router.push(`/org/${subdomain}/success`);
     } catch (err: any) {
       console.error("Submit error:", err);
       setError(err.message || "An unexpected error occurred. Please try again.");
       setSubmitting(false);
+      setUploadProgress(0);
     }
   };
 

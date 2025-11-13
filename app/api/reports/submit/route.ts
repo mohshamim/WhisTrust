@@ -107,6 +107,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
+      reportId: report.id,
       trackingCode,
       caseNumber,
       message: "Report submitted successfully",
