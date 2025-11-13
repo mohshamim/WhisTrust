@@ -48,14 +48,10 @@ export default function AnalyticsPage() {
     try {
       setIsLoading(true);
 
-      // Import analytics service
-      const { getReportStatistics, getCategoryStatistics } = await import(
-        "@/lib/services/analytics"
-      );
-
-      // Fetch statistics
-      const statsResult = await getReportStatistics();
-      const categoryResult = await getCategoryStatistics();
+      // For now, show placeholder data for super admin analytics
+      // TODO: Implement super admin cross-organization analytics
+      const statsResult = { success: true, stats: { total_reports: 0, pending_reports: 0, resolved_reports: 0, avg_resolution_days: 0 } };
+      const categoryResult = { success: true, categories: [] };
 
       if (statsResult.success && statsResult.stats) {
         setStats({
