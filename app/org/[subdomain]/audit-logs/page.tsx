@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ClientSidebar } from "@/components/client-sidebar";
 import { getCurrentClientAdmin } from "@/lib/services/client-auth";
-import { getPermissions } from "@/lib/permissions";
+import { getPermissions, UserRole } from "@/lib/permissions";
 import {
   SidebarInset,
   SidebarProvider,
@@ -124,7 +124,7 @@ export default function AuditLogsPage() {
         return;
       }
 
-      const perms = getPermissions(clientUser.role);
+      const perms = getPermissions(clientUser.role as UserRole);
       if (!perms.canViewAuditLogs) {
         router.push(`/org/${subdomain}/dashboard`);
         return;
