@@ -77,7 +77,7 @@ export default function ClientSettingsPage() {
         logo_dark_url: org.branding?.logo_dark_url || org.branding?.logo_url || "",
         email_logo_url: org.branding?.email_logo_url || "",
         favicon_url: org.branding?.favicon_url || "",
-        support_email: org.branding?.support_email || org.primary_contact_email || "",
+        support_email: org.branding?.support_email || "",
         support_phone: org.branding?.support_phone || "",
         primary_color: org.branding?.primary_color || "",
         theme_mode: org.branding?.theme_mode || "system",
