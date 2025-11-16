@@ -48,6 +48,8 @@ export default function ClientSettingsPage() {
     primary_color: "",
     theme_mode: "system",
   });
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [emailLogoFile, setEmailLogoFile] = useState<File | null>(null);
 
   useEffect(() => {
     checkAuth();
@@ -140,21 +142,93 @@ export default function ClientSettingsPage() {
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <div className="text-sm font-medium flex items-center gap-2">
-                      <ImageIcon className="h-4 w-4 text-muted-foreground" /> Logo URL
+                      <ImageIcon className="h-4 w-4 text-muted-foreground" /> Logo
                     </div>
-                    <Input
-                      value={branding.logo_url}
-                      onChange={(e) => setBranding((b) => ({ ...b, logo_url: e.target.value }))}
-                      placeholder="https://.../logo.png"
-                    />
+                    <div className="flex items-center gap-2">
+                      <Input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} />
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          if (!logoFile) return;
+                          try {
+                            const form = new FormData();
+                            form.append("file", logoFile);
+                            form.append("kind", "logo");
+                            const res = await fetch("/api/org/branding/upload", {
+                              method: "POST",
+                              credentials: "include",
+                              body: form,
+                            });
+                            const data = await res.json();
+                            if (!res.ok || !data.success) {
+                              alert(data.error || "Upload failed");
+                              return;
+                            }
+                            setBranding((b) => ({ ...b, logo_url: data.url }));
+                          } catch (err) {
+                            console.error(err);
+                            alert("Upload failed");
+                          }
+                        }}
+                      >
+                        Upload
+                      </Button>
+                    </div>
+                    {branding.logo_url ? (
+                      <div className="mt-2">
+                        <img
+                          src={branding.logo_url}
+                          alt="Logo preview"
+                          className="h-10 object-contain bg-muted rounded p-1"
+                        />
+                      </div>
+                    ) : null}
                   </div>
                   <div className="space-y-2">
-                    <div className="text-sm font-medium">Email Logo URL</div>
-                    <Input
-                      value={branding.email_logo_url}
-                      onChange={(e) => setBranding((b) => ({ ...b, email_logo_url: e.target.value }))}
-                      placeholder="https://.../email-logo.png"
-                    />
+                    <div className="text-sm font-medium">Email Logo</div>
+                    <div className="flex items-center gap-2">
+                      <Input
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => setEmailLogoFile(e.target.files?.[0] || null)}
+                      />
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          if (!emailLogoFile) return;
+                          try {
+                            const form = new FormData();
+                            form.append("file", emailLogoFile);
+                            form.append("kind", "email_logo");
+                            const res = await fetch("/api/org/branding/upload", {
+                              method: "POST",
+                              credentials: "include",
+                              body: form,
+                            });
+                            const data = await res.json();
+                            if (!res.ok || !data.success) {
+                              alert(data.error || "Upload failed");
+                              return;
+                            }
+                            setBranding((b) => ({ ...b, email_logo_url: data.url }));
+                          } catch (err) {
+                            console.error(err);
+                            alert("Upload failed");
+                          }
+                        }}
+                      >
+                        Upload
+                      </Button>
+                    </div>
+                    {branding.email_logo_url ? (
+                      <div className="mt-2">
+                        <img
+                          src={branding.email_logo_url}
+                          alt="Email logo preview"
+                          className="h-10 object-contain bg-muted rounded p-1"
+                        />
+                      </div>
+                    ) : null}
                   </div>
                   <div className="space-y-2">
                     <div className="text-sm font-medium">Support Email</div>
