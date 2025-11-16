@@ -29,6 +29,24 @@ export default function ClientLoginPage() {
     loadOrganization();
   }, [subdomain]);
 
+  // Apply branding theme and favicon live
+  useEffect(() => {
+    if (!organization) return;
+    const mode = organization.branding?.theme_mode;
+    if (mode === "dark") document.documentElement.classList.add("dark");
+    if (mode === "light") document.documentElement.classList.remove("dark");
+    if (organization.branding?.primary_color) {
+      document.documentElement.style.setProperty("--brand-primary", organization.branding.primary_color);
+    }
+    if (organization.branding?.favicon_url) {
+      const existing = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
+      const link = existing || document.createElement("link");
+      link.rel = "icon";
+      link.href = organization.branding.favicon_url;
+      if (!existing) document.head.appendChild(link);
+    }
+  }, [organization]);
+
   const loadOrganization = async () => {
     try {
       const result = await getOrganizationBySubdomain(subdomain);
@@ -126,17 +144,22 @@ export default function ClientLoginPage() {
         <Card className="border-2 border-primary/20">
           <CardHeader className="text-center space-y-4">
             {/* Organization Logo */}
-            <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
-              {organization.branding?.logo_url ? (
-                <img 
-                  src={organization.branding.logo_url} 
-                  alt={organization.name}
-                  className="w-12 h-12 object-contain"
-                />
-              ) : (
-                <Building2 className="h-8 w-8 text-primary" />
-              )}
-            </div>
+            {(() => {
+              const isDark = typeof window !== "undefined" && document.documentElement.classList.contains("dark");
+              const logo =
+                (isDark ? organization.branding?.logo_dark_url : organization.branding?.logo_light_url) ||
+                organization.branding?.logo_url ||
+                organization.logo_url;
+              return (
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
+                  {logo ? (
+                    <img src={logo} alt={organization.name} className="w-12 h-12 object-contain" />
+                  ) : (
+                    <Building2 className="h-8 w-8 text-primary" />
+                  )}
+                </div>
+              );
+            })()}
 
             {/* Organization Title */}
             <div className="space-y-2">

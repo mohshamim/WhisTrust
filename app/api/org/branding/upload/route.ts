@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     const form = await request.formData();
     const file = form.get("file") as File | null;
-    const kind = (form.get("kind") as string) || "logo"; // "logo" | "email_logo"
+    const kind = (form.get("kind") as string) || "logo"; // "logo" | "email_logo" | "favicon" | "logo_light" | "logo_dark"
 
     if (!file) {
       return NextResponse.json({ success: false, error: "File is required" }, { status: 400 });
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 
     // Build storage path
     const orgId = adminProfile.organization_id;
-    const ext = file.name.split(".").pop() || "png";
+    const ext = (file.name.split(".").pop() || "png").toLowerCase();
     const fileName = `${kind}-${Date.now()}.${ext}`;
     const filePath = `${orgId}/${fileName}`;
 

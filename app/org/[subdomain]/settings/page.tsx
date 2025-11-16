@@ -42,7 +42,10 @@ export default function ClientSettingsPage() {
   // Branding form state
   const [branding, setBranding] = useState({
     logo_url: "",
+    logo_light_url: "",
+    logo_dark_url: "",
     email_logo_url: "",
+    favicon_url: "",
     support_email: "",
     support_phone: "",
     primary_color: "",
@@ -70,7 +73,10 @@ export default function ClientSettingsPage() {
       // Initialize branding state
       const initial = {
         logo_url: org.logo_url || "",
+        logo_light_url: org.branding?.logo_light_url || org.logo_url || "",
+        logo_dark_url: org.branding?.logo_dark_url || org.logo_url || "",
         email_logo_url: org.branding?.email_logo_url || "",
+        favicon_url: org.branding?.favicon_url || "",
         support_email: org.branding?.support_email || org.primary_contact_email || "",
         support_phone: org.branding?.support_phone || "",
         primary_color: org.branding?.primary_color || "",
@@ -139,6 +145,9 @@ export default function ClientSettingsPage() {
                 <CardDescription>Customize your organization’s look and contact details</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Live theme preview */}
+                <LiveThemePreview primaryColor={branding.primary_color} themeMode={branding.theme_mode} />
+
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div className="space-y-2">
                     <div className="text-sm font-medium flex items-center gap-2">
@@ -181,6 +190,82 @@ export default function ClientSettingsPage() {
                           alt="Logo preview"
                           className="h-10 object-contain bg-muted rounded p-1"
                         />
+                      </div>
+                    ) : null}
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Logo (Light Theme)</div>
+                    <div className="flex items-center gap-2">
+                      <Input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} />
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          if (!logoFile) return;
+                          try {
+                            const form = new FormData();
+                            form.append("file", logoFile);
+                            form.append("kind", "logo_light");
+                            const res = await fetch("/api/org/branding/upload", {
+                              method: "POST",
+                              credentials: "include",
+                              body: form,
+                            });
+                            const data = await res.json();
+                            if (!res.ok || !data.success) {
+                              alert(data.error || "Upload failed");
+                              return;
+                            }
+                            setBranding((b) => ({ ...b, logo_light_url: data.url }));
+                          } catch (err) {
+                            console.error(err);
+                            alert("Upload failed");
+                          }
+                        }}
+                      >
+                        Upload
+                      </Button>
+                    </div>
+                    {branding.logo_light_url ? (
+                      <img src={branding.logo_light_url} alt="Logo light" className="h-10 object-contain bg-white rounded p-1 border" />
+                    ) : null}
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Logo (Dark Theme)</div>
+                    <div className="flex items-center gap-2">
+                      <Input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} />
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          if (!logoFile) return;
+                          try {
+                            const form = new FormData();
+                            form.append("file", logoFile);
+                            form.append("kind", "logo_dark");
+                            const res = await fetch("/api/org/branding/upload", {
+                              method: "POST",
+                              credentials: "include",
+                              body: form,
+                            });
+                            const data = await res.json();
+                            if (!res.ok || !data.success) {
+                              alert(data.error || "Upload failed");
+                              return;
+                            }
+                            setBranding((b) => ({ ...b, logo_dark_url: data.url }));
+                          } catch (err) {
+                            console.error(err);
+                            alert("Upload failed");
+                          }
+                        }}
+                      >
+                        Upload
+                      </Button>
+                    </div>
+                    {branding.logo_dark_url ? (
+                      <div className="bg-neutral-900 p-2 rounded">
+                        <img src={branding.logo_dark_url} alt="Logo dark" className="h-10 object-contain" />
                       </div>
                     ) : null}
                   </div>
@@ -230,6 +315,53 @@ export default function ClientSettingsPage() {
                       </div>
                     ) : null}
                   </div>
+
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Favicon (32x32)</div>
+                    <div className="flex items-center gap-2">
+                      <Input type="file" accept="image/*" onChange={(e) => setEmailLogoFile(e.target.files?.[0] || null)} />
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          if (!emailLogoFile) return;
+                          try {
+                            const form = new FormData();
+                            form.append("file", emailLogoFile);
+                            form.append("kind", "favicon");
+                            const res = await fetch("/api/org/branding/upload", {
+                              method: "POST",
+                              credentials: "include",
+                              body: form,
+                            });
+                            const data = await res.json();
+                            if (!res.ok || !data.success) {
+                              alert(data.error || "Upload failed");
+                              return;
+                            }
+                            setBranding((b) => ({ ...b, favicon_url: data.url }));
+                            // Update head link for live preview
+                            const link: HTMLLinkElement =
+                              (document.querySelector('link[rel="icon"]') as HTMLLinkElement) ||
+                              (() => {
+                                const l = document.createElement("link");
+                                l.rel = "icon";
+                                document.head.appendChild(l);
+                                return l;
+                              })();
+                            link.href = data.url;
+                          } catch (err) {
+                            console.error(err);
+                            alert("Upload failed");
+                          }
+                        }}
+                      >
+                        Upload
+                      </Button>
+                    </div>
+                    {branding.favicon_url ? (
+                      <img src={branding.favicon_url} alt="Favicon" className="h-8 w-8 rounded bg-muted p-1" />
+                    ) : null}
+                  </div>
                   <div className="space-y-2">
                     <div className="text-sm font-medium">Support Email</div>
                     <Input
@@ -249,11 +381,19 @@ export default function ClientSettingsPage() {
                   </div>
                   <div className="space-y-2">
                     <div className="text-sm font-medium">Primary Color (hex)</div>
-                    <Input
-                      value={branding.primary_color}
-                      onChange={(e) => setBranding((b) => ({ ...b, primary_color: e.target.value }))}
-                      placeholder="#0EA5E9"
-                    />
+                    <div className="flex items-center gap-2">
+                      <Input
+                        value={branding.primary_color}
+                        onChange={(e) => setBranding((b) => ({ ...b, primary_color: e.target.value }))}
+                        placeholder="#0EA5E9"
+                      />
+                      <div
+                        className="h-8 w-8 rounded border"
+                        style={{ background: branding.primary_color || "transparent" }}
+                        title="Preview"
+                      />
+                    </div>
+                    <ColorContrastWarning color={branding.primary_color} />
                   </div>
                   <div className="space-y-2">
                     <div className="text-sm font-medium">Theme</div>
@@ -296,6 +436,18 @@ export default function ClientSettingsPage() {
                           logo_url: data.organization.logo_url,
                           branding: data.organization.branding,
                         }));
+                        // Update favicon link if provided
+                        if (branding.favicon_url) {
+                          const link: HTMLLinkElement =
+                            (document.querySelector('link[rel="icon"]') as HTMLLinkElement) ||
+                            (() => {
+                              const l = document.createElement("link");
+                              l.rel = "icon";
+                              document.head.appendChild(l);
+                              return l;
+                            })();
+                          link.href = branding.favicon_url;
+                        }
                         alert("Branding updated successfully");
                       } catch (err) {
                         console.error(err);
@@ -471,6 +623,62 @@ export default function ClientSettingsPage() {
         </div>
       </SidebarInset>
     </SidebarProvider>
+  );
+}
+
+function LiveThemePreview({ primaryColor, themeMode }: { primaryColor: string; themeMode: string }) {
+  useEffect(() => {
+    // Apply theme class
+    if (themeMode === "dark") document.documentElement.classList.add("dark");
+    else if (themeMode === "light") document.documentElement.classList.remove("dark");
+    // If system, do nothing (respect system preference)
+  }, [themeMode]);
+
+  useEffect(() => {
+    if (!primaryColor) return;
+    document.documentElement.style.setProperty("--brand-primary", primaryColor);
+  }, [primaryColor]);
+
+  return null;
+}
+
+function ColorContrastWarning({ color }: { color: string }) {
+  if (!color || !/^#([0-9A-F]{3}){1,2}$/i.test(color)) return null;
+
+  const hexToRgb = (hex: string) => {
+    const c = hex.substring(1);
+    const n = c.length === 3 ? c.split("").map((x) => x + x).join("") : c;
+    const num = parseInt(n, 16);
+    return {
+      r: (num >> 16) & 255,
+      g: (num >> 8) & 255,
+      b: num & 255,
+    };
+  };
+  const luminance = (r: number, g: number, b: number) => {
+    const a = [r, g, b].map((v) => {
+      v /= 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
+  };
+  const contrastRatio = (hex1: string, hex2: string) => {
+    const c1 = hexToRgb(hex1);
+    const c2 = hexToRgb(hex2);
+    const l1 = luminance(c1.r, c1.g, c1.b) + 0.05;
+    const l2 = luminance(c2.r, c2.g, c2.b) + 0.05;
+    const ratio = l1 > l2 ? l1 / l2 : l2 / l1;
+    return ratio;
+  };
+  const ratioOnWhite = contrastRatio(color, "#ffffff");
+  const ratioOnBlack = contrastRatio(color, "#000000");
+  const good = ratioOnWhite >= 4.5 || ratioOnBlack >= 4.5;
+
+  return (
+    <div className={`text-xs ${good ? "text-green-600" : "text-amber-600"}`}>
+      Contrast vs white: {ratioOnWhite.toFixed(2)} / black: {ratioOnBlack.toFixed(2)}{" "}
+      {good ? "(OK)" : "(Low contrast - consider another color)"}
+    </div>
   );
 }
 
