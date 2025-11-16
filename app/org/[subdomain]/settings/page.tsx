@@ -72,9 +72,9 @@ export default function ClientSettingsPage() {
 
       // Initialize branding state
       const initial = {
-        logo_url: org.logo_url || "",
-        logo_light_url: org.branding?.logo_light_url || org.logo_url || "",
-        logo_dark_url: org.branding?.logo_dark_url || org.logo_url || "",
+        logo_url: org.branding?.logo_url || "",
+        logo_light_url: org.branding?.logo_light_url || org.branding?.logo_url || "",
+        logo_dark_url: org.branding?.logo_dark_url || org.branding?.logo_url || "",
         email_logo_url: org.branding?.email_logo_url || "",
         favicon_url: org.branding?.favicon_url || "",
         support_email: org.branding?.support_email || org.primary_contact_email || "",
