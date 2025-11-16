@@ -66,7 +66,7 @@ export async function PUT(
     // Get target user to verify same organization
     const { data: targetUser } = await supabase
       .from("admin_profiles")
-      .select("organization_id, email, role as old_role")
+      .select("organization_id, email, role")
       .eq("id", userId)
       .single();
 
@@ -82,7 +82,8 @@ export async function PUT(
     }
 
     // Prevent user from changing their own role
-    if (userId === user.id && role && role !== targetUser.old_role) {
+    const previousRole = (targetUser as any).role as string | undefined;
+    if (userId === user.id && role && previousRole && role !== previousRole) {
       return NextResponse.json(
         { success: false, error: "Cannot change your own role" },
         { status: 400 }
@@ -123,7 +124,7 @@ export async function PUT(
 
     if (full_name) auditDetails.new_name = full_name;
     if (role) {
-      auditDetails.old_role = targetUser.old_role;
+      auditDetails.old_role = previousRole;
       auditDetails.new_role = role;
     }
     if (department !== undefined) auditDetails.new_department = department;
