@@ -35,8 +35,51 @@ export default function ClientLoginPage() {
     const mode = organization.branding?.theme_mode;
     if (mode === "dark") document.documentElement.classList.add("dark");
     if (mode === "light") document.documentElement.classList.remove("dark");
-    if (organization.branding?.primary_color) {
-      document.documentElement.style.setProperty("--brand-primary", organization.branding.primary_color);
+    const hex = organization.branding?.primary_color as string | undefined;
+    if (hex) {
+      const toHsl = (h: string) => {
+        let c = h.replace("#", "");
+        if (c.length === 3) c = c.split("").map((x) => x + x).join("");
+        const r = parseInt(c.substring(0, 2), 16) / 255;
+        const g = parseInt(c.substring(2, 4), 16) / 255;
+        const b = parseInt(c.substring(4, 6), 16) / 255;
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        let hh = 0;
+        let s = 0;
+        const l = (max + min) / 2;
+        const d = max - min;
+        if (d !== 0) {
+          s = l > 0.5 ? d / (2 - max - min) : d / (max - min);
+          switch (max) {
+            case r:
+              hh = (g - b) / d + (g < b ? 6 : 0);
+              break;
+            case g:
+              hh = (b - r) / d + 2;
+              break;
+            case b:
+              hh = (r - g) / d + 4;
+              break;
+          }
+          hh /= 6;
+        }
+        return `${Math.round(hh * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+      };
+      const hsl = toHsl(hex);
+      document.documentElement.style.setProperty("--brand-primary", hex);
+      document.documentElement.style.setProperty("--primary", hsl);
+      document.documentElement.style.setProperty("--ring", hsl);
+      document.documentElement.style.setProperty("--sidebar-primary", hsl);
+      const [hStr, sStr, lStr] = hsl.split(" ");
+      const h = hStr;
+      const s = sStr;
+      const baseL = parseInt(lStr);
+      const steps = [0, -10, 10, -20, 20];
+      steps.forEach((delta, idx) => {
+        const l = Math.max(0, Math.min(100, baseL + delta));
+        document.documentElement.style.setProperty(`--chart-${idx + 1}`, `${h} ${s} ${l}%`);
+      });
     }
     if (organization.branding?.favicon_url) {
       const existing = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
