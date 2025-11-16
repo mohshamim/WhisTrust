@@ -83,39 +83,42 @@ export default function AnalyticsPage() {
 
   const handleExport = async () => {
     try {
-      const { exportAnalyticsToCSV } = await import("@/lib/services/analytics");
-
-      // Prepare data for export
-      const exportData = [
-        { Metric: "Total Reports", Value: stats.totalReports },
-        { Metric: "Pending Reports", Value: stats.pendingReports },
-        { Metric: "Resolved Reports", Value: stats.resolvedReports },
-        { Metric: "Avg Resolution Days", Value: stats.avgResolutionDays },
-        ...categoryStats.map((cat) => ({
-          Metric: `Category: ${cat.category}`,
-          Value: `${cat.count} (${cat.percentage}%)`,
-        })),
+      // Prepare rows
+      const rows: Array<Array<string | number>> = [
+        ["Metric", "Value"],
+        ["Total Reports", stats.totalReports],
+        ["Pending Reports", stats.pendingReports],
+        ["Resolved Reports", stats.resolvedReports],
+        ["Avg Resolution Days", stats.avgResolutionDays],
       ];
 
-      const csvContent = await exportAnalyticsToCSV(exportData);
+      categoryStats.forEach((cat) => {
+        rows.push([`Category: ${cat.category}`, `${cat.count} (${cat.percentage}%)`]);
+      });
 
-      // Create download link
-      const blob = new Blob([csvContent], { type: "text/csv" });
+      // Convert to CSV
+      const csv = rows
+        .map((row) =>
+          row
+            .map((cell) => `"${String(cell).replace(/"/g, '""')}"`)
+            .join(",")
+        )
+        .join("\n");
+
+      // Trigger download
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `whistrust-analytics-${
-        new Date().toISOString().split("T")[0]
-      }.csv`;
+      link.download = `whistrust-analytics-${new Date()
+        .toISOString()
+        .split("T")[0]}.csv`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-
-      alert("Analytics data exported successfully!");
     } catch (error) {
       console.error("Error exporting analytics:", error);
-      alert("Failed to export analytics data");
     }
   };
 
