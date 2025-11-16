@@ -65,12 +65,15 @@ export async function PUT(request: NextRequest) {
     }
 
     // Load existing branding to merge
-    const { data: org } = await supabase
+    const { data: org, error: orgError } = await supabase
       .from("organizations")
-      .select("id, branding, logo_url")
+      .select("id, branding")
       .eq("id", adminProfile.organization_id)
       .single();
 
+    if (orgError) {
+      console.error("Load organization error:", orgError);
+    }
     if (!org) {
       return NextResponse.json({ success: false, error: "Organization not found" }, { status: 404 });
     }
@@ -91,15 +94,13 @@ export async function PUT(request: NextRequest) {
       branding: nextBranding,
       updated_at: new Date().toISOString(),
     };
-    if (body.logo_url !== undefined) {
-      updateData.logo_url = body.logo_url;
-    }
+    // Keep all logo fields inside branding to avoid schema differences across environments
 
     const { data: updatedOrg, error: updateError } = await supabase
       .from("organizations")
       .update(updateData)
       .eq("id", adminProfile.organization_id)
-      .select("id, name, subdomain, logo_url, branding")
+      .select("id, name, subdomain, branding")
       .single();
 
     if (updateError) {
