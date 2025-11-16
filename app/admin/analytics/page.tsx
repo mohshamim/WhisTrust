@@ -50,7 +50,7 @@ export default function AnalyticsPage() {
 
       // For now, show placeholder data for super admin analytics
       // TODO: Implement super admin cross-organization analytics
-      const statsResult = { success: true, stats: { total_reports: 0, pending_reports: 0, resolved_reports: 0, avg_resolution_days: 0 } };
+      const statsResult = { success: true, stats: { total_reports: 0, pending_reports: 0, resolved_reports: 0, closed_reports: 0, avg_resolution_days: 0 } };
       const categoryResult = { success: true, categories: [] };
 
       if (statsResult.success && statsResult.stats) {
