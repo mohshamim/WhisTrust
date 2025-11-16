@@ -81,7 +81,7 @@ export default function ClientReportsPage() {
   const [sortBy, setSortBy] = useState("created_at"); // created_at, priority, status
   
   // Get user permissions
-  const permissions = user ? getPermissions(user.role) : null;
+  const permissions = user ? getPermissions(user.role as import("@/lib/permissions").UserRole) : null;
   
   // Drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
