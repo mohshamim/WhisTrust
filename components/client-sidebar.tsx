@@ -101,6 +101,7 @@ export function ClientSidebar({
 }: ClientSidebarProps) {
   const params = useParams();
   const subdomain = params.subdomain as string;
+  const [branding, setBranding] = React.useState<any>(null);
 
   // Apply organization branding theme globally
   React.useEffect(() => {
@@ -109,28 +110,35 @@ export function ClientSidebar({
       try {
         const res = await getOrganizationBySubdomain(subdomain);
         if (!res.success || !res.organization || cancelled) return;
-        const branding: any = res.organization.branding || {};
+        const brandingData: any = res.organization.branding || {};
+        setBranding(brandingData);
 
         // Theme mode
-        if (branding.theme_mode === "dark") document.documentElement.classList.add("dark");
-        if (branding.theme_mode === "light") document.documentElement.classList.remove("dark");
+        if (brandingData.theme_mode === "dark") document.documentElement.classList.add("dark");
+        if (brandingData.theme_mode === "light") document.documentElement.classList.remove("dark");
 
         // Primary color mapping
-        const hex: string | undefined = branding.primary_color;
+        const hex: string | undefined = brandingData.primary_color;
         if (hex) {
           document.documentElement.style.setProperty("--brand-primary", hex);
           // Map to common tokens used across UI
           document.documentElement.style.setProperty("--ring", hex);
           document.documentElement.style.setProperty("--primary", hex);
           document.documentElement.style.setProperty("--sidebar-primary", hex);
+          // Charts - apply brand color to chart palette (basic mapping)
+          document.documentElement.style.setProperty("--chart-1", hex);
+          document.documentElement.style.setProperty("--chart-2", hex);
+          document.documentElement.style.setProperty("--chart-3", hex);
+          document.documentElement.style.setProperty("--chart-4", hex);
+          document.documentElement.style.setProperty("--chart-5", hex);
         }
 
         // Favicon
-        if (branding.favicon_url) {
+        if (brandingData.favicon_url) {
           const existing = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
           const link = existing || document.createElement("link");
           link.rel = "icon";
-          link.href = branding.favicon_url;
+          link.href = brandingData.favicon_url;
           if (!existing) document.head.appendChild(link);
         }
       } catch {}
@@ -153,7 +161,19 @@ export function ClientSidebar({
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-1.5 text-sidebar-accent-foreground">
-          <Building2 className="size-5" />
+          {branding?.logo_light_url || branding?.logo_dark_url || branding?.logo_url ? (
+            <img
+              src={
+                (typeof document !== "undefined" && document.documentElement.classList.contains("dark")
+                  ? branding?.logo_dark_url
+                  : branding?.logo_light_url) || branding?.logo_url
+              }
+              alt={organization.name}
+              className="size-5 object-contain"
+            />
+          ) : (
+            <Building2 className="size-5" />
+          )}
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold">{organization.name}</span>
             <span className="truncate text-xs">Compliance Portal</span>
