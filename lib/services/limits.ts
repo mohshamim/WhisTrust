@@ -79,7 +79,8 @@ export async function bumpAdminCount(organizationId: string): Promise<void> {
 async function getCurrent(column: "current_reports_count" | "current_admin_users", orgId: string): Promise<number> {
   const supabase = createServiceClient();
   const { data } = await supabase.from("organizations").select(column).eq("id", orgId).single();
-  return (data?.[column] as number) || 0;
+  const row = data as Record<string, unknown> | null;
+  return (row?.[column] as number) || 0;
 }
 
 
