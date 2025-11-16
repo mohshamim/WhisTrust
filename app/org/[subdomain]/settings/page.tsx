@@ -381,18 +381,10 @@ export default function ClientSettingsPage() {
                   </div>
                   <div className="space-y-2">
                     <div className="text-sm font-medium">Primary Color (hex)</div>
-                    <div className="flex items-center gap-2">
-                      <Input
-                        value={branding.primary_color}
-                        onChange={(e) => setBranding((b) => ({ ...b, primary_color: e.target.value }))}
-                        placeholder="#0EA5E9"
-                      />
-                      <div
-                        className="h-8 w-8 rounded border"
-                        style={{ background: branding.primary_color || "transparent" }}
-                        title="Preview"
-                      />
-                    </div>
+                    <AdvancedColorPicker
+                      value={branding.primary_color}
+                      onChange={(c) => setBranding((b) => ({ ...b, primary_color: c }))}
+                    />
                     <ColorContrastWarning color={branding.primary_color} />
                   </div>
                   <div className="space-y-2">
@@ -678,6 +670,87 @@ function ColorContrastWarning({ color }: { color: string }) {
     <div className={`text-xs ${good ? "text-green-600" : "text-amber-600"}`}>
       Contrast vs white: {ratioOnWhite.toFixed(2)} / black: {ratioOnBlack.toFixed(2)}{" "}
       {good ? "(OK)" : "(Low contrast - consider another color)"}
+    </div>
+  );
+}
+
+function AdvancedColorPicker({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (hex: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const presets = [
+    "#0ea5e9",
+    "#22c55e",
+    "#ef4444",
+    "#f59e0b",
+    "#8b5cf6",
+    "#14b8a6",
+    "#6366f1",
+    "#111827",
+  ];
+
+  const normalizeHex = (hex: string) => {
+    if (!hex) return "";
+    let h = hex.trim();
+    if (!h.startsWith("#")) h = `#${h}`;
+    if (/^#([0-9A-F]{3}){1,2}$/i.test(h)) return h;
+    return value || "";
+  };
+
+  return (
+    <div className="flex items-center gap-2 relative">
+      <Input
+        value={value}
+        onChange={(e) => onChange(normalizeHex(e.target.value))}
+        placeholder="#0EA5E9"
+        className="pr-10"
+      />
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="h-8 w-8 rounded border shrink-0"
+        aria-label="Open color picker"
+        style={{ background: value || "transparent" }}
+        title={value || "Pick color"}
+      />
+
+      {open && (
+        <div className="absolute z-10 top-full mt-2 right-0 w-64 rounded-md border bg-popover p-3 shadow-md">
+          <div className="grid grid-cols-8 gap-2 mb-3">
+            {presets.map((c) => (
+              <button
+                key={c}
+                type="button"
+                className="h-6 w-6 rounded border"
+                style={{ background: c }}
+                onClick={() => onChange(c)}
+                title={c}
+              />
+            ))}
+          </div>
+          <div className="flex items-center gap-2">
+            <input
+              type="color"
+              value={value || "#0ea5e9"}
+              onChange={(e) => onChange(e.target.value)}
+              className="h-10 w-10 p-0 border rounded cursor-pointer"
+              aria-label="Color"
+            />
+            <Input
+              value={value}
+              onChange={(e) => onChange(normalizeHex(e.target.value))}
+              placeholder="#0EA5E9"
+            />
+            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+              Done
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
