@@ -51,7 +51,9 @@ export function getClientIp(req: Request | { headers: Headers }): string {
  *
  * Example:
  *  const attempt = recordAttempt(`users-create:${ip}`, 10 * 60_000, 15)
- *  if (attempt.locked) { /* deny */ }
+ *  if (attempt.locked) {
+ *    // deny request
+ *  }
  */
 export function recordAttempt(
   key: string,
