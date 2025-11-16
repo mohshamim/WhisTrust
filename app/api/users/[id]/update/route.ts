@@ -6,10 +6,10 @@ import { getSupabaseConfig } from "@/lib/config/environment";
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = params.id;
+    const { id: userId } = await context.params;
     const body = await request.json();
     const { full_name, role, department, is_active } = body;
 

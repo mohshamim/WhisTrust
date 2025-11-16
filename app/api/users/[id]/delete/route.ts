@@ -6,10 +6,10 @@ import { getSupabaseConfig } from "@/lib/config/environment";
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const userId = params.id;
+    const { id: userId } = await context.params;
     const { searchParams } = new URL(request.url);
     const hardDelete = searchParams.get("hard") === "true";
 
