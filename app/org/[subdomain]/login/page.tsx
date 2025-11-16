@@ -149,7 +149,7 @@ export default function ClientLoginPage() {
               const logo =
                 (isDark ? organization.branding?.logo_dark_url : organization.branding?.logo_light_url) ||
                 organization.branding?.logo_url ||
-                organization.logo_url;
+                "";
               return (
                 <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
                   {logo ? (
