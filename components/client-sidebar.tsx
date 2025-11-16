@@ -21,6 +21,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { getOrganizationBySubdomain } from "@/lib/services/client-auth";
 
 interface ClientSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: {
@@ -100,6 +101,45 @@ export function ClientSidebar({
 }: ClientSidebarProps) {
   const params = useParams();
   const subdomain = params.subdomain as string;
+
+  // Apply organization branding theme globally
+  React.useEffect(() => {
+    let cancelled = false;
+    const apply = async () => {
+      try {
+        const res = await getOrganizationBySubdomain(subdomain);
+        if (!res.success || !res.organization || cancelled) return;
+        const branding: any = res.organization.branding || {};
+
+        // Theme mode
+        if (branding.theme_mode === "dark") document.documentElement.classList.add("dark");
+        if (branding.theme_mode === "light") document.documentElement.classList.remove("dark");
+
+        // Primary color mapping
+        const hex: string | undefined = branding.primary_color;
+        if (hex) {
+          document.documentElement.style.setProperty("--brand-primary", hex);
+          // Map to common tokens used across UI
+          document.documentElement.style.setProperty("--ring", hex);
+          document.documentElement.style.setProperty("--primary", hex);
+          document.documentElement.style.setProperty("--sidebar-primary", hex);
+        }
+
+        // Favicon
+        if (branding.favicon_url) {
+          const existing = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
+          const link = existing || document.createElement("link");
+          link.rel = "icon";
+          link.href = branding.favicon_url;
+          if (!existing) document.head.appendChild(link);
+        }
+      } catch {}
+    };
+    apply();
+    return () => {
+      cancelled = true;
+    };
+  }, [subdomain]);
 
   const data = React.useMemo(
     () => ({

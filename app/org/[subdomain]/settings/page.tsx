@@ -406,6 +406,22 @@ export default function ClientSettingsPage() {
                         <div className="mt-2 flex items-center gap-2">
                           <ColorPickerOutput />
                           <ColorPickerFormat />
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                              // Clear to default theme
+                              setBranding((b) => ({ ...b, primary_color: "" }));
+                              if (typeof document !== "undefined") {
+                                document.documentElement.style.removeProperty("--brand-primary");
+                                document.documentElement.style.removeProperty("--primary");
+                                document.documentElement.style.removeProperty("--ring");
+                                document.documentElement.style.removeProperty("--sidebar-primary");
+                              }
+                            }}
+                          >
+                            Default
+                          </Button>
                         </div>
                       </ColorPicker>
                     </div>
