@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     // Verify requesting user is an admin
     const { data: requestingUser } = await supabase
       .from("admin_profiles")
-      .select("role, organization_id")
+      .select("role, organization_id, full_name")
       .eq("id", user.id)
       .single();
 
