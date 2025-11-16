@@ -65,12 +65,12 @@ export default function AnalyticsPage() {
         });
       }
 
-      if (categoryResult.success && categoryResult.stats) {
+      if (categoryResult.success && Array.isArray(categoryResult.categories)) {
         setCategoryStats(
-          categoryResult.stats.map((cat) => ({
-            category: cat.category,
-            count: cat.total_count,
-            percentage: cat.percentage,
+          categoryResult.categories.map((cat: any) => ({
+            category: cat.category ?? "Unknown",
+            count: cat.total_count ?? 0,
+            percentage: cat.percentage ?? 0,
           }))
         );
       }
