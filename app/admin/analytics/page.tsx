@@ -48,32 +48,56 @@ export default function AnalyticsPage() {
     try {
       setIsLoading(true);
 
-      // For now, show placeholder data for super admin analytics
-      // TODO: Implement super admin cross-organization analytics
-      const statsResult = { success: true, stats: { total_reports: 0, pending_reports: 0, resolved_reports: 0, closed_reports: 0, avg_resolution_days: 0 } };
-      const categoryResult = { success: true, categories: [] };
+      const { createServiceClient } = await import("@/lib/supabase/service-client");
+      const supabase = createServiceClient();
 
-      if (statsResult.success && statsResult.stats) {
-        setStats({
-          totalReports: statsResult.stats.total_reports || 0,
-          pendingReports: statsResult.stats.pending_reports || 0,
-          resolvedReports:
-            (statsResult.stats.resolved_reports || 0) +
-            (statsResult.stats.closed_reports || 0),
-          avgResolutionDays:
-            Math.round((statsResult.stats.avg_resolution_days || 0) * 10) / 10,
-        });
+      // Totals across all organizations
+      const [{ count: totalReports }, { count: pendingReports }, { data: resolvedData }] =
+        await Promise.all([
+          supabase.from("reports").select("*", { count: "exact", head: true }),
+          supabase
+            .from("reports")
+            .select("*", { count: "exact", head: true })
+            .in("status", ["submitted", "under_review", "investigating"]),
+          supabase
+            .from("reports")
+            .select("created_at, updated_at, status")
+            .in("status", ["resolved", "closed"]),
+        ]);
+
+      // Avg resolution
+      let avgResolutionDays = 0;
+      if (resolvedData && resolvedData.length > 0) {
+        const totalHours = resolvedData.reduce((sum: number, r: any) => {
+          const created = new Date(r.created_at);
+          const updated = new Date(r.updated_at);
+          return sum + (updated.getTime() - created.getTime()) / (1000 * 60 * 60);
+        }, 0);
+        avgResolutionDays = Math.round(totalHours / resolvedData.length / 24);
       }
 
-      if (categoryResult.success && Array.isArray(categoryResult.categories)) {
-        setCategoryStats(
-          categoryResult.categories.map((cat: any) => ({
-            category: cat.category ?? "Unknown",
-            count: cat.total_count ?? 0,
-            percentage: cat.percentage ?? 0,
-          }))
-        );
-      }
+      setStats({
+        totalReports: totalReports || 0,
+        pendingReports: pendingReports || 0,
+        resolvedReports: resolvedData?.length || 0,
+        avgResolutionDays,
+      });
+
+      // Categories distribution
+      const { data: categoriesRaw } = await supabase.from("reports").select("category");
+      const counts: Record<string, number> = {};
+      categoriesRaw?.forEach((r: any) => {
+        counts[r.category] = (counts[r.category] || 0) + 1;
+      });
+      const total = categoriesRaw?.length || 0;
+      const categories = Object.entries(counts)
+        .map(([category, count]) => ({
+          category,
+          count,
+          percentage: total > 0 ? Math.round((Number(count) / total) * 100) : 0,
+        }))
+        .sort((a, b) => b.count - a.count);
+      setCategoryStats(categories);
     } catch (error) {
       console.error("Error loading analytics:", error);
     } finally {
@@ -160,7 +184,7 @@ export default function AnalyticsPage() {
                 />
                 Refresh
               </Button>
-              <Button onClick={handleExport} variant="outline" size="sm">
+              <Button onClick={handleExport} variant="outline" size="sm" aria-label="Export global analytics as CSV">
                 <Download className="h-4 w-4 mr-2" />
                 Export Report
               </Button>
@@ -246,24 +270,30 @@ export default function AnalyticsPage() {
                 <CardDescription>Distribution of report types</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-3">
-                  {categoryStats.map((stat) => (
-                    <div key={stat.category} className="space-y-2">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-medium">{stat.category}</span>
-                        <span className="text-muted-foreground">
-                          {stat.count} ({stat.percentage}%)
-                        </span>
+                {categoryStats.length === 0 ? (
+                  <div className="text-sm text-muted-foreground py-8 text-center">
+                    No category data available yet.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {categoryStats.map((stat) => (
+                      <div key={stat.category} className="space-y-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-medium">{stat.category}</span>
+                          <span className="text-muted-foreground">
+                            {stat.count} ({stat.percentage}%)
+                          </span>
+                        </div>
+                        <div className="h-2 bg-muted rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-primary rounded-full transition-all"
+                            style={{ width: `${stat.percentage}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="h-2 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className="h-full bg-primary rounded-full transition-all"
-                          style={{ width: `${stat.percentage}%` }}
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
 

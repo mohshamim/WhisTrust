@@ -75,6 +75,14 @@ export async function sendReporterMessage(
   content: string
 ): Promise<SendMessageResult> {
   try {
+    // Basic client-side throttle: 1 message / 10s per report
+    const key = `rl:reporter:${reportId}`;
+    const now = Date.now();
+    const last = Number(sessionStorage.getItem(key) || "0");
+    if (now - last < 10_000) {
+      return { success: false, error: "Please wait a few seconds before sending another message." };
+    }
+
     if (!content || content.trim().length === 0) {
       return {
         success: false,
@@ -120,6 +128,19 @@ export async function sendReporterMessage(
       };
     }
 
+    // Mark throttle timestamp
+    sessionStorage.setItem(key, String(now));
+
+    // Fire-and-forget: notify admins via API (best-effort)
+    try {
+      await fetch("/api/notifications/message-new", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ reportId, sender: "reporter" }),
+      });
+    } catch {}
+
     return {
       success: true,
       message: data,
@@ -143,6 +164,14 @@ export async function sendAdminMessage(
   userId: string
 ): Promise<SendMessageResult> {
   try {
+    // Basic client-side throttle: 1 message / 5s per report per admin
+    const key = `rl:admin:${reportId}:${userId}`;
+    const now = Date.now();
+    const last = Number(sessionStorage.getItem(key) || "0");
+    if (now - last < 5_000) {
+      return { success: false, error: "Please wait a moment before sending again." };
+    }
+
     if (!content || content.trim().length === 0) {
       return {
         success: false,
@@ -207,6 +236,8 @@ export async function sendAdminMessage(
         error: error.message || "Failed to send message",
       };
     }
+
+    sessionStorage.setItem(key, String(now));
 
     return {
       success: true,

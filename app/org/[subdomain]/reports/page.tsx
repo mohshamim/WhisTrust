@@ -8,7 +8,7 @@ import { downloadFile } from "@/lib/services/storage";
 import { useRealtimeMessages } from "@/hooks/use-realtime-messages";
 import { getPermissions } from "@/lib/permissions";
 import { ClientSidebar } from "@/components/client-sidebar";
-import { NotificationsDropdown } from "@/components/notifications-dropdown";
+// Notifications removed by requirement
 import {
   SidebarInset,
   SidebarProvider,
@@ -29,7 +29,15 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import {
-  FileText,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  FileSearch,
   Search,
   Filter,
   Eye,
@@ -284,9 +292,12 @@ export default function ClientReportsPage() {
 
       if (error) {
         console.error("Failed to update report:", error);
-        alert("Failed to update report. Please try again.");
+        const { toast } = await import("sonner");
+        toast.error("Failed to update report. Please try again.");
         return;
       }
+
+      // Notifications disabled by requirement
 
       // Update local state
       setReports(prev =>
@@ -303,10 +314,12 @@ export default function ClientReportsPage() {
         ...updateData,
       });
 
-      alert("Report updated successfully!");
+      const { toast } = await import("sonner");
+      toast.success("Report updated successfully");
     } catch (error) {
       console.error("Save error:", error);
-      alert("An error occurred while saving.");
+      const { toast } = await import("sonner");
+      toast.error("An error occurred while saving");
     } finally {
       setSaving(false);
     }
@@ -330,11 +343,13 @@ export default function ClientReportsPage() {
     setSendingMessage(true);
     try {
       await sendAdminMessage(selectedReport.id, newMessage.trim(), user.id);
+      // Notifications disabled by requirement
       setNewMessage("");
       // Messages will update via real-time subscription
     } catch (error) {
       console.error("Failed to send message:", error);
-      alert("Failed to send message. Please try again.");
+      const { toast } = await import("sonner");
+      toast.error("Failed to send message. Please try again.");
     } finally {
       setSendingMessage(false);
     }
@@ -383,7 +398,8 @@ export default function ClientReportsPage() {
       }
     } catch (error) {
       console.error("Download error:", error);
-      alert("Failed to download file. Please try again.");
+      const { toast } = await import("sonner");
+      toast.error("Failed to download file. Please try again.");
     }
   };
 
@@ -444,7 +460,8 @@ export default function ClientReportsPage() {
 
     // Check if label already exists
     if (reportLabels.some(l => l.label_name === labelName)) {
-      alert("This label is already added");
+      const { toast } = await import("sonner");
+      toast.info("This label is already added");
       return;
     }
 
@@ -465,14 +482,16 @@ export default function ClientReportsPage() {
 
       if (error) {
         console.error("Failed to add label:", error);
-        alert("Failed to add label. Please try again.");
+        const { toast } = await import("sonner");
+        toast.error("Failed to add label. Please try again.");
         return;
       }
 
       setReportLabels([...reportLabels, data]);
     } catch (error) {
       console.error("Add label error:", error);
-      alert("An error occurred while adding label.");
+      const { toast } = await import("sonner");
+      toast.error("An error occurred while adding label.");
     } finally {
       setSavingLabels(false);
     }
@@ -493,14 +512,16 @@ export default function ClientReportsPage() {
 
       if (error) {
         console.error("Failed to remove label:", error);
-        alert("Failed to remove label. Please try again.");
+        const { toast } = await import("sonner");
+        toast.error("Failed to remove label. Please try again.");
         return;
       }
 
       setReportLabels(reportLabels.filter(l => l.id !== labelId));
     } catch (error) {
       console.error("Remove label error:", error);
-      alert("An error occurred while removing label.");
+      const { toast } = await import("sonner");
+      toast.error("An error occurred while removing label.");
     } finally {
       setSavingLabels(false);
     }
@@ -555,36 +576,34 @@ export default function ClientReportsPage() {
         userRole={user.role}
       />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear">
+        <header className="flex h-14 shrink-0 items-center gap-2 transition-[width,height] ease-linear border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex items-center gap-2 px-4 w-full">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
-            <div className="flex-1">
-              <h1 className="text-lg font-semibold">Reports</h1>
-              <p className="text-sm text-muted-foreground">
-                {filteredReports.length} report{filteredReports.length !== 1 ? 's' : ''}
-              </p>
+            <div className="flex-1 flex items-center justify-between">
+              <div>
+                <h1 className="text-lg font-semibold">Reports</h1>
+                <p className="text-sm text-muted-foreground">
+                  {filteredReports.length} report{filteredReports.length !== 1 ? 's' : ''}
+                </p>
+              </div>
             </div>
-            {/* Notifications */}
-            {user && organization && (
-              <NotificationsDropdown userId={user.id} organizationId={organization.id} />
-            )}
           </div>
         </header>
 
-        <div className="flex flex-1 flex-col gap-4 p-4">
+        <div className="flex flex-1 flex-col gap-4 md:gap-6 p-4 md:p-6 lg:p-8">
           {/* Filters */}
-          <Card className="shadow-md">
+          <Card className="shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="pt-6">
               <div className="flex flex-col gap-4">
                 {/* Search Bar */}
                 <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
                   <Input
                     placeholder="Search by case number, title, or category..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 h-11"
+                    className="pl-10"
                   />
                 </div>
                 
@@ -592,7 +611,7 @@ export default function ClientReportsPage() {
                 <div className="flex flex-col sm:flex-row gap-3">
                   {/* Status Filter */}
                   <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="h-11 sm:w-[180px]">
+                    <SelectTrigger className="h-11 sm:w-[200px]">
                       <Filter className="w-4 h-4 mr-2" />
                       <SelectValue />
                     </SelectTrigger>
@@ -609,7 +628,7 @@ export default function ClientReportsPage() {
 
                   {/* Priority Filter */}
                   <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                    <SelectTrigger className="h-11 sm:w-[180px]">
+                    <SelectTrigger className="h-11 sm:w-[200px]">
                       <Filter className="w-4 h-4 mr-2" />
                       <SelectValue />
                     </SelectTrigger>
@@ -624,7 +643,7 @@ export default function ClientReportsPage() {
 
                   {/* Sort By */}
                   <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="h-11 sm:w-[180px]">
+                    <SelectTrigger className="h-11 sm:w-[200px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -638,87 +657,110 @@ export default function ClientReportsPage() {
             </CardContent>
           </Card>
 
-          {/* Reports List */}
-          {filteredReports.length === 0 ? (
-            <Card className="shadow-lg">
-              <CardContent className="py-12 text-center">
-                <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4 opacity-50" />
-                <h3 className="text-lg font-semibold mb-2">
-                  {searchQuery || statusFilter !== "all" ? "No reports found" : "No reports yet"}
-                </h3>
-                <p className="text-muted-foreground">
-                  {searchQuery || statusFilter !== "all"
-                    ? "Try adjusting your search or filters"
-                    : "Reports will appear here when submitted"}
-                </p>
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle>All Reports</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {filteredReports.map((report) => (
-                    <div
-                      key={report.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 hover:shadow-sm transition-all cursor-pointer"
-                      onClick={() => {
-                        setSelectedReport(report);
-                        setEditData({
-                          status: report.status,
-                          priority: report.priority,
-                          internal_notes: report.internal_notes || "",
-                          assigned_to: report.assigned_to || "",
-                        });
-                        setIsDrawerOpen(true);
-                      }}
-                    >
-                      <div className="flex-1 space-y-1">
-                        <div className="flex items-center gap-2">
-                          <p className="font-semibold">{report.case_number}</p>
-                          {report.is_anonymous && (
-                            <Badge variant="outline" className="text-xs">Anonymous</Badge>
-                          )}
-                          <Badge variant="outline" className="text-xs capitalize">
-                            {report.category.replace('_', ' ')}
-                          </Badge>
-                        </div>
-                        <p className="text-sm font-medium">{report.title}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Submitted {new Date(report.created_at).toLocaleDateString()} 
-                          {!report.is_anonymous && report.reporter_email && ` • ${report.reporter_email}`}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        {getPriorityBadge(report.priority)}
-                        {getStatusBadge(report.status)}
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedReport(report);
-                            setEditData({
-                              status: report.status,
-                              priority: report.priority,
-                              internal_notes: report.internal_notes || "",
-                              assigned_to: report.assigned_to || "",
-                            });
-                            setIsDrawerOpen(true);
-                          }}
-                        >
-                          <Eye className="w-4 h-4 mr-2" />
-                          View
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
+          {/* Reports Table */}
+          <Card className="shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>All Reports</CardTitle>
+                  <CardDescription>
+                    {filteredReports.length} report{filteredReports.length !== 1 ? 's' : ''} found
+                  </CardDescription>
                 </div>
-              </CardContent>
-            </Card>
-          )}
+              </div>
+            </CardHeader>
+            <CardContent>
+              {loading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : filteredReports.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <FileSearch className="h-12 w-12 text-muted-foreground mb-4 opacity-50" />
+                  <h3 className="text-lg font-semibold mb-2">No reports found</h3>
+                  <p className="text-muted-foreground">
+                    {searchQuery || statusFilter !== "all"
+                      ? "Try adjusting your filters"
+                      : "No reports have been submitted yet"}
+                  </p>
+                </div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Case Number</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Assigned To</TableHead>
+                      <TableHead>Created</TableHead>
+                      <TableHead>Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredReports.map((report) => (
+                      <TableRow
+                        key={report.id}
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => {
+                          setSelectedReport(report);
+                          setEditData({
+                            status: report.status,
+                            priority: report.priority,
+                            internal_notes: report.internal_notes || "",
+                            assigned_to: report.assigned_to || "",
+                          });
+                          setIsDrawerOpen(true);
+                        }}
+                      >
+                        <TableCell className="font-semibold">
+                          {report.case_number}
+                          {report.is_anonymous && (
+                            <Badge variant="outline" className="ml-2 text-xs">Anonymous</Badge>
+                          )}
+                        </TableCell>
+                        <TableCell className="capitalize">{report.category.replace('_', ' ')}</TableCell>
+                        <TableCell>{getStatusBadge(report.status)}</TableCell>
+                        <TableCell>{getPriorityBadge(report.priority)}</TableCell>
+                        <TableCell>
+                          {report.assigned_to ? (
+                            adminUsers.find((a) => a.id === report.assigned_to)?.full_name ||
+                            adminUsers.find((a) => a.id === report.assigned_to)?.email ||
+                            "Unknown"
+                          ) : (
+                            <span className="text-muted-foreground">Unassigned</span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {new Date(report.created_at).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedReport(report);
+                              setEditData({
+                                status: report.status,
+                                priority: report.priority,
+                                internal_notes: report.internal_notes || "",
+                                assigned_to: report.assigned_to || "",
+                              });
+                              setIsDrawerOpen(true);
+                            }}
+                            aria-label="View report details"
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </SidebarInset>
 
@@ -735,7 +777,7 @@ export default function ClientReportsPage() {
                   <div className="flex-1">
                     <SheetTitle className="text-2xl flex items-center gap-2 animate-in fade-in slide-in-from-left-4 duration-300">
                       <div className="p-2 bg-primary/10 rounded-lg ring-1 ring-primary/20">
-                        <FileText className="h-6 w-6 text-primary" />
+                        <FileSearch className="h-6 w-6 text-primary" />
                       </div>
                       Case Details
                     </SheetTitle>
@@ -748,17 +790,26 @@ export default function ClientReportsPage() {
                     {selectedReport.is_anonymous && (
                       <Badge variant="outline">Anonymous</Badge>
                     )}
+                    {/* Close Icon */}
+                    <button
+                      type="button"
+                      aria-label="Close details"
+                      className="h-8 w-8 rounded-full inline-flex items-center justify-center hover:bg-muted transition-colors border"
+                      onClick={() => setIsDrawerOpen(false)}
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
                   </div>
                 </div>
               </SheetHeader>
 
-              <div className="p-6 space-y-6 animate-in fade-in duration-300">
+              <div className="p-6 space-y-6 pb-32 animate-in fade-in duration-300">
 
                 {/* Case Information */}
-                <Card className="hover:shadow-md transition-shadow">
+                <Card className="hover:shadow-md transition-shadow card-enhanced">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-primary" />
+                      <FileSearch className="h-5 w-5 text-primary" />
                       Case Information
                     </CardTitle>
                   </CardHeader>
@@ -788,7 +839,9 @@ export default function ClientReportsPage() {
 
                     <div className="space-y-2">
                       <p className="text-sm font-medium text-muted-foreground">Description</p>
-                      <p className="text-sm leading-relaxed">{selectedReport.description}</p>
+                      <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">
+                        {selectedReport.description}
+                      </p>
                     </div>
 
                     {!selectedReport.is_anonymous && selectedReport.reporter_email && (
@@ -802,7 +855,7 @@ export default function ClientReportsPage() {
 
                 {/* Assignment Card */}
                 {permissions?.canAssignCases && (
-                  <Card className="hover:shadow-md transition-shadow">
+                  <Card className="hover:shadow-md transition-shadow card-enhanced">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <User className="h-5 w-5 text-primary" />
@@ -841,7 +894,7 @@ export default function ClientReportsPage() {
 
                 {/* Priority Card */}
                 {permissions?.canEditPriority && (
-                  <Card className="hover:shadow-md transition-shadow">
+                  <Card className="hover:shadow-md transition-shadow card-enhanced">
                     <CardHeader>
                       <CardTitle className="flex items-center gap-2">
                         <Tag className="h-5 w-5 text-primary" />
@@ -871,10 +924,10 @@ export default function ClientReportsPage() {
                 )}
 
                 {/* Internal Notes Card */}
-                <Card className="hover:shadow-md transition-shadow">
+                <Card className="hover:shadow-md transition-shadow card-enhanced">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-primary" />
+                      <FileSearch className="h-5 w-5 text-primary" />
                       Internal Notes
                     </CardTitle>
                     <CardDescription>
@@ -894,7 +947,7 @@ export default function ClientReportsPage() {
                 </Card>
 
                 {/* Messages Card */}
-                <Card className="hover:shadow-md transition-shadow">
+                <Card className="hover:shadow-md transition-shadow card-enhanced">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
                       <MessageSquare className="h-5 w-5 text-primary" />
@@ -906,7 +959,7 @@ export default function ClientReportsPage() {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {/* Messages List */}
-                    <div className="border rounded-lg max-h-[300px] overflow-y-auto">
+                    <div className="border rounded-lg max-h-[300px] overflow-y-auto scrollbar-thin">
                       {!messages || messages.length === 0 ? (
                         <div className="p-8 text-center">
                           <MessageSquare className="w-12 h-12 mx-auto mb-3 text-muted-foreground opacity-50" />
@@ -920,7 +973,7 @@ export default function ClientReportsPage() {
                               key={msg.id}
                               className={`p-4 rounded-lg ${
                                 msg.sender_type === "admin"
-                                  ? "bg-primary/10 ml-8 border border-primary/20"
+                                  ? "bg-primary/10 ml-8 border border-primary/20 shadow-xs"
                                   : "bg-muted mr-8"
                               }`}
                             >
@@ -1073,8 +1126,8 @@ export default function ClientReportsPage() {
               </div>
 
               {/* Bottom Status Update Bar */}
-              <div className="border-t p-6 sticky bottom-0 bg-background shadow-[0_-4px_6px_-1px_rgb(0_0_0_/0.1)]">
-                <div className="flex items-center gap-3">
+              <div className="border-t p-6 sticky bottom-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-[0_-4px_12px_hsl(0_0%_0%_/0.06)]">
+                <div className="flex items-center gap-3 justify-end">
                   {permissions?.canEditStatus && (
                     <>
                       <Select
@@ -1083,7 +1136,7 @@ export default function ClientReportsPage() {
                           setEditData({ ...editData, status: value })
                         }
                       >
-                        <SelectTrigger className="w-[200px]">
+                        <SelectTrigger className="w-[220px] h-12 rounded-lg bg-card border-2 border-border px-4 text-sm shadow-sm hover:border-primary/60 focus-visible:ring-4 focus-visible:ring-ring/30 transition-all">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -1096,21 +1149,16 @@ export default function ClientReportsPage() {
                         </SelectContent>
                       </Select>
                       <Button
+                        variant="default"
                         onClick={handleSaveReport}
-                        disabled={saving}
-                        className="flex-1"
+                        disabled={saving || editData.status === selectedReport.status}
+                        className="min-w-[160px] h-12 rounded-lg shadow-sm hover:shadow-md"
                       >
                         <Save className="w-4 h-4 mr-2" />
-                        {saving ? "Saving..." : "Save Changes"}
+                        {saving ? "Saving..." : "Update Status"}
                       </Button>
                     </>
                   )}
-                  <Button
-                    onClick={() => setIsDrawerOpen(false)}
-                    variant="outline"
-                  >
-                    Close
-                  </Button>
                 </div>
               </div>
             </>

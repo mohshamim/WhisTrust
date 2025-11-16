@@ -15,6 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { MessageSquare, Search, Send, User, Radio } from "lucide-react";
+import { toast } from "sonner";
 import { useRealtimeMessages } from "@/hooks/use-realtime-messages";
 import type { Message } from "@/lib/types/database";
 
@@ -139,14 +140,14 @@ function TrackPageContent() {
               })) || [],
           });
         } else {
-          alert(messagesResult.error || "Failed to load messages");
+          toast.error(messagesResult.error || "Failed to load messages");
         }
       } else {
-        alert(reportResult.error || "Report not found");
+        toast.error(reportResult.error || "Report not found");
       }
     } catch (error) {
       console.error("Error loading case:", error);
-      alert("An error occurred while loading the case");
+      toast.error("An error occurred while loading the case");
     } finally {
       setIsLoading(false);
     }
@@ -163,7 +164,7 @@ function TrackPageContent() {
       const messageText = newMessageText.trim();
 
       if (!caseData.reportId) {
-        alert("Report ID not found");
+        toast.error("Report ID not found");
         setIsSending(false);
         return;
       }
@@ -197,11 +198,11 @@ function TrackPageContent() {
           scrollToBottom();
         }, 100);
       } else {
-        alert(result.error || "Failed to send message");
+        toast.error(result.error || "Failed to send message");
       }
     } catch (error) {
       console.error("Error sending message:", error);
-      alert("An error occurred while sending the message");
+      toast.error("An error occurred while sending the message");
     } finally {
       setIsSending(false);
     }

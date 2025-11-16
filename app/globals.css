@@ -210,11 +210,22 @@
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    /* Subtle background aesthetic using layered radial gradients */
+    background-image:
+      radial-gradient(1200px 600px at 100% -10%, hsl(var(--primary) / 0.05), transparent 60%),
+      radial-gradient(800px 400px at -10% 120%, hsl(var(--primary) / 0.06), transparent 60%);
+    background-attachment: fixed;
   }
   
   /* Smooth Transitions for All Interactive Elements */
   button, a, input, select, textarea {
     @apply transition-all duration-200 ease-in-out;
+  }
+  
+  /* Polished text selection */
+  ::selection {
+    background: hsl(var(--primary) / 0.16);
+    color: hsl(var(--foreground));
   }
   
   /* Enhanced Focus Styles */

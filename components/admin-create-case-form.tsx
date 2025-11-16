@@ -78,14 +78,16 @@ export function CreateCaseForm({ onSuccess }: { onSuccess?: () => void }) {
           onSuccess();
         }
 
-        // Show success toast (could use sonner or similar)
-        alert("Offline case created successfully!");
+        const { toast } = await import("sonner");
+        toast.success("Offline case created successfully");
       } else {
-        alert(result.error || "Failed to create case");
+        const { toast } = await import("sonner");
+        toast.error(result.error || "Failed to create case");
       }
     } catch (error) {
       console.error("Error creating case:", error);
-      alert("An error occurred while creating the case");
+      const { toast } = await import("sonner");
+      toast.error("An error occurred while creating the case");
     } finally {
       setIsSubmitting(false);
     }

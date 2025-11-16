@@ -204,11 +204,13 @@ export default function TrackReportPage() {
         setNewMessage("");
         setTimeout(scrollToBottom, 100);
       } else {
-        alert(result.error || "Failed to send message");
+        const { toast } = await import("sonner");
+        toast.error(result.error || "Failed to send message");
       }
     } catch (err) {
       console.error("Send message error:", err);
-      alert("An error occurred while sending the message");
+      const { toast } = await import("sonner");
+      toast.error("An error occurred while sending the message");
     } finally {
       setSendingMessage(false);
     }

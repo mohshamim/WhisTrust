@@ -19,6 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react";
 import { NotificationsDropdown } from "@/components/notifications-dropdown";
+import { UsageBanner } from "@/components/usage-banner";
 
 export default function CreateCasePage() {
   const router = useRouter();
@@ -77,6 +78,11 @@ export default function CreateCasePage() {
       </div>
     );
   }
+
+  const monthUsed = organization.current_reports_count || 0;
+  const monthCap = organization.max_reports_per_month || 0;
+  const atMonthlyLimit = monthCap > 0 && monthUsed >= monthCap;
+  const nearMonthlyLimit = monthCap > 0 && monthUsed / monthCap >= 0.8 && !atMonthlyLimit;
 
   const categories = [
     { value: "fraud", label: "Fraud & Financial Misconduct" },
@@ -284,6 +290,7 @@ export default function CreateCasePage() {
 
           {/* Content */}
           <div className="p-6 max-w-4xl mx-auto w-full">
+            <UsageBanner organization={organization} />
             {/* Back Button */}
             <Button
               variant="ghost"
@@ -294,15 +301,32 @@ export default function CreateCasePage() {
               Back to Reports
             </Button>
 
-            {/* Info Alert */}
-            <Alert className="mb-6 bg-blue-50 border-blue-200">
-              <Shield className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-blue-800">
-                Use this form to manually record reports received through phone calls, 
-                in-person meetings, emails, or other offline channels. All required information 
-                will be collected to ensure proper case tracking.
-              </AlertDescription>
-            </Alert>
+            {/* Info / Limits Alert */}
+            {atMonthlyLimit ? (
+              <Alert className="mb-6 bg-red-50 border-red-200">
+                <AlertCircle className="h-4 w-4 text-red-600" />
+                <AlertDescription className="text-red-800">
+                  Monthly report limit reached ({monthUsed} / {monthCap}). Increase your plan or wait
+                  until next period to record new cases.
+                </AlertDescription>
+              </Alert>
+            ) : nearMonthlyLimit ? (
+              <Alert className="mb-6 bg-amber-50 border-amber-200">
+                <AlertCircle className="h-4 w-4 text-amber-600" />
+                <AlertDescription className="text-amber-800">
+                  You&apos;re nearing your monthly report limit ({monthUsed} / {monthCap}).
+                </AlertDescription>
+              </Alert>
+            ) : (
+              <Alert className="mb-6 bg-blue-50 border-blue-200">
+                <Shield className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-blue-800">
+                  Use this form to manually record reports received through phone calls, 
+                  in-person meetings, emails, or other offline channels. All required information 
+                  will be collected to ensure proper case tracking.
+                </AlertDescription>
+              </Alert>
+            )}
 
             {/* Error Messages */}
             {errors.length > 0 && (
@@ -549,7 +573,7 @@ export default function CreateCasePage() {
               <div className="flex gap-4">
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || atMonthlyLimit}
                   className="flex-1"
                   size="lg"
                 >

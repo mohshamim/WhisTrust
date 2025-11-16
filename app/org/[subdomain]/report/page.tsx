@@ -14,6 +14,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, ArrowRight, Lock, Check, Copy, AlertCircle, FileUp, Mail, User } from "lucide-react";
 import { getOrganizationBySubdomain } from "@/lib/services/client-auth";
 import type { ClientOrganization } from "@/lib/services/client-auth";
+import { toast } from "sonner";
 
 export default function AnonymousReportPage() {
   const router = useRouter();
@@ -141,8 +142,8 @@ export default function AnonymousReportPage() {
         sessionStorage.setItem("caseNumber", data.caseNumber);
       }
 
-      // Redirect to success page
-      router.push(`/org/${subdomain}/success`);
+      // Redirect to global success page
+      router.push(`/success`);
     } catch (err: any) {
       console.error("Submit error:", err);
       setError(err.message || "An unexpected error occurred. Please try again.");
@@ -155,7 +156,7 @@ export default function AnonymousReportPage() {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
-        alert("File size must be less than 10MB");
+        toast.error("File size must be less than 10MB");
         return;
       }
       const allowedTypes = [
@@ -166,7 +167,7 @@ export default function AnonymousReportPage() {
         "application/msword",
       ];
       if (!allowedTypes.includes(file.type)) {
-        alert("Unsupported file type. Please upload PDF, DOC, DOCX, JPG, or PNG files.");
+        toast.error("Unsupported file type. Please upload PDF, DOC, DOCX, JPG, or PNG files.");
         return;
       }
       setFormData({ ...formData, file });
@@ -322,6 +323,12 @@ export default function AnonymousReportPage() {
     );
   }
 
+  const features = (organization as any).features || {};
+  const monthUsed = (organization as any).current_reports_count || 0;
+  const monthCap = (organization as any).max_reports_per_month || 0;
+  const atMonthlyLimit = monthCap > 0 && monthUsed >= monthCap;
+  const nearMonthlyLimit = monthCap > 0 && monthUsed / monthCap >= 0.8 && !atMonthlyLimit;
+
   return (
     <div className="min-h-screen bg-muted/50 flex items-center justify-center p-4 md:p-6">
       <div className="w-full max-w-3xl">
@@ -339,12 +346,33 @@ export default function AnonymousReportPage() {
           </CardHeader>
 
           <CardContent>
-            <Alert className="mb-6 border-blue-200 bg-blue-50 dark:bg-blue-950/20">
-              <AlertCircle className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-sm text-blue-800 dark:text-blue-200">
-                Your report is submitted anonymously. You&apos;ll receive a tracking code to monitor progress.
-              </AlertDescription>
-            </Alert>
+            {!features.anonymous_reporting && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="text-sm">
+                  Anonymous reporting is currently disabled for this organization.
+                </AlertDescription>
+              </Alert>
+            )}
+            {atMonthlyLimit && (
+              <Alert variant="destructive" className="mb-6">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription className="text-sm">
+                  Monthly report limit reached ({monthUsed} / {monthCap}). Please try again next month.
+                </AlertDescription>
+              </Alert>
+            )}
+            {!atMonthlyLimit && features.anonymous_reporting && (
+              <Alert className="mb-6 border-blue-200 bg-blue-50 dark:bg-blue-950/20">
+                <AlertCircle className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-sm text-blue-800 dark:text-blue-200">
+                  Your report is submitted anonymously. You&apos;ll receive a tracking code to monitor progress.
+                  {nearMonthlyLimit && (
+                    <> You&apos;re nearing the monthly report limit ({monthUsed} / {monthCap}).</>
+                  )}
+                </AlertDescription>
+              </Alert>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Category */}
@@ -509,7 +537,7 @@ export default function AnonymousReportPage() {
                 <Button
                   type="submit"
                   className="w-full h-12 text-base font-semibold shadow-sm hover:shadow-md transition-shadow"
-                  disabled={submitting || !isFormValid()}
+                  disabled={submitting || !isFormValid() || !features.anonymous_reporting || atMonthlyLimit}
                 >
                   {submitting ? (
                     <>

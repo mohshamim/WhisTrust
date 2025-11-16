@@ -24,6 +24,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { AlertCircle, FileUp, Lock, Mail, User } from "lucide-react";
+import { toast } from "sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function ReportPage() {
@@ -92,12 +93,12 @@ export default function ReportPage() {
         setUploadProgress(0);
         router.push("/success");
       } else {
-        alert(result.error || "Failed to submit report. Please try again.");
+        toast.error(result.error || "Failed to submit report. Please try again.");
         setIsSubmitting(false);
       }
     } catch (error) {
       console.error("Error submitting report:", error);
-      alert("An unexpected error occurred. Please try again.");
+      toast.error("An unexpected error occurred. Please try again.");
       setIsSubmitting(false);
     }
   };
@@ -107,7 +108,7 @@ export default function ReportPage() {
     if (file) {
       // Check file size (max 10MB)
       if (file.size > 10 * 1024 * 1024) {
-        alert("File size must be less than 10MB");
+        toast.error("File size must be less than 10MB");
         return;
       }
 
@@ -120,7 +121,7 @@ export default function ReportPage() {
         "application/msword",
       ];
       if (!allowedTypes.includes(file.type)) {
-        alert("Unsupported file type. Please upload images or PDF files.");
+        toast.error("Unsupported file type. Please upload images or PDF files.");
         return;
       }
       setFormData({ ...formData, file });

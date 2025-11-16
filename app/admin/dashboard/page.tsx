@@ -135,31 +135,33 @@ export default function AdminDashboardPage() {
     <SidebarProvider>
       <AdminSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear">
-          <div className="flex items-center gap-2 px-4">
+        <header className="flex h-14 shrink-0 items-center gap-2 transition-[width,height] ease-linear border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex items-center gap-2 px-4 w-full">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
-            <div className="flex-1">
-              <div className="flex items-center gap-2">
-                <h1 className="text-lg font-semibold">Dashboard</h1>
-                {isConnected && (
-                  <Badge variant="outline" className="text-xs">
-                    <Radio className="h-3 w-3 mr-1 animate-pulse" />
-                    Live
-                  </Badge>
-                )}
+            <div className="flex-1 flex items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-lg font-semibold">Dashboard</h1>
+                  {isConnected && (
+                    <Badge variant="outline" className="text-xs">
+                      <Radio className="h-3 w-3 mr-1 animate-pulse" />
+                      Live
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Welcome back, Compliance Manager
+                </p>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Welcome back, Compliance Manager
-              </p>
             </div>
           </div>
         </header>
 
-        <div className="flex flex-1 flex-col gap-4 p-4">
+        <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 lg:p-8">
           {/* Stats Grid */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card>
+          <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <Card className="shadow-sm hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Total Reports
@@ -174,7 +176,7 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="shadow-sm hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Open Cases
@@ -189,7 +191,7 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="shadow-sm hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Resolved</CardTitle>
                 <CheckCircle2 className="h-4 w-4 text-green-500" />
@@ -200,7 +202,7 @@ export default function AdminDashboardPage() {
               </CardContent>
             </Card>
 
-            <Card>
+            <Card className="shadow-sm hover:shadow-md transition-shadow">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
                   Avg Resolution
@@ -217,8 +219,8 @@ export default function AdminDashboardPage() {
           </div>
 
           {/* Recent Cases */}
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <Card className="col-span-7">
+          <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-7">
+            <Card className="col-span-7 shadow-sm">
               <CardHeader>
                 <CardTitle>Recent Cases</CardTitle>
                 <CardDescription>Latest report submissions</CardDescription>
@@ -234,11 +236,11 @@ export default function AdminDashboardPage() {
                     <p>No cases yet</p>
                   </div>
                 ) : (
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {recentCases.map((case_) => (
                       <div
                         key={case_.id}
-                        className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
+                        className="flex items-center justify-between p-4 border rounded-xl hover:bg-muted/60 hover:shadow-sm transition-colors cursor-pointer"
                         onClick={() => (window.location.href = `/admin/cases`)}
                       >
                         <div className="space-y-1">

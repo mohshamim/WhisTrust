@@ -539,6 +539,7 @@ export default function UsersPage() {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => openEditModal(u)}
+                                  aria-label="Edit user"
                                 >
                                   <Edit className="h-4 w-4" />
                                 </Button>
@@ -547,6 +548,7 @@ export default function UsersPage() {
                                   size="sm"
                                   onClick={() => openDeleteModal(u)}
                                   disabled={u.id === user.id}
+                                  aria-label="Delete user"
                                 >
                                   <Trash2 className="h-4 w-4" />
                                 </Button>

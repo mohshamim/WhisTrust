@@ -58,7 +58,8 @@ export function NavUser({
           router.refresh();
         } else {
           console.error("Logout failed:", result.error);
-          alert("Failed to logout. Please try again.");
+          const { toast } = await import("sonner");
+          toast.error("Failed to logout. Please try again.");
         }
       } else {
         // Super admin logout
@@ -70,12 +71,14 @@ export function NavUser({
           router.refresh();
         } else {
           console.error("Logout failed:", result.error);
-          alert("Failed to logout. Please try again.");
+          const { toast } = await import("sonner");
+          toast.error("Failed to logout. Please try again.");
         }
       }
     } catch (error) {
       console.error("Error during logout:", error);
-      alert("An error occurred during logout.");
+      const { toast } = await import("sonner");
+      toast.error("An error occurred during logout.");
     }
   };
 
@@ -113,18 +116,18 @@ export function NavUser({
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-medium flex items-center gap-2">
+                <span className="truncate font-semibold text-sidebar-foreground flex items-center gap-2">
                   {user.name}
                   {role && (
                     <Badge
-                      variant={getRoleBadgeVariant(role)}
-                      className="text-xs px-1.5 py-0 h-5"
+                      variant="default"
+                      className="text-[10px] leading-none px-2 h-5 rounded-full !bg-primary !text-primary-foreground !border-transparent"
                     >
                       {getRoleLabel(role)}
                     </Badge>
                   )}
                 </span>
-                <span className="truncate text-xs">{user.email}</span>
+                <span className="truncate text-xs text-sidebar-foreground/70">{user.email}</span>
               </div>
               <ChevronsUpDown className="ml-auto size-4" />
             </SidebarMenuButton>
@@ -146,14 +149,14 @@ export function NavUser({
                     {user.name}
                     {role && (
                       <Badge
-                        variant={getRoleBadgeVariant(role)}
-                        className="text-xs px-1.5 py-0 h-5"
+                        variant="default"
+                        className="text-[10px] leading-none px-2 h-5 rounded-full !bg-primary !text-primary-foreground !border-transparent"
                       >
                         {getRoleLabel(role)}
                       </Badge>
                     )}
                   </span>
-                  <span className="truncate text-xs">{user.email}</span>
+                  <span className="truncate text-xs text-muted-foreground">{user.email}</span>
                 </div>
               </div>
             </DropdownMenuLabel>

@@ -3,9 +3,19 @@ import { createServiceClient } from "@/lib/supabase/service-client";
 import { cookies } from "next/headers";
 import { createServerClient } from "@supabase/ssr";
 import { getSupabaseConfig } from "@/lib/config/environment";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit for admin offline create: 20 requests / 5 min per IP
+    const ip = getClientIp(request);
+    const rl = checkRateLimit(`admin-create:${ip}`, 20, 5 * 60 * 1000);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { success: false, error: "Too many requests. Please slow down." },
+        { status: 429 }
+      );
+    }
     const body = await request.json();
     const {
       category,
@@ -134,6 +144,13 @@ export async function POST(request: NextRequest) {
 
     console.log("✅ Validation passed");
 
+    // Usage limits enforcement
+    const { assertCanCreateReport, bumpReportCount } = await import("@/lib/services/limits");
+    const can = await assertCanCreateReport(adminProfile.organization_id);
+    if (!can.allowed) {
+      return NextResponse.json({ success: false, error: can.message }, { status: can.status });
+    }
+
     // Insert the report
     console.log("Attempting to insert report...");
     const { data: report, error: insertError } = await supabase
@@ -165,6 +182,9 @@ export async function POST(request: NextRequest) {
     }
 
     console.log("✅ Report created:", report.id, report.case_number);
+
+    // Bump monthly count
+    await bumpReportCount(adminProfile.organization_id);
 
     // Create audit log
     console.log("Creating audit log...");

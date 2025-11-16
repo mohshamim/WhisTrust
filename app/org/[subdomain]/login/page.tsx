@@ -280,7 +280,8 @@ export default function ClientLoginPage() {
                 <Button
                   type="submit"
                   size="lg"
-                  className="w-full h-12"
+                  variant="default"
+                  className="w-full h-12 rounded-lg shadow-md hover:shadow-lg focus-visible:ring-4"
                   disabled={isLoading}
                 >
                   {isLoading ? "Signing in..." : (

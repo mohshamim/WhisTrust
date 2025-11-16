@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { getSupabaseConfig } from "@/lib/config/environment";
+import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
 
 // Server-side Supabase client with service role (bypasses RLS for anonymous submissions)
 function createServiceClient() {
@@ -16,6 +17,16 @@ function createServiceClient() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Basic rate limit: 5 submissions per IP per 10 minutes
+    const ip = getClientIp(request);
+    const rl = checkRateLimit(`submit:${ip}`, 5, 10 * 60 * 1000);
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const {
       subdomain,
@@ -56,6 +67,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Enforce usage limits / plan
+    const { assertCanCreateReport, bumpReportCount } = await import("@/lib/services/limits");
+    const can = await assertCanCreateReport(org.id);
+    if (!can.allowed) {
+      return NextResponse.json({ error: can.message }, { status: can.status });
+    }
+
     // Generate tracking code
     const trackingCode = generateTrackingCode();
 
@@ -91,6 +109,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Notifications disabled by requirement (no emails sent)
+
     // Log audit event
     await supabase.from("audit_logs").insert({
       organization_id: org.id,
@@ -104,6 +124,9 @@ export async function POST(request: NextRequest) {
         is_anonymous: !reporterEmail,
       },
     });
+
+    // Bump monthly count
+    await bumpReportCount(org.id);
 
     return NextResponse.json({
       success: true,

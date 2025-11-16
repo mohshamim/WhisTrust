@@ -122,6 +122,15 @@ export default function ClientDashboardPage() {
     return null;
   }
 
+  const usersUsed = organization.current_admin_users || 0;
+  const usersCap = organization.max_admin_users || 0;
+  const reportsUsed = organization.current_reports_count || 0;
+  const reportsCap = organization.max_reports_per_month || 0;
+  const usersNear = usersCap > 0 && usersUsed / usersCap >= 0.8 && usersUsed < usersCap;
+  const usersAt = usersCap > 0 && usersUsed >= usersCap;
+  const reportsNear = reportsCap > 0 && reportsUsed / reportsCap >= 0.8 && reportsUsed < reportsCap;
+  const reportsAt = reportsCap > 0 && reportsUsed >= reportsCap;
+
   return (
     <SidebarProvider>
       <ClientSidebar
@@ -137,7 +146,7 @@ export default function ClientDashboardPage() {
         userRole={user.role}
       />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear">
+        <header className="flex h-14 shrink-0 items-center gap-2 transition-[width,height] ease-linear border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex items-center gap-2 px-4 w-full">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
@@ -161,10 +170,25 @@ export default function ClientDashboardPage() {
           </div>
         </header>
 
-        <div className="flex flex-1 flex-col gap-4 p-4">
+        <div className="flex flex-1 flex-col gap-6 p-4 md:p-6 lg:p-8">
+        {/* Usage Banner */}
+        {(usersNear || usersAt || reportsNear || reportsAt) && (
+          <Alert className={`${(usersAt || reportsAt) ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'}`}>
+            <AlertCircle className={`h-4 w-4 ${(usersAt || reportsAt) ? 'text-red-600' : 'text-amber-600'}`} />
+            <AlertDescription className={`${(usersAt || reportsAt) ? 'text-red-800' : 'text-amber-800'}`}>
+              {usersAt && <>You have reached your user limit ({usersUsed}/{usersCap}). </>}
+              {usersNear && !usersAt && <>You&apos;re nearing your user limit ({usersUsed}/{usersCap}). </>}
+              {reportsAt && <>You have reached your monthly report limit ({reportsUsed}/{reportsCap}). </>}
+              {reportsNear && !reportsAt && <>You&apos;re nearing your monthly report limit ({reportsUsed}/{reportsCap}). </>}
+              <span className="ml-1">
+                <a href="/contact" className="underline">Contact sales</a> to increase your limits.
+              </span>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Stats Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Card className="shadow-md hover:shadow-lg transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -223,7 +247,7 @@ export default function ClientDashboardPage() {
         </div>
 
         {/* Organization Info & Welcome */}
-        <Card className="shadow-lg">
+        <Card className="shadow-sm hover:shadow-md transition-shadow">
           <CardHeader>
             <CardTitle>Welcome to Your Compliance Dashboard</CardTitle>
             <CardDescription>

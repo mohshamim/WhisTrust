@@ -3,9 +3,20 @@ import { createServiceClient } from "@/lib/supabase/service-client";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { getSupabaseConfig } from "@/lib/config/environment";
+import { checkRateLimit, getClientIp, recordAttempt } from "@/lib/rate-limit";
 
 export async function POST(request: NextRequest) {
   try {
+    // Throttle user create endpoint: 30/min per IP, lockout after 15 attempts in 10min
+    const ip = getClientIp(request);
+    const rl = checkRateLimit(`users-create:${ip}`, 30, 60 * 1000);
+    if (!rl.allowed) {
+      return NextResponse.json({ success: false, error: "Too many requests" }, { status: 429 });
+    }
+    const attempt = recordAttempt(`users-create-attempt:${ip}`, 10 * 60 * 1000, 15);
+    if (attempt.locked) {
+      return NextResponse.json({ success: false, error: "Temporarily locked due to repeated attempts" }, { status: 429 });
+    }
     const body = await request.json();
     const { email, full_name, password, role, department, organizationId } = body;
 
@@ -69,6 +80,13 @@ export async function POST(request: NextRequest) {
 
     if (!["admin", "manager", "investigator"].includes(role)) {
       return NextResponse.json({ success: false, error: "Invalid role" }, { status: 400 });
+    }
+
+    // Enforce usage limits
+    const { assertCanCreateAdmin, bumpAdminCount } = await import("@/lib/services/limits");
+    const limit = await assertCanCreateAdmin(organizationId);
+    if (!limit.allowed) {
+      return NextResponse.json({ success: false, error: limit.message }, { status: limit.status });
     }
 
     // Check if email already exists
@@ -141,6 +159,11 @@ export async function POST(request: NextRequest) {
         created_by: requestingUser.full_name || user.email,
       },
     });
+
+    // Bump counters
+    await bumpAdminCount(organizationId);
+
+    // Emails disabled by requirement - skip welcome email
 
     return NextResponse.json({
       success: true,

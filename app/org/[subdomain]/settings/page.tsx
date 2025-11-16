@@ -28,6 +28,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 import {
   ColorPicker,
   ColorPickerAlpha,
@@ -37,6 +38,7 @@ import {
   ColorPickerOutput,
   ColorPickerSelection,
 } from "@/components/ui/shadcn-io/color-picker";
+import { UsageBanner } from "@/components/usage-banner";
 
 export default function ClientSettingsPage() {
   const params = useParams();
@@ -59,6 +61,12 @@ export default function ClientSettingsPage() {
     support_phone: "",
     primary_color: "",
     theme_mode: "system",
+  });
+  const [notifPrefs, setNotifPrefs] = useState<any>({
+    new_report: true,
+    reporter_message: true,
+    assignment_change: true,
+    status_change: true,
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [emailLogoFile, setEmailLogoFile] = useState<File | null>(null);
@@ -92,6 +100,16 @@ export default function ClientSettingsPage() {
         theme_mode: org.branding?.theme_mode || "system",
       };
       setBranding(initial);
+
+      // Load notification prefs from user if available
+      if ((clientUser as any).notification_prefs) {
+        setNotifPrefs({
+          new_report: (clientUser as any).notification_prefs.new_report !== false,
+          reporter_message: (clientUser as any).notification_prefs.reporter_message !== false,
+          assignment_change: (clientUser as any).notification_prefs.assignment_change !== false,
+          status_change: (clientUser as any).notification_prefs.status_change !== false,
+        });
+      }
     } catch (error) {
       console.error("Auth check error:", error);
       router.push(`/org/${subdomain}/login`);
@@ -144,6 +162,7 @@ export default function ClientSettingsPage() {
 
         <div className="flex flex-1 flex-col gap-4 p-4">
           <div className="max-w-4xl space-y-6">
+            <UsageBanner organization={organization} />
             {/* Branding */}
             <Card>
               <CardHeader>
@@ -179,13 +198,13 @@ export default function ClientSettingsPage() {
                             });
                             const data = await res.json();
                             if (!res.ok || !data.success) {
-                              alert(data.error || "Upload failed");
+                              toast.error(data.error || "Upload failed");
                               return;
                             }
                             setBranding((b) => ({ ...b, logo_url: data.url }));
                           } catch (err) {
                             console.error(err);
-                            alert("Upload failed");
+                            toast.error("Upload failed");
                           }
                         }}
                       >
@@ -222,13 +241,13 @@ export default function ClientSettingsPage() {
                             });
                             const data = await res.json();
                             if (!res.ok || !data.success) {
-                              alert(data.error || "Upload failed");
+                              toast.error(data.error || "Upload failed");
                               return;
                             }
                             setBranding((b) => ({ ...b, logo_light_url: data.url }));
                           } catch (err) {
                             console.error(err);
-                            alert("Upload failed");
+                            toast.error("Upload failed");
                           }
                         }}
                       >
@@ -259,13 +278,13 @@ export default function ClientSettingsPage() {
                             });
                             const data = await res.json();
                             if (!res.ok || !data.success) {
-                              alert(data.error || "Upload failed");
+                              toast.error(data.error || "Upload failed");
                               return;
                             }
                             setBranding((b) => ({ ...b, logo_dark_url: data.url }));
                           } catch (err) {
                             console.error(err);
-                            alert("Upload failed");
+                            toast.error("Upload failed");
                           }
                         }}
                       >
@@ -301,13 +320,13 @@ export default function ClientSettingsPage() {
                             });
                             const data = await res.json();
                             if (!res.ok || !data.success) {
-                              alert(data.error || "Upload failed");
+                              toast.error(data.error || "Upload failed");
                               return;
                             }
                             setBranding((b) => ({ ...b, email_logo_url: data.url }));
                           } catch (err) {
                             console.error(err);
-                            alert("Upload failed");
+                            toast.error("Upload failed");
                           }
                         }}
                       >
@@ -344,7 +363,7 @@ export default function ClientSettingsPage() {
                             });
                             const data = await res.json();
                             if (!res.ok || !data.success) {
-                              alert(data.error || "Upload failed");
+                              toast.error(data.error || "Upload failed");
                               return;
                             }
                             setBranding((b) => ({ ...b, favicon_url: data.url }));
@@ -360,7 +379,7 @@ export default function ClientSettingsPage() {
                             link.href = data.url;
                           } catch (err) {
                             console.error(err);
-                            alert("Upload failed");
+                            toast.error("Upload failed");
                           }
                         }}
                       >
@@ -459,7 +478,7 @@ export default function ClientSettingsPage() {
                         });
                         const data = await res.json();
                         if (!res.ok || !data.success) {
-                          alert(data.error || "Failed to save branding");
+                          toast.error(data.error || "Failed to save branding");
                           return;
                         }
                         // reflect saved state in UI
@@ -480,10 +499,10 @@ export default function ClientSettingsPage() {
                             })();
                           link.href = branding.favicon_url;
                         }
-                        alert("Branding updated successfully");
+                        toast.success("Branding updated successfully");
                       } catch (err) {
                         console.error(err);
-                        alert("Something went wrong");
+                        toast.error("Something went wrong");
                       } finally {
                         setSaving(false);
                       }
@@ -496,6 +515,8 @@ export default function ClientSettingsPage() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Notifications UI removed by requirement */}
             {/* Organization Info */}
             <Card>
               <CardHeader>

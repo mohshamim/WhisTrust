@@ -59,6 +59,7 @@ import {
   X,
 } from "lucide-react";
 import { PriorityBadge } from "@/components/ui/priority-badge";
+import { toast } from "sonner";
 import { CaseAssignmentSelect } from "@/components/ui/case-assignment-select";
 import { LabelsInput } from "@/components/ui/labels-input";
 import { AdminNotifications } from "@/components/admin-notifications";
@@ -315,7 +316,7 @@ function CasesPageContent() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (!user) {
-        alert("You must be logged in to send messages");
+        toast.error("You must be logged in to send messages");
         setIsSending(false);
         return;
       }
@@ -384,7 +385,7 @@ function CasesPageContent() {
     if (!selectedCase) return;
 
     if (!Permissions.canAssignCases(role)) {
-      alert("You don't have permission to assign cases.");
+      toast.error("You don't have permission to assign cases.");
       return;
     }
 
@@ -493,13 +494,13 @@ function CasesPageContent() {
         );
         // Update selected case
         setSelectedCase({ ...selectedCase, status: newStatus });
-        alert("Status updated successfully!");
+        toast.success("Status updated successfully");
       } else {
-        alert(result.error || "Failed to update status");
+        toast.error(result.error || "Failed to update status");
       }
     } catch (error) {
       console.error("Error updating status:", error);
-      alert("An error occurred while updating the status");
+      toast.error("An error occurred while updating the status");
     }
   };
 
@@ -522,13 +523,13 @@ function CasesPageContent() {
         );
         // Update selected case
         setSelectedCase({ ...selectedCase, priority: newPriority });
-        alert("Priority updated successfully!");
+        toast.success("Priority updated successfully");
       } else {
-        alert(result.error || "Failed to update priority");
+        toast.error(result.error || "Failed to update priority");
       }
     } catch (error) {
       console.error("Error updating priority:", error);
-      alert("An error occurred while updating the priority");
+      toast.error("An error occurred while updating the priority");
     }
   };
 
@@ -536,25 +537,27 @@ function CasesPageContent() {
     <SidebarProvider>
       <AdminSidebar />
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear">
-          <div className="flex items-center gap-2 px-4">
+        <header className="flex h-14 shrink-0 items-center gap-2 transition-[width,height] ease-linear border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+          <div className="flex items-center gap-2 px-4 w-full">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />
-            <div>
-              <h1 className="text-lg font-semibold">All Cases</h1>
-              <p className="text-sm text-muted-foreground">
-                Manage and review reports
-              </p>
+            <div className="flex-1 flex items-center justify-between">
+              <div>
+                <h1 className="text-lg font-semibold">All Cases</h1>
+                <p className="text-sm text-muted-foreground">
+                  Manage and review reports
+                </p>
+              </div>
+              <div>
+                <AdminNotifications />
+              </div>
             </div>
-          </div>
-          <div className="ml-auto px-4">
-            <AdminNotifications />
           </div>
         </header>
 
-        <div className="flex flex-1 flex-col gap-4 p-4">
+        <div className="flex flex-1 flex-col gap-4 md:gap-6 p-4 md:p-6 lg:p-8">
           {/* Filters */}
-          <Card>
+          <Card className="shadow-sm hover:shadow-md transition-shadow">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Filter className="h-5 w-5" />
@@ -610,7 +613,7 @@ function CasesPageContent() {
           </Card>
 
           {/* Cases Table */}
-          <Card>
+          <Card className="shadow-sm">
             <CardHeader>
               <div className="flex items-center justify-between">
                 <div>
@@ -695,6 +698,7 @@ function CasesPageContent() {
                               e.stopPropagation();
                               openCaseDetails(case_);
                             }}
+                            aria-label="View case details"
                           >
                             <Eye className="h-4 w-4" />
                           </Button>

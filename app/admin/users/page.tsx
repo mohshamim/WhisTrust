@@ -25,6 +25,7 @@ import {
 import type { AdminUser } from "@/lib/types/database";
 import { useUserRole, Permissions } from "@/hooks/use-user-role";
 import { createClient } from "@/lib/supabase/client";
+import { toast } from "sonner";
 
 export default function AdminUsersPage() {
   const { role } = useUserRole();
@@ -87,7 +88,7 @@ export default function AdminUsersPage() {
     userId: string,
     newRole: AdminUser["role"]
   ) => {
-    if (!Permissions.canManageUsers(role)) return alert("Permission denied");
+    if (!Permissions.canManageUsers(role)) return toast.error("Permission denied");
 
     const user = users.find((u) => u.id === userId);
 
@@ -114,13 +115,13 @@ export default function AdminUsersPage() {
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      return alert(data.error || "Failed to update role");
+      return toast.error(data.error || "Failed to update role");
     }
     await loadUsers();
   };
 
   const handleToggleActive = async (userId: string, isActive: boolean) => {
-    if (!Permissions.canManageUsers(role)) return alert("Permission denied");
+    if (!Permissions.canManageUsers(role)) return toast.error("Permission denied");
     const res = await fetch(`/api/users/${userId}/update`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
@@ -129,7 +130,7 @@ export default function AdminUsersPage() {
     });
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      return alert(data.error || "Failed to update status");
+      return toast.error(data.error || "Failed to update status");
     }
     await loadUsers();
   };
