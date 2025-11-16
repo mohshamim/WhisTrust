@@ -46,9 +46,38 @@ export default function AdminUsersPage() {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const { listAdminUsers } = await import("@/lib/services/users");
-      const res = await listAdminUsers();
-      if (res.success && res.users) setUsers(res.users);
+      const supabase = createClient();
+
+      // Get current user and profile to determine organization
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) {
+        setUsers([]);
+        return;
+      }
+
+      const { data: me } = await supabase
+        .from("admin_profiles")
+        .select("organization_id")
+        .eq("id", user.id)
+        .maybeSingle();
+
+      if (!me?.organization_id) {
+        setUsers([]);
+        return;
+      }
+
+      // Load users for the same organization
+      const { data } = await supabase
+        .from("admin_profiles")
+        .select(
+          "id, organization_id, email, full_name, role, department, avatar_url, is_active, last_login_at, created_at, updated_at"
+        )
+        .eq("organization_id", me.organization_id)
+        .order("created_at", { ascending: false });
+
+      setUsers((data as unknown as AdminUser[]) || []);
     } finally {
       setLoading(false);
     }
@@ -59,9 +88,9 @@ export default function AdminUsersPage() {
     newRole: AdminUser["role"]
   ) => {
     if (!Permissions.canManageUsers(role)) return alert("Permission denied");
-    
+
     const user = users.find((u) => u.id === userId);
-    
+
     // 🛡️ SECURITY: Warn if changing own admin role
     if (userId === currentUserId && user?.role === 'admin' && newRole !== 'admin') {
       const confirmed = window.confirm(
@@ -77,17 +106,31 @@ export default function AdminUsersPage() {
       if (!confirmed) return;
     }
     
-    const { updateAdminRole } = await import("@/lib/services/users");
-    const res = await updateAdminRole(userId, newRole, user?.role);
-    if (!res.success) return alert(res.error || "Failed to update role");
+    const res = await fetch(`/api/users/${userId}/update`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ role: newRole }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return alert(data.error || "Failed to update role");
+    }
     await loadUsers();
   };
 
   const handleToggleActive = async (userId: string, isActive: boolean) => {
     if (!Permissions.canManageUsers(role)) return alert("Permission denied");
-    const { updateAdminActive } = await import("@/lib/services/users");
-    const res = await updateAdminActive(userId, isActive);
-    if (!res.success) return alert(res.error || "Failed to update status");
+    const res = await fetch(`/api/users/${userId}/update`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({ is_active: isActive }),
+    });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return alert(data.error || "Failed to update status");
+    }
     await loadUsers();
   };
 
