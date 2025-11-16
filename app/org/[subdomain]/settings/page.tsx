@@ -21,7 +21,13 @@ import {
   Mail,
   Phone,
   Calendar,
+  Palette,
+  Image as ImageIcon,
+  Save,
 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 export default function ClientSettingsPage() {
   const params = useParams();
@@ -31,6 +37,17 @@ export default function ClientSettingsPage() {
   const [user, setUser] = useState<any>(null);
   const [organization, setOrganization] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Branding form state
+  const [branding, setBranding] = useState({
+    logo_url: "",
+    email_logo_url: "",
+    support_email: "",
+    support_phone: "",
+    primary_color: "",
+    theme_mode: "system",
+  });
 
   useEffect(() => {
     checkAuth();
@@ -47,6 +64,17 @@ export default function ClientSettingsPage() {
 
       setUser(clientUser);
       setOrganization(org);
+
+      // Initialize branding state
+      const initial = {
+        logo_url: org.logo_url || "",
+        email_logo_url: org.branding?.email_logo_url || "",
+        support_email: org.branding?.support_email || org.primary_contact_email || "",
+        support_phone: org.branding?.support_phone || "",
+        primary_color: org.branding?.primary_color || "",
+        theme_mode: org.branding?.theme_mode || "system",
+      };
+      setBranding(initial);
     } catch (error) {
       console.error("Auth check error:", error);
       router.push(`/org/${subdomain}/login`);
@@ -99,6 +127,117 @@ export default function ClientSettingsPage() {
 
         <div className="flex flex-1 flex-col gap-4 p-4">
           <div className="max-w-4xl space-y-6">
+            {/* Branding */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Palette className="h-5 w-5" />
+                  Branding
+                </CardTitle>
+                <CardDescription>Customize your organization’s look and contact details</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium flex items-center gap-2">
+                      <ImageIcon className="h-4 w-4 text-muted-foreground" /> Logo URL
+                    </div>
+                    <Input
+                      value={branding.logo_url}
+                      onChange={(e) => setBranding((b) => ({ ...b, logo_url: e.target.value }))}
+                      placeholder="https://.../logo.png"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Email Logo URL</div>
+                    <Input
+                      value={branding.email_logo_url}
+                      onChange={(e) => setBranding((b) => ({ ...b, email_logo_url: e.target.value }))}
+                      placeholder="https://.../email-logo.png"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Support Email</div>
+                    <Input
+                      type="email"
+                      value={branding.support_email}
+                      onChange={(e) => setBranding((b) => ({ ...b, support_email: e.target.value }))}
+                      placeholder="support@yourorg.com"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Support Phone</div>
+                    <Input
+                      value={branding.support_phone}
+                      onChange={(e) => setBranding((b) => ({ ...b, support_phone: e.target.value }))}
+                      placeholder="+1 555-123-4567"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Primary Color (hex)</div>
+                    <Input
+                      value={branding.primary_color}
+                      onChange={(e) => setBranding((b) => ({ ...b, primary_color: e.target.value }))}
+                      placeholder="#0EA5E9"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-sm font-medium">Theme</div>
+                    <Select
+                      value={branding.theme_mode}
+                      onValueChange={(v) =>
+                        setBranding((b) => ({ ...b, theme_mode: v as "light" | "dark" | "system" }))
+                      }
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Theme mode" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="system">System</SelectItem>
+                        <SelectItem value="light">Light</SelectItem>
+                        <SelectItem value="dark">Dark</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="flex justify-end">
+                  <Button
+                    onClick={async () => {
+                      try {
+                        setSaving(true);
+                        const res = await fetch("/api/org/branding", {
+                          method: "PUT",
+                          headers: { "Content-Type": "application/json" },
+                          credentials: "include",
+                          body: JSON.stringify(branding),
+                        });
+                        const data = await res.json();
+                        if (!res.ok || !data.success) {
+                          alert(data.error || "Failed to save branding");
+                          return;
+                        }
+                        // reflect saved state in UI
+                        setOrganization((o: any) => ({
+                          ...o,
+                          logo_url: data.organization.logo_url,
+                          branding: data.organization.branding,
+                        }));
+                        alert("Branding updated successfully");
+                      } catch (err) {
+                        console.error(err);
+                        alert("Something went wrong");
+                      } finally {
+                        setSaving(false);
+                      }
+                    }}
+                    disabled={saving}
+                  >
+                    <Save className={`h-4 w-4 mr-2 ${saving ? "animate-pulse" : ""}`} />
+                    {saving ? "Saving..." : "Save Changes"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
             {/* Organization Info */}
             <Card>
               <CardHeader>
