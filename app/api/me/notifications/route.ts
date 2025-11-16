@@ -10,9 +10,18 @@ export async function PUT(request: NextRequest) {
     const config = getSupabaseConfig();
     const supabaseAuth = createServerClient(config.url, config.anonKey, {
       cookies: {
-        get: (n: string) => cookieStore.get(n)?.value,
-        set: (n, v, o) => cookieStore.set({ name: n, value: v, ...o }),
-        remove: (n, o) => cookieStore.set({ name: n, value: "", ...o }),
+        getAll() {
+          return cookieStore.getAll();
+        },
+        setAll(cookiesToSet) {
+          try {
+            cookiesToSet.forEach(({ name, value, options }) => {
+              cookieStore.set(name, value, options);
+            });
+          } catch (_) {
+            // ignore
+          }
+        },
       },
     });
     const { data: { user } } = await supabaseAuth.auth.getUser();
