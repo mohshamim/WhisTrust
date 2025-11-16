@@ -7,6 +7,7 @@ type Bucket = {
 };
 
 const buckets = new Map<string, Bucket>();
+const attemptBuckets = new Map<string, Bucket>();
 
 export function checkRateLimit(
   key: string,
@@ -42,6 +43,36 @@ export function getClientIp(req: Request | { headers: Headers }): string {
   }
   const ip = headers.get?.("x-real-ip") || (headers as any)["x-real-ip"];
   return typeof ip === "string" && ip.length > 0 ? ip : "unknown";
+}
+
+/**
+ * Record an attempt within a fixed window and report lockout state.
+ * Use this when you want to lock a client out after N attempts in M ms.
+ *
+ * Example:
+ *  const attempt = recordAttempt(`users-create:${ip}`, 10 * 60_000, 15)
+ *  if (attempt.locked) { /* deny */ }
+ */
+export function recordAttempt(
+  key: string,
+  windowMs: number,
+  maxAttempts: number
+): { locked: boolean; remaining: number; resetAt: number } {
+  const now = Date.now();
+  let bucket = attemptBuckets.get(key);
+
+  // Initialize or reset window
+  if (!bucket || now - bucket.updatedAt > windowMs) {
+    bucket = { tokens: 0, updatedAt: now };
+    attemptBuckets.set(key, bucket);
+  }
+
+  bucket.tokens += 1;
+  const locked = bucket.tokens >= maxAttempts;
+  const remaining = Math.max(0, maxAttempts - bucket.tokens);
+  const resetAt = bucket.updatedAt + windowMs;
+
+  return { locked, remaining, resetAt };
 }
 
 
