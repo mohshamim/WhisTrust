@@ -5,7 +5,15 @@ import { cookies } from "next/headers";
 import { getSupabaseConfig } from "@/lib/config/environment";
 
 const BUCKET = "branding-assets";
-const ALLOWED_MIME_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/svg+xml"];
+const ALLOWED_MIME_TYPES = [
+  "image/png",
+  "image/jpeg",
+  "image/jpg",
+  "image/svg+xml",
+  "image/webp",
+  "image/x-icon",
+  "image/vnd.microsoft.icon",
+];
 const MAX_FILE_SIZE = 2 * 1024 * 1024; // 2MB
 
 export async function POST(request: NextRequest) {
