@@ -1,740 +1,1608 @@
 # WhisTrust Comprehensive Testing Guide
 
-**Purpose:** Step-by-step guide to test ALL functionality in WhisTrust  
-**Last Updated:** December 2024
+**Version:** 1.0  
+**Date:** January 2025  
+**Purpose:** Complete end-to-end testing guide for all flows, features, and user roles
 
 ---
 
-## 🎯 Testing Overview
+## 📋 Table of Contents
 
-This guide covers testing of:
-
-- ✅ Database schema and data
-- ✅ Report submission
-- ✅ Case tracking and messaging
-- ✅ Admin dashboard
-- ✅ Case management
-- ✅ Analytics
-- ✅ Audit logs
-- ✅ Real-time features
-- ✅ File uploads
-- ✅ Labels and priorities
-- ✅ Notifications
+1. [Prerequisites](#prerequisites)
+2. [Environment URLs](#environment-urls)
+3. [User Roles & Credentials](#user-roles--credentials)
+4. [Sample Test Content](#sample-test-content)
+5. [Testing Flows by Role](#testing-flows-by-role)
+6. [Feature-by-Feature Testing](#feature-by-feature-testing)
+7. [End-to-End Scenarios](#end-to-end-scenarios)
+8. [Troubleshooting](#troubleshooting)
 
 ---
 
-## 📋 Pre-Testing Checklist
+## Prerequisites
 
-Before starting:
+### Local Development Setup
 
-- [ ] All 3 SQL migration files run in Supabase
-- [ ] Sample data inserted (`supabase/sample-data.sql`)
-- [ ] Admin user created in Supabase Auth
-- [ ] Admin profile record inserted
-- [ ] Environment variables configured
-- [ ] App running locally (`npm run dev`)
+1. **Node.js 18+** installed
+2. **Development server running:**
+   ```bash
+   npm run dev
+   ```
+3. **Supabase configured** in `.env.local`:
+   - Demo Supabase credentials
+   - Production Supabase credentials (for multi-tenant)
+
+### Production Testing
+
+- Access to production URLs (see below)
+- Valid credentials for each role
+- Browser with developer tools enabled
 
 ---
 
-## Part 1: Database Verification
+## Environment URLs
 
-### Test 1.1: Check All Tables Exist
+### Local Development
 
-**Run in Supabase SQL Editor:**
+| Portal | URL |
+|--------|-----|
+| Homepage | `http://localhost:3000` |
+| Demo Report | `http://localhost:3000/report` |
+| Demo Track | `http://localhost:3000/track` |
+| Demo Admin Login | `http://localhost:3000/admin/login` |
+| Demo Admin Dashboard | `http://localhost:3000/admin/dashboard` |
+| Demo Admin Cases | `http://localhost:3000/admin/cases` |
+| **Multi-Tenant AISAR** | |
+| AISAR Report | `http://localhost:3000/org/aisar/report` |
+| AISAR Track | `http://localhost:3000/org/aisar/track` |
+| AISAR Admin Login | `http://localhost:3000/org/aisar/login` |
+| AISAR Admin Dashboard | `http://localhost:3000/org/aisar/dashboard` |
+| AISAR Admin Cases | `http://localhost:3000/org/aisar/reports` |
+| **Multi-Tenant CodeSquare** | |
+| CodeSquare Report | `http://localhost:3000/org/codesquare/report` |
+| CodeSquare Track | `http://localhost:3000/org/codesquare/track` |
+| CodeSquare Admin Login | `http://localhost:3000/org/codesquare/login` |
+| **Super Admin** | |
+| Super Admin Login | `http://localhost:3000/superadmin/login` |
+| Super Admin Dashboard | `http://localhost:3000/superadmin/dashboard` |
+| Super Admin Organizations | `http://localhost:3000/superadmin/organizations` |
+| **Test & Diagnostics** | |
+| Connection Test | `http://localhost:3000/test/connection` |
 
-```sql
-SELECT table_name, table_type
-FROM information_schema.tables
-WHERE table_schema = 'public'
-AND table_type = 'BASE TABLE'
-ORDER BY table_name;
+### Production (Vercel)
+
+| Portal | URL |
+|--------|-----|
+| Homepage | `https://www.whistrust.com` |
+| Demo Report | `https://www.whistrust.com/report` |
+| Demo Track | `https://www.whistrust.com/track` |
+| Demo Admin Login | `https://www.whistrust.com/admin/login` |
+| **Multi-Tenant AISAR** | |
+| AISAR Report | `https://www.whistrust.com/org/aisar/report` |
+| AISAR Track | `https://www.whistrust.com/org/aisar/track` |
+| AISAR Admin Login | `https://www.whistrust.com/org/aisar/login` |
+| **Multi-Tenant CodeSquare** | |
+| CodeSquare Report | `https://www.whistrust.com/org/codesquare/report` |
+| CodeSquare Track | `https://www.whistrust.com/org/codesquare/track` |
+| **Super Admin** | |
+| Super Admin Login | `https://www.whistrust.com/superadmin/login` |
+| Super Admin Dashboard | `https://www.whistrust.com/superadmin/dashboard` |
+| Super Admin Organizations | `https://www.whistrust.com/superadmin/organizations` |
+| **Test & Diagnostics** | |
+| Connection Test | `https://www.whistrust.com/test/connection` |
+
+---
+
+## User Roles & Credentials
+
+### 1. Super Admin (Platform-wide)
+
+**Purpose:** Manage all organizations and platform settings
+
+| Field | Value |
+|-------|-------|
+| **Portal** | Super Admin |
+| **URL** | `/superadmin/login` |
+| **Email** | `sup-adm@whistrust.com` |
+| **Password** | `sup-pass-adm!1@3#5` |
+| **Role** | Super Admin |
+| **Organization** | Platform (no tenant) |
+| **Permissions** | Full platform access, create/manage organizations |
+
+---
+
+### 2. Demo Admin (Single-Tenant Demo)
+
+**Purpose:** Test single-tenant demo features
+
+| Field | Value |
+|-------|-------|
+| **Portal** | Demo Admin |
+| **URL** | `/admin/login` |
+| **Email** | `ahmed.admin@whistrust.com` |
+| **Password** | `Admin@WhistTrust2025` |
+| **Role** | Admin |
+| **Organization** | Demo |
+| **Permissions** | Full access to demo portal |
+
+**Additional Demo Users:**
+
+| Role | Email | Password |
+|------|-------|----------|
+| Manager (HR) | `hassan.hr@whistrust.com` | `Manager@WhistTrust2025` |
+| Manager (Finance) | `omar.finance@whistrust.com` | `Manager@WhistTrust2025` |
+| Investigator | `yusuf.investigator@whistrust.com` | `Investigator@WhistTrust2025` |
+
+---
+
+### 3. AISAR Admin (Multi-Tenant)
+
+**Purpose:** Test multi-tenant organization features
+
+| Field | Value |
+|-------|-------|
+| **Portal** | AISAR Tenant Admin |
+| **URL** | `/org/aisar/login` |
+| **Email** | `admin@aisar.com` |
+| **Password** | `Aisar@123!` |
+| **Role** | Admin |
+| **Organization** | `aisar` |
+| **Subdomain** | `aisar` |
+| **Permissions** | Full access to AISAR portal |
+
+**Note:** Additional AISAR users (Manager, HR) can be created through the admin portal.
+
+---
+
+### 4. CodeSquare Admin (Multi-Tenant)
+
+**Purpose:** Test multi-tenant organization features
+
+| Field | Value |
+|-------|-------|
+| **Portal** | CodeSquare Tenant Admin |
+| **URL** | `/org/codesquare/login` |
+| **Email** | `admin@codesquare.com` |
+| **Password** | Set during user creation |
+| **Role** | Admin |
+| **Organization** | `codesquare` |
+| **Subdomain** | `codesquare` |
+| **Permissions** | Full access to CodeSquare portal |
+
+---
+
+### 5. Anonymous Reporter (No Login Required)
+
+**Purpose:** Submit reports anonymously
+
+| Field | Value |
+|-------|-------|
+| **Portal** | Public Report Form |
+| **URL** | `/report` (demo) or `/org/{subdomain}/report` (tenant) |
+| **Authentication** | None (anonymous) |
+| **Access Method** | Tracking code only |
+| **Permissions** | Submit reports, track cases, send messages |
+
+---
+
+## Sample Test Content
+
+### Report Categories
+
+1. **Fraud & Financial Misconduct**
+2. **Harassment & Discrimination**
+3. **Safety Violations**
+4. **Ethics Violations**
+5. **Data Privacy Breaches**
+6. **Retaliation**
+7. **Other**
+
+### Sample Report Descriptions
+
+#### Sample 1: Fraud Report (50+ characters)
+```
+I have discovered evidence of financial fraud in the accounting department. 
+Multiple invoices have been falsified over the past 6 months, totaling 
+approximately $250,000. The invoices appear to be for services that were 
+never rendered. I have attached supporting documents showing the discrepancies.
 ```
 
-**Expected:** 7 tables listed
-
-- admin_profiles
-- audit_logs
-- messages
-- notifications
-- report_attachments
-- report_labels
-- reports
-
-### Test 1.2: Check Sample Data
-
-```sql
--- Count reports
-SELECT COUNT(*) as total_reports FROM reports;
-
--- Check priorities
-SELECT priority, COUNT(*) as count
-FROM reports
-WHERE priority IS NOT NULL
-GROUP BY priority;
-
--- Check sources
-SELECT source, COUNT(*) as count
-FROM reports
-GROUP BY source;
+#### Sample 2: Harassment Report (50+ characters)
+```
+I have been experiencing ongoing harassment from my supervisor for the past 
+3 months. The behavior includes inappropriate comments, unwanted physical 
+contact, and threats of retaliation if I report the incidents. I have 
+witnesses who can corroborate these events.
 ```
 
-**Expected:**
-
-- At least 5 reports
-- Mix of high/medium/low priorities
-- Mix of online/offline/phone/email sources
-
-### Test 1.3: Verify Labels
-
-```sql
-SELECT
-  r.tracking_code,
-  rl.label,
-  rl.color
-FROM report_labels rl
-JOIN reports r ON rl.report_id = r.id;
+#### Sample 3: Safety Violation (50+ characters)
+```
+There are serious safety violations in the manufacturing facility. 
+Emergency exits are blocked, fire extinguishers are expired, and workers 
+are not provided with required protective equipment. This poses immediate 
+danger to all employees.
 ```
 
-**Expected:** At least 8 labels across different reports
-
----
-
-## Part 2: Anonymous Report Submission
-
-### Test 2.1: Submit New Report
-
-**Steps:**
-
-1. Navigate to `http://localhost:3000/report`
-2. Fill in the form:
-   - Category: "Test Category"
-   - Description: "This is a test report for functionality verification"
-3. Click "Submit Report"
-4. Copy the tracking code
-
-**Expected:** Success message, tracking code displayed
-
-### Test 2.2: Verify Report in Database
-
-**Run in Supabase:**
-
-```sql
-SELECT tracking_code, category, status, priority, source, created_at
-FROM reports
-ORDER BY created_at DESC
-LIMIT 1;
+#### Sample 4: Ethics Violation (50+ characters)
+```
+A senior executive has been accepting gifts from vendors in exchange for 
+contracts. This violates our company's ethics policy and creates a conflict 
+of interest. I have email evidence of these transactions.
 ```
 
-**Expected:** New report with status 'pending', source 'online'
-
----
-
-## Part 3: Case Tracking
-
-### Test 3.1: Track Report Status
-
-**Steps:**
-
-1. Navigate to `http://localhost:3000/track`
-2. Enter tracking code from Test 2.1
-3. Click "Track Report"
-
-**Expected:**
-
-- Case details displayed
-- Current status shown
-- No messages yet (or sample messages from database)
-
-### Test 3.2: Send Message as Reporter
-
-**Steps:**
-
-1. On the track page, type a message in the input
-2. Click "Send Message"
-3. Wait for message to appear
-
-**Expected:**
-
-- Message appears immediately in the thread
-- Message sender labeled as "You"
-- "Live" indicator visible
-- Message scrolls into view
-
-### Test 3.3: View Message in Admin
-
-**Steps:**
-
-1. Go to Admin Dashboard → Cases
-2. Find the report with the tracking code from Test 2.1
-3. Click on the case to open drawer
-4. Scroll to Messages section
-
-**Expected:**
-
-- Message from reporter visible
-- Message content visible
-- Timestamp displayed
-- Sender type shows "Reporter"
-
-### Test 3.4: Reply as Admin
-
-**Steps:**
-
-1. In case details drawer
-2. Type admin response in message input
-3. Click "Send Message"
-
-**Expected:**
-
-- Message appears instantly
-- Labeled as "Admin"
-- Reporter should see it in real-time on track page (test manually)
-
----
-
-## Part 4: Admin Dashboard
-
-### Test 4.1: View Dashboard Statistics
-
-**Steps:**
-
-1. Navigate to `http://localhost:3000/admin/dashboard`
-2. Check statistics cards
-
-**Expected:**
-
-- Total Reports card shows count
-- Open Cases card shows pending count
-- Resolved Cases card shows resolved count
-- Avg Resolution Time card shows average
-
-### Test 4.2: Check Live Updates
-
-**Steps:**
-
-1. Open dashboard in one tab
-2. Submit new report from another tab/browser
-3. Watch dashboard
-
-**Expected:**
-
-- "Live" badge visible
-- Statistics cards update automatically
-- Recent cases list updates
-- New report appears in Recent Cases
-
-### Test 4.3: Click Recent Case
-
-**Steps:**
-
-1. Click on any recent case card
-2. Should navigate to cases page
-
-**Expected:** Navigate to `/admin/cases` with case details
-
----
-
-## Part 5: Case Management
-
-### Test 5.1: View All Cases
-
-**Steps:**
-
-1. Navigate to `/admin/cases`
-2. Check the table
-
-**Expected:**
-
-- All reports listed in table
-- Columns: ID, Category, Status, Priority, Created, Actions
-- Priority badges displayed (if priority set)
-
-### Test 5.2: Search Cases
-
-**Steps:**
-
-1. In search box, type a tracking code
-2. Press Enter
-
-**Expected:** Only matching cases displayed
-
-### Test 5.3: Filter by Status
-
-**Steps:**
-
-1. Click "All Statuses" dropdown
-2. Select "Open Cases"
-
-**Expected:** Only pending cases displayed
-
-### Test 5.4: View Case Details
-
-**Steps:**
-
-1. Click eye icon on any case
-2. Case details drawer opens
-
-**Expected:**
-
-- Drawer slides in from right
-- Case information card visible
-- Messages section visible
-- Assignment section (if Phase 3 data exists)
-- Priority badge displayed
-- Labels section (if labels exist)
-
-### Test 5.5: Update Case Status
-
-**Steps:**
-
-1. In case details drawer
-2. Find status dropdown
-3. Change status to "In Progress"
-4. Click "Update Status" button
-
-**Expected:**
-
-- Status updates immediately
-- Success toast notification
-- Drawer remains open
-- Status badge changes in case list
-
-### Test 5.6: Assign Case (Phase 3)
-
-**Steps:**
-
-1. In case details drawer
-2. Find "Assign To" section
-3. Open assignment dropdown
-4. Select an admin user
-5. Wait for update
-
-**Expected:**
-
-- Case assigned to admin
-- Assignment saved
-- Audit log entry created (check later)
-- Assigned user name displayed
-
-### Test 5.7: Add Labels (Phase 3)
-
-**Steps:**
-
-1. In case details drawer
-2. Find "Labels" section
-3. Click "Add Label"
-4. Enter label name: "Test Label"
-5. Select a color
-6. Click "Add Label"
-
-**Expected:**
-
-- Label added immediately
-- Label badge displayed with color
-- Persists after drawer closes
-
-### Test 5.8: Remove Label
-
-**Steps:**
-
-1. In labels section
-2. Click X on any label
-
-**Expected:**
-
-- Label removed immediately
-- Badge disappears
-
----
-
-## Part 6: Analytics Dashboard
-
-### Test 6.1: View Analytics
-
-**Steps:**
-
-1. Navigate to `/admin/analytics`
-2. Check statistics cards
-
-**Expected:**
-
-- Report statistics displayed
-- Category breakdown chart
-- Activity timeline
-
-### Test 6.2: Check Statistics
-
-**Verify:**
-
-- Total reports count
-- Pending vs resolved breakdown
-- Category distribution
-
-**Expected:** Real data from database
-
-### Test 6.3: Export CSV
-
-**Steps:**
-
-1. Click "Export CSV" button
-2. File should download
-
-**Expected:** CSV file downloads with analytics data
-
-### Test 6.4: Refresh Data
-
-**Steps:**
-
-1. Submit a new report
-2. Go back to analytics
-3. Click "Refresh" button
-
-**Expected:** Statistics update with new data
-
----
-
-## Part 7: Audit Logs
-
-### Test 7.1: View Audit Logs
-
-**Steps:**
-
-1. Navigate to `/admin/audit-logs`
-2. Check log entries
-
-**Expected:**
-
-- List of audit log entries
-- Columns: Action, Resource, User, Date
-- Actions like: report_created, status_changed, message_sent
-
-### Test 7.2: Filter Audit Logs
-
-**Steps:**
-
-1. Use date filter
-2. Select today's date
-3. Check results
-
-**Expected:** Only today's logs displayed
-
-### Test 7.3: Check Auto-Generated Logs
-
-**Verify in Supabase:**
-
-```sql
-SELECT action, resource_type, details
-FROM audit_logs
-ORDER BY created_at DESC
-LIMIT 10;
+### Sample File Attachments
+
+- **Document types:** PDF, DOC, DOCX, TXT, JPG, PNG
+- **Size limit:** 10 MB per file
+- **Sample files to use:**
+  - `test-document.pdf` (any PDF file)
+  - `evidence-screenshot.png` (any image file)
+  - `email-export.txt` (text file with email content)
+
+### Sample Messages
+
+#### From Reporter:
+```
+Thank you for acknowledging my report. I have additional information 
+that may be relevant. Can I provide more details?
 ```
 
-**Expected:**
-
-- Automatic logs for status changes
-- Automatic logs for assignments (if Phase 3)
-- Details JSON with metadata
-
----
-
-## Part 8: Real-Time Features
-
-### Test 8.1: Real-Time Messages
-
-**Steps:**
-
-1. Open track page in two browser windows
-2. Send message from one window
-3. Check other window
-
-**Expected:** Message appears in both windows simultaneously
-
-### Test 8.2: Real-Time Dashboard
-
-**Steps:**
-
-1. Open dashboard
-2. Submit new report (from another window)
-3. Watch dashboard
-
-**Expected:**
-
-- Stats update automatically
-- Recent cases update
-- "Live" badge visible
-
-### Test 8.3: Live Indicator
-
-**Verify:**
-
-- "Live" badge visible when connected
-- Green color indicates active connection
+#### From Admin:
+```
+Thank you for your report. We take these matters seriously and have 
+assigned an investigator to review your case. We will keep you updated 
+through this secure messaging system.
+```
 
 ---
 
-## Part 9: Phase 3 Features
+## Testing Flows by Role
 
-### Test 9.1: Priority Management
+### Flow 1: Anonymous Reporter (End-to-End)
+
+#### 1.1 Submit Report (Demo)
 
 **Steps:**
+1. Navigate to: `http://localhost:3000/report` (or production URL)
+2. **Select Category:** Choose "Fraud & Financial Misconduct"
+3. **Enter Description:** Use Sample Report 1 (Fraud) - ensure 50+ characters
+4. **Optional Fields:**
+   - Name: `John Doe` (optional)
+   - Email: `john.doe@example.com` (optional)
+5. **File Attachment (Optional):**
+   - Click "Choose File" or drag & drop
+   - Select a test PDF or image file
+   - Verify upload progress indicator appears
+6. **Submit:**
+   - Click "Submit Report" button
+   - Verify button is enabled (green) when description has 50+ characters
+   - Verify button is disabled (gray) if description is too short
 
-1. Go to cases page
-2. Open any case
-3. Check priority badge
+**Expected Results:**
+- ✅ Form validation works (category required, 50+ characters)
+- ✅ Character counter shows "X/50" and turns green at 50+
+- ✅ File upload shows progress
+- ✅ Success page displays with tracking code
+- ✅ Tracking code is copyable
+- ✅ Redirect to success page after submission
 
-**Expected:**
-
-- Priority badge displayed
-- Correct color (green/yellow/red)
-- Correct icon (trending up/alert/alert triangle)
-
-### Test 9.2: Source Badge
-
-**Verify:**
-
-- Cases show source badges
-- Correct icon per source
-- Color-coded badges
-
-### Test 9.3: Case Assignment
-
-**Verify:**
-
-- Assignment dropdown shows admin list
-- Can assign/unassign cases
-- Assignment persists
-
-### Test 9.4: Custom Labels
-
-**Verify:**
-
-- Can add multiple labels per case
-- Color picker works
-- Labels persist
-- Can remove labels
+**Success Page Verification:**
+- ✅ Tracking code displayed prominently
+- ✅ "Copy Code" button works
+- ✅ "Track Your Case" link navigates to track page
+- ✅ Instructions displayed clearly
 
 ---
 
-## Part 10: File Upload (if implemented)
-
-### Test 10.1: Upload File
+#### 1.2 Track Case (Demo)
 
 **Steps:**
+1. Copy tracking code from success page (or use a known tracking code)
+2. Navigate to: `http://localhost:3000/track`
+3. **Enter Tracking Code:**
+   - Paste or type tracking code
+   - Click "Track Case" or press Enter
+4. **Verify Case Details:**
+   - Case status displayed (e.g., "Pending", "Under Review")
+   - Category shown
+   - Description displayed
+   - Submitted date/time shown
+   - Case number displayed (if assigned)
+5. **Test Messaging:**
+   - Scroll to messaging section
+   - Type a message: "Thank you for acknowledging my report..."
+   - Click "Send Message"
+   - Verify message appears in thread
+   - Verify real-time updates (if admin responds)
 
-1. Submit a report
-2. Attach a file (if upload UI exists)
-3. Check upload progress
-
-**Expected:**
-
-- File uploads successfully
-- Progress bar shows
-- File listed after upload
-
-### Test 10.2: View Attachments
-
-**Steps:**
-
-1. Open case details
-2. Check attachments section
-
-**Expected:**
-
-- Attached files listed
-- Can click to download/view
+**Expected Results:**
+- ✅ Tracking code input accepts valid codes
+- ✅ Invalid tracking code shows error message
+- ✅ Case details load correctly
+- ✅ Status badge displays with correct color
+- ✅ Message thread displays chronologically
+- ✅ New messages appear in real-time
+- ✅ Connection status indicator shows online/offline
 
 ---
 
-## Part 11: Notifications (if implemented)
-
-### Test 11.1: Notification Bell
+#### 1.3 Submit Report (Multi-Tenant - AISAR)
 
 **Steps:**
+1. Navigate to: `http://localhost:3000/org/aisar/report`
+2. Follow same steps as 1.1, but verify:
+   - URL shows `/org/aisar/report`
+   - Organization branding (if configured)
+   - Report is associated with AISAR organization
+3. Submit report and save tracking code
 
-1. Check admin header
-2. Look for notification bell icon
-3. Click to open dropdown
-
-**Expected:**
-
-- Bell icon with unread count badge
-- Dropdown shows notifications
-- Can mark as read
-
-### Test 11.2: Real-Time Notifications
-
-**Steps:**
-
-1. Open admin dashboard
-2. Submit new report
-3. Check notification bell
-
-**Expected:**
-
-- New notification appears
-- Badge count increases
-- Toast notification (if configured)
+**Expected Results:**
+- ✅ Report submitted to AISAR organization
+- ✅ Tracking code works on `/org/aisar/track`
+- ✅ Admin can see report in AISAR admin portal
+- ✅ Data isolation: report not visible in other organizations
 
 ---
 
-## Part 12: Error Handling
+### Flow 2: Demo Admin
 
-### Test 12.1: Invalid Tracking Code
-
-**Steps:**
-
-1. Go to track page
-2. Enter invalid code like "INVALID123"
-3. Click Track
-
-**Expected:** Error message displayed
-
-### Test 12.2: Network Error (Simulate)
+#### 2.1 Login
 
 **Steps:**
+1. Navigate to: `http://localhost:3000/admin/login`
+2. **Enter Credentials:**
+   - Email: `ahmed.admin@whistrust.com`
+   - Password: `Admin@WhistTrust2025`
+3. Click "Sign In"
+4. Verify redirect to dashboard
 
-1. Disconnect internet
-2. Try to submit report
-3. Reconnect
-
-**Expected:** Error handled gracefully, can retry
+**Expected Results:**
+- ✅ Login form validates email format
+- ✅ Password field is secure (masked)
+- ✅ Invalid credentials show error message
+- ✅ Successful login redirects to dashboard
+- ✅ Session persists across page refreshes
 
 ---
 
-## Part 13: Responsive Design
-
-### Test 13.1: Mobile View
+#### 2.2 Dashboard Overview
 
 **Steps:**
+1. After login, verify dashboard loads
+2. **Check Statistics:**
+   - Total reports count
+   - Pending reports count
+   - In-progress reports count
+   - Resolved reports count
+3. **Check Recent Reports:**
+   - List of recent reports
+   - Status badges
+   - Priority indicators
+4. **Check Navigation:**
+   - Sidebar menu items
+   - User profile dropdown
+   - Logout button
 
-1. Open browser DevTools
-2. Switch to mobile view
-3. Test all pages
-
-**Expected:**
-
-- Layout adapts to mobile
-- Touch-friendly buttons
-- Scrolling works smoothly
-
-### Test 13.2: Tablet View
-
-**Steps:**
-
-1. Switch to tablet viewport (768px-1024px)
-2. Test navigation
-
-**Expected:**
-
-- Sidebar collapses appropriately
-- Content remains readable
+**Expected Results:**
+- ✅ Statistics cards display correct numbers
+- ✅ Recent reports list loads
+- ✅ Status badges show correct colors
+- ✅ Navigation menu works
+- ✅ User profile shows correct email/name
 
 ---
 
-## Part 14: Security & Auth
-
-### Test 14.1: Protected Routes
+#### 2.3 View Cases
 
 **Steps:**
+1. Navigate to: `http://localhost:3000/admin/cases`
+2. **Verify Case List:**
+   - All reports displayed in table/list
+   - Sorting by date (newest first)
+   - Status filters (if available)
+   - Search functionality (if available)
+3. **Open Case Details:**
+   - Click on a case to open drawer/sidebar
+   - Verify all case information displayed:
+     - Tracking code
+     - Case number
+     - Category
+     - Description
+     - Status
+     - Priority
+     - Submitted date
+     - Attachments (if any)
+     - Message thread
 
-1. Log out (if logged in)
-2. Try to access `/admin/dashboard` directly
+**Expected Results:**
+- ✅ Case list loads all reports
+- ✅ Case details drawer opens correctly
+- ✅ All case information visible
+- ✅ Attachments downloadable
+- ✅ Message thread displays correctly
 
-**Expected:** Redirected to `/admin/login`
+---
 
-### Test 14.2: Admin Only Access
+#### 2.4 Update Case Status
 
 **Steps:**
+1. Open a case from the cases list
+2. **Change Status:**
+   - Find status dropdown/selector
+   - Change from "Pending" to "Under Review"
+   - Click "Update Status" or "Save"
+3. **Verify Update:**
+   - Status badge updates in case details
+   - Status updates in case list
+   - Audit log entry created (if visible)
 
-1. Try to access `/admin/cases` without login
+**Expected Results:**
+- ✅ Status dropdown shows all available statuses
+- ✅ Status update saves successfully
+- ✅ UI updates immediately
+- ✅ Toast notification confirms update
+- ✅ Status persists after page refresh
 
-**Expected:** Redirected to login page
+**Available Statuses:**
+- Pending
+- Under Review
+- In Progress
+- Resolved
+- Closed
 
-### Test 14.3: Session Persistence
+---
+
+#### 2.5 Update Case Priority
 
 **Steps:**
+1. Open a case from the cases list
+2. **Change Priority:**
+   - Find priority dropdown/selector
+   - Change priority (e.g., Low → High)
+   - Click "Update" or "Save"
+3. **Verify Update:**
+   - Priority badge updates
+   - Priority updates in case list
 
-1. Log in
-2. Close tab
-3. Reopen and go to `/admin/dashboard`
-
-**Expected:** Still logged in, no redirect to login
-
----
-
-## 📊 Testing Results Template
-
-### Date: ****\_\_\_****
-
-| Test Category         | Passed | Failed | Notes |
-| --------------------- | ------ | ------ | ----- |
-| Database Verification |        |        |       |
-| Report Submission     |        |        |       |
-| Case Tracking         |        |        |       |
-| Admin Dashboard       |        |        |       |
-| Case Management       |        |        |       |
-| Analytics             |        |        |       |
-| Audit Logs            |        |        |       |
-| Real-Time Features    |        |        |       |
-| Phase 3 Features      |        |        |       |
-| File Upload           |        |        |       |
-| Notifications         |        |        |       |
-| Error Handling        |        |        |       |
-| Responsive Design     |        |        |       |
-| Security & Auth       |        |        |       |
-
-### Issues Found:
-
-1. ***
-2. ***
-3. ***
-
-### Fixes Applied:
-
-1. ***
-2. ***
-3. ***
+**Expected Results:**
+- ✅ Priority dropdown shows all options (Low, Medium, High, Critical)
+- ✅ Priority update saves successfully
+- ✅ UI updates immediately
+- ✅ Toast notification confirms update
 
 ---
 
-## ✅ Quick Verification Checklist
+#### 2.6 Assign Case
 
-Run these quick checks to verify basic functionality:
+**Steps:**
+1. Open a case from the cases list
+2. **Assign to User:**
+   - Find assignment dropdown/selector
+   - Select a user (e.g., Investigator)
+   - Click "Assign" or "Save"
+3. **Verify Assignment:**
+   - Assigned user name displays in case details
+   - Assignment visible in case list
+   - Audit log entry created
 
-- [ ] Can submit new report
-- [ ] Tracking code generated and works
-- [ ] Can send messages on track page
-- [ ] Can login to admin dashboard
-- [ ] Dashboard shows statistics
-- [ ] Can view all cases
-- [ ] Can open case details
-- [ ] Can update case status
-- [ ] Analytics page loads
-- [ ] Audit logs page loads
-- [ ] Priority badges display
-- [ ] Labels can be added/removed
-- [ ] Real-time updates work
-- [ ] Mobile view responsive
-
----
-
-## 🎯 Success Criteria
-
-All functionality is working correctly if:
-
-✅ All reports can be created, viewed, and tracked  
-✅ Messages flow between reporter and admin  
-✅ Admin can manage cases (update status, assign, add labels)  
-✅ Dashboard shows live statistics  
-✅ Analytics provides data visualizations  
-✅ Audit logs capture all actions  
-✅ Real-time features update instantly  
-✅ Mobile responsive design works  
-✅ Authentication and routes are protected  
-✅ Phase 3 features (priority, labels, assignment) work
+**Expected Results:**
+- ✅ Assignment dropdown shows available users
+- ✅ Assignment saves successfully
+- ✅ Assigned user name displays correctly
+- ✅ Toast notification confirms assignment
 
 ---
 
-**Good luck with testing!** 🚀
+#### 2.7 Add Internal Notes
 
-If you find any issues, document them in the Testing Results Template above.
+**Steps:**
+1. Open a case from the cases list
+2. **Add Note:**
+   - Find "Internal Notes" section
+   - Type note: "Initial review completed. Evidence collected."
+   - Click "Add Note" or "Save"
+3. **Verify Note:**
+   - Note appears in notes list
+   - Author and timestamp displayed
+
+**Expected Results:**
+- ✅ Notes section visible (admin-only)
+- ✅ Note saves successfully
+- ✅ Notes list displays chronologically
+- ✅ Notes not visible to reporter
+
+---
+
+#### 2.8 Add/Remove Labels
+
+**Steps:**
+1. Open a case from the cases list
+2. **Add Label:**
+   - Find "Labels" section
+   - Type label: "Urgent" or "Legal Review"
+   - Press Enter or click "Add"
+3. **Remove Label:**
+   - Click X on a label to remove
+4. **Verify Labels:**
+   - Labels display as badges
+   - Labels persist after page refresh
+
+**Expected Results:**
+- ✅ Labels can be added
+- ✅ Labels can be removed
+- ✅ Labels display as colored badges
+- ✅ Labels persist in database
+
+---
+
+#### 2.9 Send Message to Reporter
+
+**Steps:**
+1. Open a case from the cases list
+2. **Send Message:**
+   - Scroll to message thread
+   - Type message: "Thank you for your report. We have assigned an investigator..."
+   - Click "Send Message"
+3. **Verify Message:**
+   - Message appears in thread
+   - Message marked as "Admin" or "You"
+   - Timestamp displayed
+   - Reporter can see message on track page
+
+**Expected Results:**
+- ✅ Message sends successfully
+- ✅ Message appears in thread immediately
+- ✅ Real-time updates work
+- ✅ Message visible to reporter on track page
+- ✅ Connection status indicator works
+
+---
+
+#### 2.10 Download Attachments
+
+**Steps:**
+1. Open a case with attachments
+2. **Download File:**
+   - Find "Attachments" section
+   - Click on file name or download icon
+   - Verify file downloads
+3. **Verify File:**
+   - File opens correctly
+   - File name matches original
+
+**Expected Results:**
+- ✅ Attachments list displays
+- ✅ Download link works
+- ✅ File downloads successfully
+- ✅ File integrity maintained
+
+---
+
+### Flow 3: AISAR Admin (Multi-Tenant)
+
+#### 3.1 Login
+
+**Steps:**
+1. Navigate to: `http://localhost:3000/org/aisar/login`
+2. **Enter Credentials:**
+   - Email: `admin@aisar.com`
+   - Password: `Aisar@123!`
+3. Click "Sign In"
+4. Verify redirect to AISAR dashboard
+
+**Expected Results:**
+- ✅ Login works for tenant-specific URL
+- ✅ Redirects to `/org/aisar/dashboard`
+- ✅ Session scoped to AISAR organization
+- ✅ Cannot access other organizations' data
+
+---
+
+#### 3.2 Dashboard
+
+**Steps:**
+1. After login, verify AISAR dashboard loads
+2. **Verify Organization Context:**
+   - Dashboard shows AISAR-specific data
+   - Statistics for AISAR reports only
+   - Recent reports from AISAR only
+3. **Check Data Isolation:**
+   - Reports from other organizations not visible
+   - Statistics only reflect AISAR data
+
+**Expected Results:**
+- ✅ Dashboard loads AISAR-specific data
+- ✅ Data isolation maintained
+- ✅ Navigation shows AISAR branding (if configured)
+
+---
+
+#### 3.3 View AISAR Reports
+
+**Steps:**
+1. Navigate to: `http://localhost:3000/org/aisar/reports`
+2. **Verify Reports:**
+   - Only AISAR reports displayed
+   - Reports submitted via `/org/aisar/report` visible
+   - Reports from other organizations not visible
+3. **Test Case Management:**
+   - Follow same steps as Demo Admin (2.3-2.10)
+   - Verify all features work in tenant context
+
+**Expected Results:**
+- ✅ Only AISAR reports visible
+- ✅ All case management features work
+- ✅ Data isolation maintained
+- ✅ Updates scoped to AISAR organization
+
+---
+
+#### 3.4 User Management (If Available)
+
+**Steps:**
+1. Navigate to user management page (if available)
+2. **Create User:**
+   - Click "Add User" or "Create User"
+   - Fill in:
+     - Email: `manager@aisar.com`
+     - Full Name: `Manager User`
+     - Role: `Manager`
+     - Department: `Compliance`
+   - Set password or send invitation
+   - Click "Create"
+3. **Verify User:**
+   - User appears in user list
+   - User can login with new credentials
+   - User has correct role permissions
+
+**Expected Results:**
+- ✅ User creation works
+- ✅ User receives credentials/invitation
+- ✅ User can login
+- ✅ Role permissions enforced
+
+---
+
+### Flow 4: Super Admin
+
+#### 4.1 Login
+
+**Steps:**
+1. Navigate to: `http://localhost:3000/superadmin/login`
+2. **Enter Credentials:**
+   - Email: `sup-adm@whistrust.com`
+   - Password: `sup-pass-adm!1@3#5`
+3. Click "Sign In"
+4. Verify redirect to super admin dashboard
+
+**Expected Results:**
+- ✅ Login works
+- ✅ Redirects to `/superadmin/dashboard`
+- ✅ Platform-wide access granted
+
+---
+
+#### 4.2 Dashboard Overview
+
+**Steps:**
+1. After login, verify super admin dashboard loads
+2. **Check Platform Statistics:**
+   - Total organizations count
+   - Total reports across all organizations
+   - Active organizations
+   - System-wide metrics
+3. **Check Navigation:**
+   - Organizations menu item
+   - Settings menu item
+   - Logout button
+
+**Expected Results:**
+- ✅ Platform statistics display
+- ✅ Navigation menu works
+- ✅ User profile shows super admin email
+
+---
+
+#### 4.3 View Organizations
+
+**Steps:**
+1. Navigate to: `http://localhost:3000/superadmin/organizations`
+2. **Verify Organization List:**
+   - All organizations displayed
+   - Organization details:
+     - Name
+     - Subdomain
+     - Status (Active/Suspended)
+     - Plan
+     - Created date
+     - Report counts
+3. **Test Filters/Search:**
+   - Filter by status
+   - Search by name/subdomain
+   - Sort by various columns
+
+**Expected Results:**
+- ✅ Organization list loads
+- ✅ All organizations visible
+- ✅ Filters/search work
+- ✅ Sorting works
+
+---
+
+#### 4.4 Create Organization
+
+**Steps:**
+1. Navigate to organizations page
+2. **Click "Create Organization" or "Add Organization"**
+3. **Fill Form:**
+   - Name: `Test Organization`
+   - Subdomain: `testorg`
+   - Plan: `Professional` (or available plan)
+   - Status: `Active`
+   - Features: Enable/disable features
+   - Limits: Set report/user limits
+4. **Submit:**
+   - Click "Create" or "Save"
+   - Verify organization appears in list
+5. **Verify Organization:**
+   - Organization accessible at `/org/testorg/login`
+   - Can create admin user for organization
+   - Organization data isolated
+
+**Expected Results:**
+- ✅ Organization created successfully
+   - ✅ Subdomain validation works
+   - ✅ Organization accessible via URL
+   - ✅ Data isolation maintained
+   - ✅ Toast notification confirms creation
+
+---
+
+#### 4.5 Edit Organization
+
+**Steps:**
+1. Click on an organization in the list
+2. **Edit Details:**
+   - Change status (Active → Suspended)
+   - Update plan
+   - Modify features
+   - Update limits
+3. **Save Changes:**
+   - Click "Save" or "Update"
+   - Verify changes persist
+
+**Expected Results:**
+- ✅ Organization details editable
+- ✅ Changes save successfully
+- ✅ Status changes affect organization access
+- ✅ Toast notification confirms update
+
+---
+
+#### 4.6 Suspend Organization
+
+**Steps:**
+1. Edit an organization
+2. **Change Status to "Suspended"**
+3. **Save Changes**
+4. **Test Impact:**
+   - Try to submit report via `/org/{subdomain}/report`
+   - Verify error message: "Organization is not active"
+   - Try admin login via `/org/{subdomain}/login`
+   - Verify access blocked or limited
+
+**Expected Results:**
+- ✅ Status change saves
+- ✅ Report submission blocked for suspended org
+- ✅ Admin access limited/blocked
+- ✅ Toast notification confirms suspension
+
+---
+
+### Flow 5: Role-Based Permissions Testing
+
+#### 5.1 Manager Role
+
+**Login:**
+- Email: `hassan.hr@whistrust.com` (Demo) or create Manager in AISAR
+- Password: `Manager@WhistTrust2025` (Demo)
+
+**Test Permissions:**
+1. ✅ Can view all reports
+2. ✅ Can edit report status
+3. ✅ Can edit priority
+4. ✅ Can assign cases
+5. ✅ Can view audit logs
+6. ✅ Can view analytics
+7. ✅ Can send messages
+8. ✅ Can add labels
+9. ❌ Cannot delete reports
+10. ❌ Cannot manage users
+11. ❌ Cannot manage settings
+
+**Steps:**
+1. Login as Manager
+2. Navigate to cases/reports page
+3. Open a case
+4. **Verify UI Elements:**
+   - Status dropdown: ✅ Visible and editable
+   - Priority dropdown: ✅ Visible and editable
+   - Assignment dropdown: ✅ Visible and editable
+   - Delete button: ❌ Not visible
+   - User management menu: ❌ Not visible
+   - Settings menu: ❌ Not visible
+5. **Test Actions:**
+   - Update status: ✅ Should work
+   - Update priority: ✅ Should work
+   - Assign case: ✅ Should work
+   - Try to access `/admin/users`: ❌ Should be blocked or not visible
+
+**Expected Results:**
+- ✅ UI shows/hides elements based on permissions
+- ✅ Allowed actions work
+- ✅ Restricted actions blocked or hidden
+
+---
+
+#### 5.2 Investigator Role
+
+**Login:**
+- Email: `yusuf.investigator@whistrust.com` (Demo) or create Investigator in AISAR
+- Password: `Investigator@WhistTrust2025` (Demo)
+
+**Test Permissions:**
+1. ✅ Can view all reports
+2. ✅ Can edit report status
+3. ✅ Can send messages
+4. ✅ Can add labels
+5. ❌ Cannot edit priority
+6. ❌ Cannot assign cases
+7. ❌ Cannot view audit logs
+8. ❌ Cannot view analytics
+9. ❌ Cannot delete reports
+10. ❌ Cannot manage users
+
+**Steps:**
+1. Login as Investigator
+2. Navigate to cases/reports page
+3. Open a case
+4. **Verify UI Elements:**
+   - Status dropdown: ✅ Visible and editable
+   - Priority dropdown: ❌ Not visible or read-only
+   - Assignment dropdown: ❌ Not visible or read-only
+   - Analytics menu: ❌ Not visible
+   - Audit logs menu: ❌ Not visible
+5. **Test Actions:**
+   - Update status: ✅ Should work
+   - Update priority: ❌ Should be blocked
+   - Assign case: ❌ Should be blocked
+   - Try to access `/admin/analytics`: ❌ Should be blocked
+
+**Expected Results:**
+- ✅ UI shows/hides elements based on permissions
+- ✅ Allowed actions work
+- ✅ Restricted actions blocked or hidden
+
+---
+
+#### 5.3 HR Role
+
+**Login:**
+- Create HR user in Demo or AISAR organization
+
+**Test Permissions:**
+1. ✅ Can view all reports
+2. ✅ Can edit report status
+3. ✅ Can send messages
+4. ✅ Can add labels
+5. ❌ Cannot edit priority
+6. ❌ Cannot assign cases
+7. ❌ Cannot view audit logs
+8. ❌ Cannot view analytics
+9. ❌ Cannot delete reports
+10. ❌ Cannot manage users
+
+**Steps:**
+1. Login as HR
+2. Follow same steps as Investigator (5.2)
+3. Verify same permission restrictions
+
+**Expected Results:**
+- ✅ Same as Investigator permissions
+- ✅ UI reflects HR role limitations
+
+---
+
+## Feature-by-Feature Testing
+
+### Feature 1: Report Submission
+
+**Test Cases:**
+
+1. **Valid Submission**
+   - Category selected
+   - Description 50+ characters
+   - Optional fields filled
+   - File attached (optional)
+   - ✅ Should submit successfully
+
+2. **Invalid Submission - Missing Category**
+   - Category not selected
+   - Description provided
+   - ❌ Should show validation error
+
+3. **Invalid Submission - Short Description**
+   - Category selected
+   - Description < 50 characters
+   - ❌ Should show character count error
+   - ❌ Submit button disabled
+
+4. **File Upload - Valid File**
+   - PDF file < 10 MB
+   - ✅ Should upload successfully
+   - ✅ Progress indicator shows
+
+5. **File Upload - Invalid Type**
+   - Executable file (.exe)
+   - ❌ Should reject with error message
+
+6. **File Upload - Too Large**
+   - File > 10 MB
+   - ❌ Should reject with size limit error
+
+7. **Multi-Tenant Submission**
+   - Submit via `/org/aisar/report`
+   - ✅ Should associate with AISAR organization
+   - ✅ Tracking code works on `/org/aisar/track`
+
+---
+
+### Feature 2: Case Tracking
+
+**Test Cases:**
+
+1. **Valid Tracking Code**
+   - Enter valid tracking code
+   - ✅ Should load case details
+   - ✅ All information displayed
+
+2. **Invalid Tracking Code**
+   - Enter random string
+   - ❌ Should show "Case not found" error
+
+3. **Empty Tracking Code**
+   - Submit without entering code
+   - ❌ Should show validation error
+
+4. **Case Status Display**
+   - Verify status badge shows correct color
+   - ✅ Pending = yellow/orange
+   - ✅ Under Review = blue
+   - ✅ Resolved = green
+   - ✅ Closed = gray
+
+5. **Message Thread**
+   - Verify messages display chronologically
+   - ✅ Newest messages at bottom
+   - ✅ Timestamps displayed
+   - ✅ Sender labels (Reporter/Admin) clear
+
+---
+
+### Feature 3: Real-Time Messaging
+
+**Test Cases:**
+
+1. **Send Message from Reporter**
+   - Type message and send
+   - ✅ Message appears immediately
+   - ✅ Admin sees message in real-time
+
+2. **Send Message from Admin**
+   - Admin sends message
+   - ✅ Message appears in admin view
+   - ✅ Reporter sees message on track page in real-time
+
+3. **Connection Status**
+   - Verify connection indicator
+   - ✅ Shows "Online" when connected
+   - ✅ Shows "Offline" when disconnected
+   - ✅ Reconnects automatically
+
+4. **Message Persistence**
+   - Refresh page
+   - ✅ Messages still visible
+   - ✅ Message history maintained
+
+---
+
+### Feature 4: Case Management
+
+**Test Cases:**
+
+1. **Status Update**
+   - Change status
+   - ✅ Saves successfully
+   - ✅ UI updates immediately
+   - ✅ Audit log entry created
+
+2. **Priority Update**
+   - Change priority
+   - ✅ Saves successfully
+   - ✅ Priority badge updates
+
+3. **Case Assignment**
+   - Assign to user
+   - ✅ Assignment saves
+   - ✅ Assigned user name displays
+   - ✅ Audit log entry created
+
+4. **Label Management**
+   - Add label
+   - ✅ Label appears as badge
+   - Remove label
+   - ✅ Label removed
+   - ✅ Changes persist
+
+5. **Internal Notes**
+   - Add note
+   - ✅ Note saved
+   - ✅ Note visible to admins only
+   - ✅ Reporter cannot see notes
+
+---
+
+### Feature 5: File Attachments
+
+**Test Cases:**
+
+1. **Upload Attachment**
+   - Upload file during report submission
+   - ✅ File uploads successfully
+   - ✅ File appears in case details
+
+2. **Download Attachment**
+   - Click download link
+   - ✅ File downloads
+   - ✅ File integrity maintained
+
+3. **Multiple Attachments**
+   - Upload multiple files
+   - ✅ All files listed
+   - ✅ All files downloadable
+
+4. **Attachment Security**
+   - Verify attachments not publicly accessible
+   - ✅ URLs require authentication
+   - ✅ RLS policies enforced
+
+---
+
+### Feature 6: Analytics & Reporting
+
+**Test Cases:**
+
+1. **Dashboard Statistics**
+   - Verify counts are accurate
+   - ✅ Total reports = sum of all statuses
+   - ✅ Statistics update in real-time
+
+2. **Category Statistics**
+   - View reports by category
+   - ✅ Category breakdown accurate
+   - ✅ Charts/graphs display (if available)
+
+3. **Status Distribution**
+   - View reports by status
+   - ✅ Status counts accurate
+   - ✅ Visual representation (if available)
+
+4. **Time-based Analytics**
+   - View reports over time
+   - ✅ Date ranges work
+   - ✅ Trends visible (if available)
+
+---
+
+### Feature 7: User Management
+
+**Test Cases:**
+
+1. **Create User (Admin Only)**
+   - Fill user creation form
+   - ✅ User created successfully
+   - ✅ User receives credentials/invitation
+
+2. **Edit User**
+   - Update user details
+   - ✅ Changes save
+   - ✅ User profile updates
+
+3. **Deactivate User**
+   - Deactivate user account
+   - ✅ User cannot login
+   - ✅ User hidden from lists
+
+4. **Role Assignment**
+   - Assign role to user
+   - ✅ Role permissions enforced
+   - ✅ UI reflects role permissions
+
+---
+
+### Feature 8: Audit Logging
+
+**Test Cases:**
+
+1. **Status Change Logging**
+   - Change case status
+   - ✅ Audit log entry created
+   - ✅ Entry shows: user, action, timestamp, details
+
+2. **Assignment Logging**
+   - Assign case
+   - ✅ Audit log entry created
+   - ✅ Entry shows assignment details
+
+3. **View Audit Logs**
+   - Navigate to audit logs page
+   - ✅ Logs display chronologically
+   - ✅ Filters work (if available)
+
+4. **Audit Log Security**
+   - Verify only authorized roles can view
+   - ✅ Admin/Manager can view
+   - ✅ Investigator/HR cannot view
+
+---
+
+## End-to-End Scenarios
+
+### Scenario 1: Complete Report Lifecycle
+
+**Objective:** Test full cycle from submission to resolution
+
+**Steps:**
+1. **Submit Report (Reporter)**
+   - Go to `/org/aisar/report`
+   - Submit report with sample content
+   - Save tracking code
+
+2. **Track Case (Reporter)**
+   - Go to `/org/aisar/track`
+   - Enter tracking code
+   - Verify case status is "Pending"
+   - Send initial message: "Thank you for acknowledging..."
+
+3. **Admin Review (Admin)**
+   - Login as `admin@aisar.com`
+   - Navigate to cases/reports
+   - Find the submitted report
+   - Open case details
+
+4. **Admin Actions (Admin)**
+   - Update status to "Under Review"
+   - Assign to Investigator
+   - Add label: "Urgent"
+   - Add internal note: "Initial review completed"
+   - Send message to reporter: "We have received your report..."
+
+5. **Reporter Response (Reporter)**
+   - Return to track page
+   - Verify status updated to "Under Review"
+   - See admin message
+   - Send reply: "I have additional information..."
+
+6. **Investigation (Investigator)**
+   - Login as Investigator
+   - View assigned case
+   - Update status to "In Progress"
+   - Send message: "We are investigating your concerns..."
+
+7. **Resolution (Admin)**
+   - Admin updates status to "Resolved"
+   - Sends final message: "Your case has been resolved..."
+   - Adds internal note: "Investigation complete. Action taken."
+
+8. **Reporter Verification (Reporter)**
+   - Reporter checks track page
+   - Sees status "Resolved"
+   - Reads final message
+   - Case complete
+
+**Expected Results:**
+- ✅ All steps complete successfully
+- ✅ Status updates visible to reporter
+- ✅ Messages exchanged in real-time
+- ✅ Audit trail complete
+- ✅ Data persisted correctly
+
+---
+
+### Scenario 2: Multi-Tenant Data Isolation
+
+**Objective:** Verify organizations cannot access each other's data
+
+**Steps:**
+1. **Submit Report to AISAR**
+   - Go to `/org/aisar/report`
+   - Submit report
+   - Save tracking code
+
+2. **Submit Report to CodeSquare**
+   - Go to `/org/codesquare/report`
+   - Submit report
+   - Save tracking code
+
+3. **Login as AISAR Admin**
+   - Login at `/org/aisar/login`
+   - View reports
+   - ✅ Should only see AISAR reports
+   - ❌ Should NOT see CodeSquare reports
+
+4. **Login as CodeSquare Admin**
+   - Login at `/org/codesquare/login`
+   - View reports
+   - ✅ Should only see CodeSquare reports
+   - ❌ Should NOT see AISAR reports
+
+5. **Test Tracking Codes**
+   - AISAR tracking code on `/org/aisar/track`: ✅ Works
+   - AISAR tracking code on `/org/codesquare/track`: ❌ Should fail
+   - CodeSquare tracking code on `/org/codesquare/track`: ✅ Works
+   - CodeSquare tracking code on `/org/aisar/track`: ❌ Should fail
+
+**Expected Results:**
+- ✅ Complete data isolation
+- ✅ Reports only visible to correct organization
+- ✅ Tracking codes scoped to organization
+- ✅ Admin portals show only their organization's data
+
+---
+
+### Scenario 3: Role Permission Enforcement
+
+**Objective:** Verify RBAC works correctly across all roles
+
+**Steps:**
+1. **Create Test Case**
+   - Submit a report
+   - Admin assigns to Investigator
+
+2. **Test as Admin**
+   - Login as Admin
+   - ✅ Can view all reports
+   - ✅ Can edit status, priority
+   - ✅ Can assign cases
+   - ✅ Can manage users
+   - ✅ Can view analytics
+   - ✅ Can view audit logs
+
+3. **Test as Manager**
+   - Login as Manager
+   - ✅ Can view all reports
+   - ✅ Can edit status, priority
+   - ✅ Can assign cases
+   - ✅ Can view analytics
+   - ✅ Can view audit logs
+   - ❌ Cannot manage users
+   - ❌ Cannot delete reports
+
+4. **Test as Investigator**
+   - Login as Investigator
+   - ✅ Can view assigned case
+   - ✅ Can edit status
+   - ✅ Can send messages
+   - ❌ Cannot edit priority
+   - ❌ Cannot assign cases
+   - ❌ Cannot view analytics
+   - ❌ Cannot view audit logs
+
+5. **Test as HR**
+   - Login as HR
+   - ✅ Can view all reports
+   - ✅ Can edit status
+   - ✅ Can send messages
+   - ❌ Cannot edit priority
+   - ❌ Cannot assign cases
+   - ❌ Cannot view analytics
+
+**Expected Results:**
+- ✅ All permissions enforced correctly
+- ✅ UI shows/hides elements based on role
+- ✅ API endpoints reject unauthorized actions
+- ✅ Database RLS policies enforce restrictions
+
+---
+
+### Scenario 4: Organization Suspension
+
+**Objective:** Test organization suspension and its effects
+
+**Steps:**
+1. **Submit Report to Organization**
+   - Go to `/org/aisar/report`
+   - Submit report
+   - Verify success
+
+2. **Suspend Organization (Super Admin)**
+   - Login as Super Admin
+   - Navigate to organizations
+   - Edit AISAR organization
+   - Change status to "Suspended"
+   - Save
+
+3. **Test Report Submission (Blocked)**
+   - Try to submit report via `/org/aisar/report`
+   - ❌ Should show error: "Organization is not active"
+   - ❌ Report should not be submitted
+
+4. **Test Admin Login (Limited)**
+   - Try to login as AISAR admin
+   - ❌ Should be blocked or show suspension message
+
+5. **Test Existing Reports (Access)**
+   - Existing reports should still be accessible
+   - ✅ Reporter can still track case
+   - ✅ Admin can still view/manage existing cases (if allowed)
+
+6. **Reactivate Organization (Super Admin)**
+   - Super Admin changes status back to "Active"
+   - ✅ Report submission works again
+   - ✅ Admin login works again
+
+**Expected Results:**
+- ✅ Suspension blocks new submissions
+- ✅ Suspension limits admin access
+- ✅ Existing data remains accessible (if configured)
+- ✅ Reactivation restores full functionality
+
+---
+
+## Troubleshooting
+
+### Common Issues
+
+#### 1. Login Fails
+
+**Symptoms:**
+- "Invalid credentials" error
+- Redirects back to login page
+
+**Solutions:**
+- Verify email and password are correct
+- Check if user account is active
+- Verify Supabase connection (check `/test/connection`)
+- Check browser console for errors
+- Clear browser cache and cookies
+
+---
+
+#### 2. Reports Not Loading
+
+**Symptoms:**
+- Case list is empty
+- "No reports found" message
+
+**Solutions:**
+- Verify Supabase connection
+- Check RLS policies are enabled
+- Verify user has correct role/permissions
+- Check browser console for API errors
+- Verify organization status is "Active"
+
+---
+
+#### 3. Real-Time Updates Not Working
+
+**Symptoms:**
+- Messages don't appear immediately
+- Status updates not reflected in real-time
+
+**Solutions:**
+- Check connection status indicator
+- Verify Supabase real-time is enabled
+- Check browser console for WebSocket errors
+- Refresh page to reload data
+- Verify network connection
+
+---
+
+#### 4. File Upload Fails
+
+**Symptoms:**
+- Upload progress stuck
+- Error message on upload
+
+**Solutions:**
+- Verify file size < 10 MB
+- Check file type is allowed (PDF, DOC, DOCX, TXT, JPG, PNG)
+- Verify Supabase Storage bucket exists
+- Check RLS policies on storage bucket
+- Verify storage bucket is configured correctly
+
+---
+
+#### 5. Tracking Code Not Found
+
+**Symptoms:**
+- "Case not found" error
+- Tracking code doesn't work
+
+**Solutions:**
+- Verify tracking code is correct (copy-paste recommended)
+- Check if report was submitted to correct organization
+- Verify organization subdomain matches
+- Check if organization is active
+- Verify report exists in database
+
+---
+
+#### 6. Permission Errors
+
+**Symptoms:**
+- "Access denied" messages
+- UI elements missing
+- Actions blocked
+
+**Solutions:**
+- Verify user role is correct
+- Check role permissions in database
+- Verify RLS policies allow access
+- Check if user is assigned to correct organization
+- Verify user account is active
+
+---
+
+#### 7. Environment Detection Issues
+
+**Symptoms:**
+- Wrong Supabase database used
+- Demo data in production or vice versa
+
+**Solutions:**
+- Check `/test/connection` page
+- Verify environment variables in `.env.local` (local) or Vercel (production)
+- Verify URL path/subdomain detection
+- Check `lib/config/environment.ts` logic
+- Restart dev server after env changes
+
+---
+
+### Debug Checklist
+
+When reporting issues, include:
+
+1. **Environment:**
+   - [ ] Local or Production?
+   - [ ] URL accessed
+   - [ ] Browser and version
+
+2. **User Context:**
+   - [ ] Role
+   - [ ] Organization (if multi-tenant)
+   - [ ] Login status
+
+3. **Error Details:**
+   - [ ] Error message (exact text)
+   - [ ] Browser console errors
+   - [ ] Network tab errors
+   - [ ] Steps to reproduce
+
+4. **Expected vs Actual:**
+   - [ ] What should happen?
+   - [ ] What actually happened?
+
+---
+
+## Test Completion Checklist
+
+### Core Flows
+- [ ] Anonymous reporter can submit report (demo)
+- [ ] Anonymous reporter can submit report (multi-tenant)
+- [ ] Reporter can track case
+- [ ] Reporter can send/receive messages
+- [ ] Admin can login (demo)
+- [ ] Admin can login (multi-tenant)
+- [ ] Admin can view cases
+- [ ] Admin can update case status
+- [ ] Admin can update priority
+- [ ] Admin can assign cases
+- [ ] Admin can send messages
+- [ ] Admin can manage users (if available)
+- [ ] Super Admin can login
+- [ ] Super Admin can view organizations
+- [ ] Super Admin can create organization
+- [ ] Super Admin can edit organization
+- [ ] Super Admin can suspend organization
+
+### Features
+- [ ] Report submission validation
+- [ ] File upload/download
+- [ ] Real-time messaging
+- [ ] Case status management
+- [ ] Priority management
+- [ ] Case assignment
+- [ ] Label management
+- [ ] Internal notes
+- [ ] Analytics/statistics
+- [ ] Audit logging
+- [ ] User management
+- [ ] Role-based permissions
+
+### Security & Isolation
+- [ ] Multi-tenant data isolation
+- [ ] RLS policies enforced
+- [ ] Role permissions enforced
+- [ ] Organization suspension works
+- [ ] Tracking code scoping
+- [ ] File attachment security
+
+### UI/UX
+- [ ] All pages load correctly
+- [ ] Navigation works
+- [ ] Forms validate correctly
+- [ ] Error messages display
+- [ ] Success messages display
+- [ ] Loading states work
+- [ ] Responsive design (mobile/tablet/desktop)
+- [ ] Accessibility (keyboard navigation, screen readers)
+
+---
+
+## Notes for Testers
+
+### Best Practices
+
+1. **Use Sample Content:**
+   - Use provided sample descriptions (50+ characters)
+   - Use test files for attachments
+   - Use realistic but test data
+
+2. **Test Both Environments:**
+   - Test on local development
+   - Test on production (if available)
+   - Note any differences
+
+3. **Document Issues:**
+   - Take screenshots of errors
+   - Note exact steps to reproduce
+   - Include browser console errors
+   - Note environment details
+
+4. **Test Edge Cases:**
+   - Very long descriptions
+   - Special characters in input
+   - Multiple file uploads
+   - Rapid status changes
+   - Concurrent user actions
+
+5. **Verify Data Persistence:**
+   - Refresh pages after actions
+   - Close and reopen browser
+   - Verify data persists across sessions
+
+---
+
+## Contact & Support
+
+For issues or questions during testing:
+
+1. **Check Documentation:**
+   - `README.md` - Project overview
+   - `CREDENTIALS_SUMMARY.md` - All credentials
+   - `README_MULTI_TENANT.md` - Multi-tenant setup
+
+2. **Check Test Page:**
+   - `/test/connection` - Environment diagnostics
+
+3. **Review Logs:**
+   - Browser console (F12)
+   - Network tab
+   - Supabase dashboard logs
+
+---
+
+**Document Version:** 1.0  
+**Last Updated:** January 2025  
+**Maintained By:** WhisTrust Development Team
