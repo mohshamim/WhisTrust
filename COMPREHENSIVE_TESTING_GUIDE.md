@@ -21,69 +21,34 @@
 
 ## Prerequisites
 
-### Local Development Setup
-
-1. **Node.js 18+** installed
-2. **Development server running:**
-   ```bash
-   npm run dev
-   ```
-3. **Supabase configured** in `.env.local`:
-   - Demo Supabase credentials
-   - Production Supabase credentials (for multi-tenant)
-
-### Production Testing
+### Production Testing Requirements
 
 - Access to production URLs (see below)
 - Valid credentials for each role
 - Browser with developer tools enabled
+- Internet connection
 
 ---
 
 ## Environment URLs
 
-### Local Development
-
-| Portal | URL |
-|--------|-----|
-| Homepage | `http://localhost:3000` |
-| Demo Report | `http://localhost:3000/report` |
-| Demo Track | `http://localhost:3000/track` |
-| Demo Admin Login | `http://localhost:3000/admin/login` |
-| Demo Admin Dashboard | `http://localhost:3000/admin/dashboard` |
-| Demo Admin Cases | `http://localhost:3000/admin/cases` |
-| **Multi-Tenant AISAR** | |
-| AISAR Report | `http://localhost:3000/org/aisar/report` |
-| AISAR Track | `http://localhost:3000/org/aisar/track` |
-| AISAR Admin Login | `http://localhost:3000/org/aisar/login` |
-| AISAR Admin Dashboard | `http://localhost:3000/org/aisar/dashboard` |
-| AISAR Admin Cases | `http://localhost:3000/org/aisar/reports` |
-| **Multi-Tenant CodeSquare** | |
-| CodeSquare Report | `http://localhost:3000/org/codesquare/report` |
-| CodeSquare Track | `http://localhost:3000/org/codesquare/track` |
-| CodeSquare Admin Login | `http://localhost:3000/org/codesquare/login` |
-| **Super Admin** | |
-| Super Admin Login | `http://localhost:3000/superadmin/login` |
-| Super Admin Dashboard | `http://localhost:3000/superadmin/dashboard` |
-| Super Admin Organizations | `http://localhost:3000/superadmin/organizations` |
-| **Test & Diagnostics** | |
-| Connection Test | `http://localhost:3000/test/connection` |
-
-### Production (Vercel)
+### Production URLs
 
 | Portal | URL |
 |--------|-----|
 | Homepage | `https://www.whistrust.com` |
-| Demo Report | `https://www.whistrust.com/report` |
-| Demo Track | `https://www.whistrust.com/track` |
-| Demo Admin Login | `https://www.whistrust.com/admin/login` |
 | **Multi-Tenant AISAR** | |
 | AISAR Report | `https://www.whistrust.com/org/aisar/report` |
 | AISAR Track | `https://www.whistrust.com/org/aisar/track` |
 | AISAR Admin Login | `https://www.whistrust.com/org/aisar/login` |
+| AISAR Admin Dashboard | `https://www.whistrust.com/org/aisar/dashboard` |
+| AISAR Admin Cases | `https://www.whistrust.com/org/aisar/reports` |
 | **Multi-Tenant CodeSquare** | |
 | CodeSquare Report | `https://www.whistrust.com/org/codesquare/report` |
 | CodeSquare Track | `https://www.whistrust.com/org/codesquare/track` |
+| CodeSquare Admin Login | `https://www.whistrust.com/org/codesquare/login` |
+| CodeSquare Admin Dashboard | `https://www.whistrust.com/org/codesquare/dashboard` |
+| CodeSquare Admin Cases | `https://www.whistrust.com/org/codesquare/reports` |
 | **Super Admin** | |
 | Super Admin Login | `https://www.whistrust.com/superadmin/login` |
 | Super Admin Dashboard | `https://www.whistrust.com/superadmin/dashboard` |
@@ -111,31 +76,7 @@
 
 ---
 
-### 2. Demo Admin (Single-Tenant Demo)
-
-**Purpose:** Test single-tenant demo features
-
-| Field | Value |
-|-------|-------|
-| **Portal** | Demo Admin |
-| **URL** | `/admin/login` |
-| **Email** | `ahmed.admin@whistrust.com` |
-| **Password** | `Admin@WhistTrust2025` |
-| **Role** | Admin |
-| **Organization** | Demo |
-| **Permissions** | Full access to demo portal |
-
-**Additional Demo Users:**
-
-| Role | Email | Password |
-|------|-------|----------|
-| Manager (HR) | `hassan.hr@whistrust.com` | `Manager@WhistTrust2025` |
-| Manager (Finance) | `omar.finance@whistrust.com` | `Manager@WhistTrust2025` |
-| Investigator | `yusuf.investigator@whistrust.com` | `Investigator@WhistTrust2025` |
-
----
-
-### 3. AISAR Admin (Multi-Tenant)
+### 2. AISAR Admin (Multi-Tenant)
 
 **Purpose:** Test multi-tenant organization features
 
@@ -154,7 +95,7 @@
 
 ---
 
-### 4. CodeSquare Admin (Multi-Tenant)
+### 3. CodeSquare Admin (Multi-Tenant)
 
 **Purpose:** Test multi-tenant organization features
 
@@ -171,14 +112,14 @@
 
 ---
 
-### 5. Anonymous Reporter (No Login Required)
+### 4. Anonymous Reporter (No Login Required)
 
 **Purpose:** Submit reports anonymously
 
 | Field | Value |
 |-------|-------|
 | **Portal** | Public Report Form |
-| **URL** | `/report` (demo) or `/org/{subdomain}/report` (tenant) |
+| **URL** | `/org/{subdomain}/report` (multi-tenant) |
 | **Authentication** | None (anonymous) |
 | **Access Method** | Tracking code only |
 | **Permissions** | Submit reports, track cases, send messages |
@@ -260,10 +201,10 @@ through this secure messaging system.
 
 ### Flow 1: Anonymous Reporter (End-to-End)
 
-#### 1.1 Submit Report (Demo)
+#### 1.1 Submit Report (Multi-Tenant - AISAR)
 
 **Steps:**
-1. Navigate to: `http://localhost:3000/report` (or production URL)
+1. Navigate to: `https://www.whistrust.com/org/aisar/report`
 2. **Select Category:** Choose "Fraud & Financial Misconduct"
 3. **Enter Description:** Use Sample Report 1 (Fraud) - ensure 50+ characters
 4. **Optional Fields:**
@@ -285,6 +226,10 @@ through this secure messaging system.
 - ✅ Success page displays with tracking code
 - ✅ Tracking code is copyable
 - ✅ Redirect to success page after submission
+- ✅ Report submitted to AISAR organization
+- ✅ URL shows `/org/aisar/report`
+- ✅ Organization branding (if configured)
+- ✅ Report is associated with AISAR organization
 
 **Success Page Verification:**
 - ✅ Tracking code displayed prominently
@@ -294,11 +239,11 @@ through this secure messaging system.
 
 ---
 
-#### 1.2 Track Case (Demo)
+#### 1.2 Track Case (Multi-Tenant - AISAR)
 
 **Steps:**
 1. Copy tracking code from success page (or use a known tracking code)
-2. Navigate to: `http://localhost:3000/track`
+2. Navigate to: `https://www.whistrust.com/org/aisar/track`
 3. **Enter Tracking Code:**
    - Paste or type tracking code
    - Click "Track Case" or press Enter
@@ -323,79 +268,94 @@ through this secure messaging system.
 - ✅ Message thread displays chronologically
 - ✅ New messages appear in real-time
 - ✅ Connection status indicator shows online/offline
-
----
-
-#### 1.3 Submit Report (Multi-Tenant - AISAR)
-
-**Steps:**
-1. Navigate to: `http://localhost:3000/org/aisar/report`
-2. Follow same steps as 1.1, but verify:
-   - URL shows `/org/aisar/report`
-   - Organization branding (if configured)
-   - Report is associated with AISAR organization
-3. Submit report and save tracking code
-
-**Expected Results:**
-- ✅ Report submitted to AISAR organization
 - ✅ Tracking code works on `/org/aisar/track`
 - ✅ Admin can see report in AISAR admin portal
 - ✅ Data isolation: report not visible in other organizations
 
 ---
 
-### Flow 2: Demo Admin
+#### 1.3 Submit Report (Multi-Tenant - CodeSquare)
+
+**Steps:**
+1. Navigate to: `https://www.whistrust.com/org/codesquare/report`
+2. Follow same steps as 1.1, but verify:
+   - URL shows `/org/codesquare/report`
+   - Organization branding (if configured)
+   - Report is associated with CodeSquare organization
+3. Submit report and save tracking code
+
+**Expected Results:**
+- ✅ Report submitted to CodeSquare organization
+- ✅ Tracking code works on `/org/codesquare/track`
+- ✅ Admin can see report in CodeSquare admin portal
+- ✅ Data isolation: report not visible in other organizations
+
+---
+
+### Flow 2: AISAR Admin (Multi-Tenant)
 
 #### 2.1 Login
 
 **Steps:**
-1. Navigate to: `http://localhost:3000/admin/login`
+1. Navigate to: `https://www.whistrust.com/org/aisar/login`
 2. **Enter Credentials:**
-   - Email: `ahmed.admin@whistrust.com`
-   - Password: `Admin@WhistTrust2025`
+   - Email: `admin@aisar.com`
+   - Password: `Aisar@123!`
 3. Click "Sign In"
-4. Verify redirect to dashboard
+4. Verify redirect to AISAR dashboard
 
 **Expected Results:**
 - ✅ Login form validates email format
 - ✅ Password field is secure (masked)
 - ✅ Invalid credentials show error message
-- ✅ Successful login redirects to dashboard
+- ✅ Successful login redirects to AISAR dashboard
 - ✅ Session persists across page refreshes
+- ✅ Login works for tenant-specific URL
+- ✅ Redirects to `/org/aisar/dashboard`
+- ✅ Session scoped to AISAR organization
+- ✅ Cannot access other organizations' data
 
 ---
 
 #### 2.2 Dashboard Overview
 
 **Steps:**
-1. After login, verify dashboard loads
-2. **Check Statistics:**
-   - Total reports count
+1. After login, verify AISAR dashboard loads
+2. **Verify Organization Context:**
+   - Dashboard shows AISAR-specific data
+   - Statistics for AISAR reports only
+   - Recent reports from AISAR only
+3. **Check Statistics:**
+   - Total reports count (AISAR only)
    - Pending reports count
    - In-progress reports count
    - Resolved reports count
-3. **Check Recent Reports:**
-   - List of recent reports
+4. **Check Recent Reports:**
+   - List of recent reports (AISAR only)
    - Status badges
    - Priority indicators
-4. **Check Navigation:**
+5. **Check Navigation:**
    - Sidebar menu items
    - User profile dropdown
    - Logout button
 
 **Expected Results:**
-- ✅ Statistics cards display correct numbers
-- ✅ Recent reports list loads
+- ✅ Dashboard loads AISAR-specific data
+- ✅ Data isolation maintained
+- ✅ Statistics cards display correct numbers (AISAR only)
+- ✅ Recent reports list loads (AISAR only)
 - ✅ Status badges show correct colors
 - ✅ Navigation menu works
 - ✅ User profile shows correct email/name
+- ✅ Reports from other organizations not visible
+- ✅ Statistics only reflect AISAR data
 
 ---
 
 #### 2.3 View Cases
 
 **Steps:**
-1. Navigate to: `http://localhost:3000/admin/cases`
+1. Navigate to: `https://www.whistrust.com/org/aisar/reports`
 2. **Verify Case List:**
    - All reports displayed in table/list
    - Sorting by date (newest first)
@@ -578,66 +538,7 @@ through this secure messaging system.
 
 ---
 
-### Flow 3: AISAR Admin (Multi-Tenant)
-
-#### 3.1 Login
-
-**Steps:**
-1. Navigate to: `http://localhost:3000/org/aisar/login`
-2. **Enter Credentials:**
-   - Email: `admin@aisar.com`
-   - Password: `Aisar@123!`
-3. Click "Sign In"
-4. Verify redirect to AISAR dashboard
-
-**Expected Results:**
-- ✅ Login works for tenant-specific URL
-- ✅ Redirects to `/org/aisar/dashboard`
-- ✅ Session scoped to AISAR organization
-- ✅ Cannot access other organizations' data
-
----
-
-#### 3.2 Dashboard
-
-**Steps:**
-1. After login, verify AISAR dashboard loads
-2. **Verify Organization Context:**
-   - Dashboard shows AISAR-specific data
-   - Statistics for AISAR reports only
-   - Recent reports from AISAR only
-3. **Check Data Isolation:**
-   - Reports from other organizations not visible
-   - Statistics only reflect AISAR data
-
-**Expected Results:**
-- ✅ Dashboard loads AISAR-specific data
-- ✅ Data isolation maintained
-- ✅ Navigation shows AISAR branding (if configured)
-
----
-
-#### 3.3 View AISAR Reports
-
-**Steps:**
-1. Navigate to: `http://localhost:3000/org/aisar/reports`
-2. **Verify Reports:**
-   - Only AISAR reports displayed
-   - Reports submitted via `/org/aisar/report` visible
-   - Reports from other organizations not visible
-3. **Test Case Management:**
-   - Follow same steps as Demo Admin (2.3-2.10)
-   - Verify all features work in tenant context
-
-**Expected Results:**
-- ✅ Only AISAR reports visible
-- ✅ All case management features work
-- ✅ Data isolation maintained
-- ✅ Updates scoped to AISAR organization
-
----
-
-#### 3.4 User Management (If Available)
+#### 2.4 User Management (If Available)
 
 **Steps:**
 1. Navigate to user management page (if available)
@@ -663,12 +564,54 @@ through this secure messaging system.
 
 ---
 
+### Flow 3: CodeSquare Admin (Multi-Tenant)
+
+#### 3.1 Login
+
+**Steps:**
+1. Navigate to: `https://www.whistrust.com/org/codesquare/login`
+2. **Enter Credentials:**
+   - Email: `admin@codesquare.com`
+   - Password: (Set during user creation)
+3. Click "Sign In"
+4. Verify redirect to CodeSquare dashboard
+
+**Expected Results:**
+- ✅ Login works for tenant-specific URL
+- ✅ Redirects to `/org/codesquare/dashboard`
+- ✅ Session scoped to CodeSquare organization
+- ✅ Cannot access other organizations' data
+
+---
+
+#### 3.2 Dashboard & Case Management
+
+**Steps:**
+1. After login, verify CodeSquare dashboard loads
+2. **Verify Organization Context:**
+   - Dashboard shows CodeSquare-specific data
+   - Statistics for CodeSquare reports only
+   - Recent reports from CodeSquare only
+3. **Test Case Management:**
+   - Navigate to reports page
+   - Follow same case management steps as AISAR Admin (2.3-2.10)
+   - Verify all features work in CodeSquare context
+
+**Expected Results:**
+- ✅ Dashboard loads CodeSquare-specific data
+- ✅ Only CodeSquare reports visible
+- ✅ All case management features work
+- ✅ Data isolation maintained
+- ✅ Updates scoped to CodeSquare organization
+
+---
+
 ### Flow 4: Super Admin
 
 #### 4.1 Login
 
 **Steps:**
-1. Navigate to: `http://localhost:3000/superadmin/login`
+1. Navigate to: `https://www.whistrust.com/superadmin/login`
 2. **Enter Credentials:**
    - Email: `sup-adm@whistrust.com`
    - Password: `sup-pass-adm!1@3#5`
@@ -706,7 +649,7 @@ through this secure messaging system.
 #### 4.3 View Organizations
 
 **Steps:**
-1. Navigate to: `http://localhost:3000/superadmin/organizations`
+1. Navigate to: `https://www.whistrust.com/superadmin/organizations`
 2. **Verify Organization List:**
    - All organizations displayed
    - Organization details:
@@ -804,8 +747,8 @@ through this secure messaging system.
 #### 5.1 Manager Role
 
 **Login:**
-- Email: `hassan.hr@whistrust.com` (Demo) or create Manager in AISAR
-- Password: `Manager@WhistTrust2025` (Demo)
+- Create Manager user in AISAR or CodeSquare organization through admin portal
+- Use credentials set during user creation
 
 **Test Permissions:**
 1. ✅ Can view all reports
@@ -847,8 +790,8 @@ through this secure messaging system.
 #### 5.2 Investigator Role
 
 **Login:**
-- Email: `yusuf.investigator@whistrust.com` (Demo) or create Investigator in AISAR
-- Password: `Investigator@WhistTrust2025` (Demo)
+- Create Investigator user in AISAR or CodeSquare organization through admin portal
+- Use credentials set during user creation
 
 **Test Permissions:**
 1. ✅ Can view all reports
@@ -888,7 +831,8 @@ through this secure messaging system.
 #### 5.3 HR Role
 
 **Login:**
-- Create HR user in Demo or AISAR organization
+- Create HR user in AISAR or CodeSquare organization through admin portal
+- Use credentials set during user creation
 
 **Test Permissions:**
 1. ✅ Can view all reports
@@ -1164,12 +1108,12 @@ through this secure messaging system.
 
 **Steps:**
 1. **Submit Report (Reporter)**
-   - Go to `/org/aisar/report`
+   - Go to `https://www.whistrust.com/org/aisar/report`
    - Submit report with sample content
    - Save tracking code
 
 2. **Track Case (Reporter)**
-   - Go to `/org/aisar/track`
+   - Go to `https://www.whistrust.com/org/aisar/track`
    - Enter tracking code
    - Verify case status is "Pending"
    - Send initial message: "Thank you for acknowledging..."
@@ -1225,32 +1169,32 @@ through this secure messaging system.
 
 **Steps:**
 1. **Submit Report to AISAR**
-   - Go to `/org/aisar/report`
+   - Go to `https://www.whistrust.com/org/aisar/report`
    - Submit report
    - Save tracking code
 
 2. **Submit Report to CodeSquare**
-   - Go to `/org/codesquare/report`
+   - Go to `https://www.whistrust.com/org/codesquare/report`
    - Submit report
    - Save tracking code
 
 3. **Login as AISAR Admin**
-   - Login at `/org/aisar/login`
+   - Login at `https://www.whistrust.com/org/aisar/login`
    - View reports
    - ✅ Should only see AISAR reports
    - ❌ Should NOT see CodeSquare reports
 
 4. **Login as CodeSquare Admin**
-   - Login at `/org/codesquare/login`
+   - Login at `https://www.whistrust.com/org/codesquare/login`
    - View reports
    - ✅ Should only see CodeSquare reports
    - ❌ Should NOT see AISAR reports
 
 5. **Test Tracking Codes**
-   - AISAR tracking code on `/org/aisar/track`: ✅ Works
-   - AISAR tracking code on `/org/codesquare/track`: ❌ Should fail
-   - CodeSquare tracking code on `/org/codesquare/track`: ✅ Works
-   - CodeSquare tracking code on `/org/aisar/track`: ❌ Should fail
+   - AISAR tracking code on `https://www.whistrust.com/org/aisar/track`: ✅ Works
+   - AISAR tracking code on `https://www.whistrust.com/org/codesquare/track`: ❌ Should fail
+   - CodeSquare tracking code on `https://www.whistrust.com/org/codesquare/track`: ✅ Works
+   - CodeSquare tracking code on `https://www.whistrust.com/org/aisar/track`: ❌ Should fail
 
 **Expected Results:**
 - ✅ Complete data isolation
@@ -1321,24 +1265,24 @@ through this secure messaging system.
 
 **Steps:**
 1. **Submit Report to Organization**
-   - Go to `/org/aisar/report`
+   - Go to `https://www.whistrust.com/org/aisar/report`
    - Submit report
    - Verify success
 
 2. **Suspend Organization (Super Admin)**
-   - Login as Super Admin
+   - Login as Super Admin at `https://www.whistrust.com/superadmin/login`
    - Navigate to organizations
    - Edit AISAR organization
    - Change status to "Suspended"
    - Save
 
 3. **Test Report Submission (Blocked)**
-   - Try to submit report via `/org/aisar/report`
+   - Try to submit report via `https://www.whistrust.com/org/aisar/report`
    - ❌ Should show error: "Organization is not active"
    - ❌ Report should not be submitted
 
 4. **Test Admin Login (Limited)**
-   - Try to login as AISAR admin
+   - Try to login as AISAR admin at `https://www.whistrust.com/org/aisar/login`
    - ❌ Should be blocked or show suspension message
 
 5. **Test Existing Reports (Access)**
@@ -1458,14 +1402,14 @@ through this secure messaging system.
 
 **Symptoms:**
 - Wrong Supabase database used
-- Demo data in production or vice versa
+- Wrong organization data displayed
 
 **Solutions:**
 - Check `/test/connection` page
-- Verify environment variables in `.env.local` (local) or Vercel (production)
+- Verify environment variables in Vercel (production)
 - Verify URL path/subdomain detection
-- Check `lib/config/environment.ts` logic
-- Restart dev server after env changes
+- Check organization subdomain matches URL
+- Verify organization status is "Active"
 
 ---
 
@@ -1474,8 +1418,7 @@ through this secure messaging system.
 When reporting issues, include:
 
 1. **Environment:**
-   - [ ] Local or Production?
-   - [ ] URL accessed
+   - [ ] Production URL accessed
    - [ ] Browser and version
 
 2. **User Context:**
@@ -1498,12 +1441,13 @@ When reporting issues, include:
 ## Test Completion Checklist
 
 ### Core Flows
-- [ ] Anonymous reporter can submit report (demo)
-- [ ] Anonymous reporter can submit report (multi-tenant)
-- [ ] Reporter can track case
+- [ ] Anonymous reporter can submit report (AISAR)
+- [ ] Anonymous reporter can submit report (CodeSquare)
+- [ ] Reporter can track case (AISAR)
+- [ ] Reporter can track case (CodeSquare)
 - [ ] Reporter can send/receive messages
-- [ ] Admin can login (demo)
-- [ ] Admin can login (multi-tenant)
+- [ ] AISAR Admin can login
+- [ ] CodeSquare Admin can login
 - [ ] Admin can view cases
 - [ ] Admin can update case status
 - [ ] Admin can update priority
@@ -1559,10 +1503,9 @@ When reporting issues, include:
    - Use test files for attachments
    - Use realistic but test data
 
-2. **Test Both Environments:**
-   - Test on local development
-   - Test on production (if available)
-   - Note any differences
+2. **Test Production Environment:**
+   - Test on production URLs
+   - Note any issues or differences
 
 3. **Document Issues:**
    - Take screenshots of errors
