@@ -17,16 +17,35 @@ export async function GET(request: NextRequest) {
     const cookieStore = await cookies();
     const config = getSupabaseConfig();
     
-    // Get organization subdomain from URL
-    const hostname = request.headers.get("host") || "";
-    const pathname = request.nextUrl.pathname;
-    const organizationSubdomain = getOrganizationFromRequest(hostname, pathname);
+        // Get organization subdomain from URL
+        const hostname = request.headers.get("host") || "";
+        const pathname = request.nextUrl.pathname;
+        let organizationSubdomain = getOrganizationFromRequest(hostname, pathname);
+        
+        // If not found in URL, try to extract from state parameter (OAuth state)
+        if (!organizationSubdomain) {
+          const stateParam = request.nextUrl.searchParams.get("state");
+          if (stateParam) {
+            try {
+              // Try to decode base64 JSON state
+              const decoded = JSON.parse(Buffer.from(stateParam, 'base64').toString());
+              if (decoded.org) {
+                organizationSubdomain = decoded.org;
+              }
+            } catch (e) {
+              // If not JSON, might be plain subdomain
+              if (stateParam && stateParam.length < 50) {
+                organizationSubdomain = stateParam;
+              }
+            }
+          }
+        }
 
-    if (!organizationSubdomain) {
-      return NextResponse.redirect(
-        new URL("/error?message=Organization not found", request.url)
-      );
-    }
+        if (!organizationSubdomain) {
+          return NextResponse.redirect(
+            new URL("/error?message=Organization not found", request.url)
+          );
+        }
 
     // Create Supabase client for auth
     const supabaseAuth = createServerClient(config.url, config.anonKey, {
