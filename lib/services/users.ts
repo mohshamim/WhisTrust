@@ -1,9 +1,16 @@
 /**
  * Users Management Service
  * Handles CRUD operations for admin profiles
+ *
+ * IMPORTANT:
+ * - This file is used from client components (e.g. org users page)
+ * - We MUST NOT use the service-role client in the browser because it
+ *   depends on SUPABASE_SERVICE_ROLE_KEY, which is server-only.
+ * - Instead we use the regular Supabase client with the logged-in
+ *   admin's session and rely on RLS for permissions.
  */
 
-import { createServiceClient } from "@/lib/supabase/service-client";
+import { createClient } from "@/lib/supabase/client";
 
 export interface AdminUser {
   id: string;
@@ -41,7 +48,7 @@ export async function getOrganizationUsers(
   organizationId: string
 ): Promise<{ success: boolean; data?: AdminUser[]; error?: string }> {
   try {
-    const supabase = createServiceClient();
+    const supabase = createClient();
 
     const { data, error } = await supabase
       .from("admin_profiles")
@@ -68,7 +75,7 @@ export async function getUserById(
   userId: string
 ): Promise<{ success: boolean; data?: AdminUser; error?: string }> {
   try {
-    const supabase = createServiceClient();
+    const supabase = createClient();
 
     const { data, error } = await supabase
       .from("admin_profiles")
@@ -96,7 +103,7 @@ export async function checkEmailExists(
   email: string
 ): Promise<boolean> {
   try {
-    const supabase = createServiceClient();
+    const supabase = createClient();
 
     const { data, error } = await supabase
       .from("admin_profiles")
@@ -117,7 +124,7 @@ export async function checkEmailExists(
  */
 export async function getUserCasesCount(userId: string): Promise<number> {
   try {
-    const supabase = createServiceClient();
+    const supabase = createClient();
 
     const { count, error } = await supabase
       .from("reports")
@@ -137,7 +144,7 @@ export async function getUserCasesCount(userId: string): Promise<number> {
  */
 export async function updateLastLogin(userId: string): Promise<void> {
   try {
-    const supabase = createServiceClient();
+    const supabase = createClient();
 
     await supabase
       .from("admin_profiles")

@@ -108,42 +108,33 @@ function TrackPageContent() {
     setIsLoading(true);
 
     try {
-      // Import services
-      const { getReportByTrackingCode } = await import(
-        "@/lib/services/reports"
-      );
-      const { getReportMessages } = await import("@/lib/services/messages");
+      // Use server-side API to bypass RLS issues
+      const response = await fetch("/api/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ trackingCode }),
+      });
 
-      // Get report data
-      const reportResult = await getReportByTrackingCode(trackingCode);
+      const result = await response.json();
 
-      if (reportResult.success && reportResult.report) {
-        // Get messages for this report
-        const messagesResult = await getReportMessages(reportResult.report.id);
-
-        if (messagesResult.success) {
-          // Transform data to match UI expectations
-          setCaseData({
-            id: reportResult.report.tracking_code,
-            reportId: reportResult.report.id,
-            status: reportResult.report.status,
-            category: reportResult.report.category,
-            createdAt: new Date(
-              reportResult.report.created_at
-            ).toLocaleDateString(),
-            messages:
-              messagesResult.messages?.map((msg) => ({
-                id: msg.id,
-                type: msg.sender_type,
-                text: msg.content,
-                timestamp: new Date(msg.created_at).toLocaleString(),
-              })) || [],
-          });
-        } else {
-          toast.error(messagesResult.error || "Failed to load messages");
-        }
+      if (result.success && result.report) {
+        // Transform data to match UI expectations
+        setCaseData({
+          id: result.report.tracking_code,
+          reportId: result.report.id,
+          status: result.report.status,
+          category: result.report.category,
+          createdAt: new Date(result.report.created_at).toLocaleDateString(),
+          messages:
+            result.messages?.map((msg: any) => ({
+              id: msg.id,
+              type: msg.sender_type,
+              text: msg.content,
+              timestamp: new Date(msg.created_at).toLocaleString(),
+            })) || [],
+        });
       } else {
-        toast.error(reportResult.error || "Report not found");
+        toast.error(result.error || "Report not found");
       }
     } catch (error) {
       console.error("Error loading case:", error);

@@ -27,18 +27,46 @@ export async function PUT(request: NextRequest) {
     const { data: { user } } = await supabaseAuth.auth.getUser();
     if (!user) return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
 
-    const { key, enabled } = await request.json();
-    if (!key) return NextResponse.json({ success: false, error: "Missing key" }, { status: 400 });
-
+    const body = await request.json();
+    
+    // Support both single key update and bulk update
+    const { key, enabled, preferences } = body;
+    
     const supabase = createServiceClient();
-    const { data: profile } = await supabase
+    const { data: profile, error: profileError } = await supabase
       .from("admin_profiles")
       .select("notification_prefs")
       .eq("id", user.id)
       .single();
 
-    const prefs = { ...(profile?.notification_prefs || {}) };
-    prefs[key] = !!enabled;
+    if (profileError) {
+      console.error("Error fetching profile:", profileError);
+      return NextResponse.json({ success: false, error: "Failed to fetch profile" }, { status: 500 });
+    }
+
+    // Initialize prefs with defaults if not present
+    const existingPrefs = profile?.notification_prefs || {};
+    const prefs: Record<string, boolean> = {
+      new_report: existingPrefs.new_report !== false,
+      reporter_message: existingPrefs.reporter_message !== false,
+      assignment_change: existingPrefs.assignment_change !== false,
+      status_change: existingPrefs.status_change !== false,
+      ...existingPrefs, // Preserve any other existing prefs
+    };
+    
+    // If preferences object is provided, update all at once (bulk update)
+    if (preferences && typeof preferences === 'object') {
+      if (preferences.new_report !== undefined) prefs.new_report = !!preferences.new_report;
+      if (preferences.reporter_message !== undefined) prefs.reporter_message = !!preferences.reporter_message;
+      if (preferences.assignment_change !== undefined) prefs.assignment_change = !!preferences.assignment_change;
+      if (preferences.status_change !== undefined) prefs.status_change = !!preferences.status_change;
+    } 
+    // Otherwise, update single key (backward compatibility)
+    else if (key) {
+      prefs[key] = !!enabled;
+    } else {
+      return NextResponse.json({ success: false, error: "Missing key or preferences" }, { status: 400 });
+    }
 
     const { error } = await supabase
       .from("admin_profiles")

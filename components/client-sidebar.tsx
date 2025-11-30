@@ -21,6 +21,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { getOrganizationBySubdomain } from "@/lib/services/client-auth";
 
 interface ClientSidebarProps extends React.ComponentProps<typeof Sidebar> {
@@ -198,23 +199,46 @@ export function ClientSidebar({
     [subdomain, userRole, user]
   );
 
+  const roleLabel =
+    userRole === "admin"
+      ? "Admin workspace"
+      : userRole === "manager"
+        ? "Manager workspace"
+        : "Investigator workspace";
+
+  const resolvedLogo =
+    (typeof document !== "undefined" && document.documentElement.classList.contains("dark")
+      ? branding?.logo_dark_url
+      : branding?.logo_light_url) || branding?.logo_url;
+
+  const logoNode = resolvedLogo ? (
+    <img src={resolvedLogo} alt={organization.name} className="size-5 object-contain" />
+  ) : (
+    <Building2 className="size-5" />
+  );
+
+  const mobileHeader = (
+    <>
+      <SheetTitle className="flex items-center gap-3 text-base">
+        <span className="flex size-9 items-center justify-center rounded-md bg-sidebar-primary/10 text-sidebar-primary">
+          {logoNode}
+        </span>
+        <span className="min-w-0">
+          <span className="block truncate font-semibold">{organization.name}</span>
+          <span className="block truncate text-xs text-muted-foreground">{roleLabel}</span>
+        </span>
+      </SheetTitle>
+      <SheetDescription className="text-xs text-muted-foreground">
+        Navigate reports, users, and settings for {organization.name}.
+      </SheetDescription>
+    </>
+  );
+
   return (
-    <Sidebar collapsible="icon" {...props}>
+    <Sidebar collapsible="icon" mobileHeader={mobileHeader} {...props}>
       <SidebarHeader>
         <div className="flex items-center gap-2 px-2 py-1.5 text-sidebar-accent-foreground">
-          {branding?.logo_light_url || branding?.logo_dark_url || branding?.logo_url ? (
-            <img
-              src={
-                (typeof document !== "undefined" && document.documentElement.classList.contains("dark")
-                  ? branding?.logo_dark_url
-                  : branding?.logo_light_url) || branding?.logo_url
-              }
-              alt={organization.name}
-              className="size-5 object-contain"
-            />
-          ) : (
-            <Building2 className="size-5" />
-          )}
+          {logoNode}
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold">{organization.name}</span>
             <span className="truncate text-xs">Compliance Portal</span>

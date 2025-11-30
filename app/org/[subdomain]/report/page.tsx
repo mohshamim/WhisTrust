@@ -116,23 +116,28 @@ export default function AnonymousReportPage() {
       // Step 2: Upload file if present
       if (formData.file && data.reportId) {
         setUploadProgress(10);
-        
-        // Dynamic import of upload service
-        const { uploadFile } = await import('@/lib/services/storage');
-        
-        const uploadResult = await uploadFile({
-          reportId: data.reportId,
-          file: formData.file,
-          onProgress: (progress) => {
-            setUploadProgress(progress);
-          },
+
+        const attachmentFormData = new FormData();
+        attachmentFormData.append("reportId", data.reportId);
+        attachmentFormData.append("file", formData.file);
+
+        const uploadResponse = await fetch("/api/reports/upload-attachment", {
+          method: "POST",
+          body: attachmentFormData,
         });
 
-        if (!uploadResult.success) {
-          console.error('File upload failed:', uploadResult.error);
-          // Report was submitted but file upload failed
-          // Show warning but still show tracking code
-          setError(`Report submitted successfully, but file upload failed: ${uploadResult.error}`);
+        const uploadData = await uploadResponse.json();
+
+        if (!uploadResponse.ok || !uploadData.success) {
+          const message =
+            uploadData?.error ||
+            "File upload failed. Please try again without the attachment.";
+          console.error("File upload failed:", message);
+          setError(
+            `Report submitted successfully, but file upload failed: ${message}`
+          );
+        } else {
+          setUploadProgress(100);
         }
       }
 

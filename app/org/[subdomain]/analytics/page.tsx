@@ -47,12 +47,6 @@ import {
 } from "lucide-react";
 import { NotificationsDropdown } from "@/components/notifications-dropdown";
 import {
-  getAnalyticsSummary,
-  getReportsByStatus,
-  getReportsByCategory,
-  getReportsTrend,
-  getReportsByPriority,
-  getCategoryMetrics,
   exportAnalyticsCSV,
   type AnalyticsSummary,
   type ReportsByStatus,
@@ -122,34 +116,44 @@ export default function AnalyticsPage() {
     setLoadingData(true);
 
     try {
-      // Calculate date range
-      let range: { start: Date; end: Date } | undefined;
-      if (dateRange !== "all") {
-        const end = new Date();
-        const start = new Date();
-        start.setDate(start.getDate() - parseInt(dateRange));
-        range = { start, end };
+      const response = await fetch("/api/analytics", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          organizationId: organization.id,
+          dateRange,
+        }),
+      });
+
+      const payload = await response.json();
+
+      if (!response.ok || !payload.success) {
+        console.error("Analytics API error:", payload.error || response.statusText);
+        setSummary(null);
+        setByStatus([]);
+        setByCategory([]);
+        setTrend([]);
+        setByPriority([]);
+        setCategoryMetrics([]);
+        return;
       }
 
-      // Load all analytics data in parallel
-      const [summaryResult, statusResult, categoryResult, trendResult, priorityResult, metricsResult] =
-        await Promise.all([
-          getAnalyticsSummary(organization.id, range),
-          getReportsByStatus(organization.id, range),
-          getReportsByCategory(organization.id, range),
-          getReportsTrend(organization.id, parseInt(dateRange)),
-          getReportsByPriority(organization.id, range),
-          getCategoryMetrics(organization.id),
-        ]);
-
-      if (summaryResult.success && summaryResult.data) setSummary(summaryResult.data);
-      if (statusResult.success && statusResult.data) setByStatus(statusResult.data);
-      if (categoryResult.success && categoryResult.data) setByCategory(categoryResult.data);
-      if (trendResult.success && trendResult.data) setTrend(trendResult.data);
-      if (priorityResult.success && priorityResult.data) setByPriority(priorityResult.data);
-      if (metricsResult.success && metricsResult.data) setCategoryMetrics(metricsResult.data);
+      setSummary(payload.data.summary);
+      setByStatus(payload.data.byStatus);
+      setByCategory(payload.data.byCategory);
+      setTrend(payload.data.trend);
+      setByPriority(payload.data.byPriority);
+      setCategoryMetrics(payload.data.categoryMetrics);
     } catch (error) {
       console.error("Error loading analytics:", error);
+      setSummary(null);
+      setByStatus([]);
+      setByCategory([]);
+      setTrend([]);
+      setByPriority([]);
+      setCategoryMetrics([]);
     } finally {
       setLoadingData(false);
     }
@@ -321,27 +325,29 @@ export default function AnalyticsPage() {
                     </CardHeader>
                     <CardContent>
                       {byStatus.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={300}>
-                          <PieChart>
-                            <Pie
-                              data={byStatus}
-                              dataKey="count"
-                              nameKey="status"
-                              cx="50%"
-                              cy="50%"
-                              outerRadius={100}
-                              label={(entry) => `${entry.status}: ${entry.percentage}%`}
-                            >
-                              {byStatus.map((entry, index) => (
-                                <Cell
-                                  key={`cell-${index}`}
-                                  fill={COLORS[entry.status as keyof typeof COLORS] || "#888"}
-                                />
-                              ))}
-                            </Pie>
-                            <ChartTooltip content={<ChartTooltipContent />} />
-                          </PieChart>
-                        </ResponsiveContainer>
+                        <ChartContainer config={{}} className="h-[300px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <PieChart>
+                              <Pie
+                                data={byStatus}
+                                dataKey="count"
+                                nameKey="status"
+                                cx="50%"
+                                cy="50%"
+                                outerRadius={100}
+                                label={(entry) => `${entry.status}: ${entry.percentage}%`}
+                              >
+                                {byStatus.map((entry, index) => (
+                                  <Cell
+                                    key={`cell-${index}`}
+                                    fill={COLORS[entry.status as keyof typeof COLORS] || "#888"}
+                                  />
+                                ))}
+                              </Pie>
+                              <ChartTooltip content={<ChartTooltipContent />} />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        </ChartContainer>
                       ) : (
                         <div className="flex items-center justify-center h-[300px] text-muted-foreground">
                           No data available
@@ -361,15 +367,17 @@ export default function AnalyticsPage() {
                     </CardHeader>
                     <CardContent>
                       {byCategory.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={300}>
-                          <BarChart data={byCategory}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="category" angle={-45} textAnchor="end" height={100} />
-                            <YAxis />
-                            <ChartTooltip content={<ChartTooltipContent />} />
-                            <Bar dataKey="count" fill="#3b82f6" />
-                          </BarChart>
-                        </ResponsiveContainer>
+                        <ChartContainer config={{}} className="h-[300px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <BarChart data={byCategory}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="category" angle={-45} textAnchor="end" height={100} />
+                              <YAxis />
+                              <ChartTooltip content={<ChartTooltipContent />} />
+                              <Bar dataKey="count" fill="#3b82f6" />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        </ChartContainer>
                       ) : (
                         <div className="flex items-center justify-center h-[300px] text-muted-foreground">
                           No data available
@@ -389,15 +397,17 @@ export default function AnalyticsPage() {
                     </CardHeader>
                     <CardContent>
                       {trend.length > 0 ? (
-                        <ResponsiveContainer width="100%" height={300}>
-                          <LineChart data={trend}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="date" />
-                            <YAxis />
-                            <ChartTooltip content={<ChartTooltipContent />} />
-                            <Line type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} />
-                          </LineChart>
-                        </ResponsiveContainer>
+                        <ChartContainer config={{}} className="h-[300px]">
+                          <ResponsiveContainer width="100%" height="100%">
+                            <LineChart data={trend}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="date" />
+                              <YAxis />
+                              <ChartTooltip content={<ChartTooltipContent />} />
+                              <Line type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} />
+                            </LineChart>
+                          </ResponsiveContainer>
+                        </ChartContainer>
                       ) : (
                         <div className="flex items-center justify-center h-[300px] text-muted-foreground">
                           No trend data available
@@ -418,28 +428,30 @@ export default function AnalyticsPage() {
                     <CardContent>
                       {byPriority.length > 0 ? (
                         <div className="grid md:grid-cols-2 gap-6">
-                          <ResponsiveContainer width="100%" height={250}>
-                            <PieChart>
-                              <Pie
-                                data={byPriority}
-                                dataKey="count"
-                                nameKey="priority"
-                                cx="50%"
-                                cy="50%"
-                                innerRadius={60}
-                                outerRadius={90}
-                                label
-                              >
-                                {byPriority.map((entry, index) => (
-                                  <Cell
-                                    key={`cell-${index}`}
-                                    fill={PRIORITY_COLORS[entry.priority as keyof typeof PRIORITY_COLORS] || "#888"}
-                                  />
-                                ))}
-                              </Pie>
-                              <ChartTooltip content={<ChartTooltipContent />} />
-                            </PieChart>
-                          </ResponsiveContainer>
+                          <ChartContainer config={{}} className="h-[250px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                              <PieChart>
+                                <Pie
+                                  data={byPriority}
+                                  dataKey="count"
+                                  nameKey="priority"
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius={60}
+                                  outerRadius={90}
+                                  label
+                                >
+                                  {byPriority.map((entry, index) => (
+                                    <Cell
+                                      key={`cell-${index}`}
+                                      fill={PRIORITY_COLORS[entry.priority as keyof typeof PRIORITY_COLORS] || "#888"}
+                                    />
+                                  ))}
+                                </Pie>
+                                <ChartTooltip content={<ChartTooltipContent />} />
+                              </PieChart>
+                            </ResponsiveContainer>
+                          </ChartContainer>
                           <div className="flex flex-col justify-center space-y-3">
                             {byPriority.map((item) => (
                               <div key={item.priority} className="flex items-center justify-between">

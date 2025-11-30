@@ -24,10 +24,18 @@ import {
   Palette,
   Image as ImageIcon,
   Save,
+  Bell,
+  MessageSquare,
+  UserCheck,
+  CheckCircle2,
+  Key,
+  Globe,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import {
   ColorPicker,
@@ -49,6 +57,19 @@ export default function ClientSettingsPage() {
   const [organization, setOrganization] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [savingNotifPrefs, setSavingNotifPrefs] = useState(false);
+  const [savingSSO, setSavingSSO] = useState(false);
+  
+  // SSO configuration state
+  const [ssoConfig, setSsoConfig] = useState({
+    sso_enabled: false,
+    sso_provider: "" as "azure" | "google" | "oidc" | "",
+    sso_client_id: "",
+    sso_client_secret: "",
+    sso_issuer_url: "",
+    sso_redirect_url: "",
+    sso_domain_restriction: "",
+  });
 
   // Branding form state
   const [branding, setBranding] = useState({
@@ -69,17 +90,68 @@ export default function ClientSettingsPage() {
     status_change: true,
   });
   const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [logoLightFile, setLogoLightFile] = useState<File | null>(null);
+  const [logoDarkFile, setLogoDarkFile] = useState<File | null>(null);
   const [emailLogoFile, setEmailLogoFile] = useState<File | null>(null);
+  const [faviconFile, setFaviconFile] = useState<File | null>(null);
+
+  // Validation state
+  const [validationErrors, setValidationErrors] = useState<{
+    support_email?: string;
+    support_phone?: string;
+  }>({});
+
+  // Load SSO configuration function (defined before checkAuth)
+  const loadSSOConfig = async () => {
+    try {
+      const res = await fetch("/api/org/sso", {
+        method: "GET",
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (res.ok && data.success && data.config) {
+        const baseUrl = typeof window !== 'undefined' 
+          ? window.location.origin 
+          : 'http://localhost:3000';
+        const defaultRedirectUrl = `${baseUrl}/org/${subdomain}/sso/callback`;
+        
+        setSsoConfig({
+          sso_enabled: data.config.sso_enabled || false,
+          sso_provider: data.config.sso_provider || "",
+          sso_client_id: data.config.sso_client_id || "",
+          sso_client_secret: "", // Never load secret
+          sso_issuer_url: data.config.sso_issuer_url || "",
+          sso_redirect_url: data.config.sso_redirect_url || defaultRedirectUrl,
+          sso_domain_restriction: data.config.sso_domain_restriction || "",
+        });
+      }
+    } catch (err) {
+      console.error("Failed to load SSO config:", err);
+    }
+  };
 
   useEffect(() => {
-    checkAuth();
-  }, []);
+    if (subdomain) {
+      checkAuth();
+    }
+  }, [subdomain]);
 
   const checkAuth = async () => {
     try {
       const { user: clientUser, organization: org } = await getCurrentClientAdmin();
       
-      if (!clientUser || !org || org.subdomain !== subdomain) {
+      if (!clientUser || !org) {
+        console.log("Not authenticated, redirecting to login");
+        router.push(`/org/${subdomain}/login`);
+        return;
+      }
+
+      // Verify user belongs to this organization
+      if (org.subdomain !== subdomain) {
+        console.log("User doesn't belong to this organization", {
+          userOrg: org.subdomain,
+          requestedSubdomain: subdomain,
+        });
         router.push(`/org/${subdomain}/login`);
         return;
       }
@@ -110,10 +182,17 @@ export default function ClientSettingsPage() {
           status_change: (clientUser as any).notification_prefs.status_change !== false,
         });
       }
+
+      // Load SSO configuration (don't block on this)
+      loadSSOConfig().catch((err) => {
+        console.error("Failed to load SSO config:", err);
+        // Non-critical, continue anyway
+      });
+      
+      setLoading(false);
     } catch (error) {
       console.error("Auth check error:", error);
-      router.push(`/org/${subdomain}/login`);
-    } finally {
+      // Don't redirect on temporary errors - let user retry
       setLoading(false);
     }
   };
@@ -126,10 +205,55 @@ export default function ClientSettingsPage() {
     );
   }
 
+  // Calculate usage percentages with zero-division protection
+  const calculatePercentage = (current: number, max: number): number => {
+    if (!max || max === 0 || isNaN(max) || !isFinite(max)) {
+      return 0;
+    }
+    if (!current || current === 0 || isNaN(current) || !isFinite(current)) {
+      return 0;
+    }
+    const percentage = (current / max) * 100;
+    return isNaN(percentage) || !isFinite(percentage) ? 0 : Math.max(0, Math.min(100, percentage));
+  };
+
   const usagePercentages = {
-    users: (organization.current_admin_users / organization.max_admin_users) * 100,
-    reports: (organization.current_reports_count / organization.max_reports_per_month) * 100,
-    storage: (organization.current_storage_mb / organization.max_storage_mb) * 100,
+    users: calculatePercentage(organization.current_admin_users, organization.max_admin_users),
+    reports: calculatePercentage(organization.current_reports_count, organization.max_reports_per_month),
+    storage: calculatePercentage(organization.current_storage_mb, organization.max_storage_mb),
+  };
+
+  // Validation functions
+  const validateEmail = (email: string): string | undefined => {
+    if (!email.trim()) return undefined; // Empty is allowed (optional field)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address";
+    }
+    return undefined;
+  };
+
+  const validatePhone = (phone: string): string | undefined => {
+    if (!phone.trim()) return undefined; // Empty is allowed (optional field)
+    // Basic phone validation: allows digits, spaces, dashes, parentheses, plus sign
+    const phoneRegex = /^[\+]?[(]?[0-9]{1,4}[)]?[-\s\.]?[(]?[0-9]{1,4}[)]?[-\s\.]?[0-9]{1,9}$/;
+    if (!phoneRegex.test(phone.replace(/\s/g, ""))) {
+      return "Please enter a valid phone number";
+    }
+    return undefined;
+  };
+
+  const validateForm = (): boolean => {
+    const errors: { support_email?: string; support_phone?: string } = {};
+    
+    const emailError = validateEmail(branding.support_email);
+    if (emailError) errors.support_email = emailError;
+
+    const phoneError = validatePhone(branding.support_phone);
+    if (phoneError) errors.support_phone = phoneError;
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   return (
@@ -202,6 +326,8 @@ export default function ClientSettingsPage() {
                               return;
                             }
                             setBranding((b) => ({ ...b, logo_url: data.url }));
+                            setLogoFile(null); // Clear file input after successful upload
+                            toast.success("Logo uploaded successfully");
                           } catch (err) {
                             console.error(err);
                             toast.error("Upload failed");
@@ -225,14 +351,14 @@ export default function ClientSettingsPage() {
                   <div className="space-y-2">
                     <div className="text-sm font-medium">Logo (Light Theme)</div>
                     <div className="flex items-center gap-2">
-                      <Input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} />
+                      <Input type="file" accept="image/*" onChange={(e) => setLogoLightFile(e.target.files?.[0] || null)} />
                       <Button
                         variant="outline"
                         onClick={async () => {
-                          if (!logoFile) return;
+                          if (!logoLightFile) return;
                           try {
                             const form = new FormData();
-                            form.append("file", logoFile);
+                            form.append("file", logoLightFile);
                             form.append("kind", "logo_light");
                             const res = await fetch("/api/org/branding/upload", {
                               method: "POST",
@@ -245,6 +371,8 @@ export default function ClientSettingsPage() {
                               return;
                             }
                             setBranding((b) => ({ ...b, logo_light_url: data.url }));
+                            setLogoLightFile(null); // Clear file input after successful upload
+                            toast.success("Logo (Light) uploaded successfully");
                           } catch (err) {
                             console.error(err);
                             toast.error("Upload failed");
@@ -262,14 +390,14 @@ export default function ClientSettingsPage() {
                   <div className="space-y-2">
                     <div className="text-sm font-medium">Logo (Dark Theme)</div>
                     <div className="flex items-center gap-2">
-                      <Input type="file" accept="image/*" onChange={(e) => setLogoFile(e.target.files?.[0] || null)} />
+                      <Input type="file" accept="image/*" onChange={(e) => setLogoDarkFile(e.target.files?.[0] || null)} />
                       <Button
                         variant="outline"
                         onClick={async () => {
-                          if (!logoFile) return;
+                          if (!logoDarkFile) return;
                           try {
                             const form = new FormData();
-                            form.append("file", logoFile);
+                            form.append("file", logoDarkFile);
                             form.append("kind", "logo_dark");
                             const res = await fetch("/api/org/branding/upload", {
                               method: "POST",
@@ -282,6 +410,8 @@ export default function ClientSettingsPage() {
                               return;
                             }
                             setBranding((b) => ({ ...b, logo_dark_url: data.url }));
+                            setLogoDarkFile(null); // Clear file input after successful upload
+                            toast.success("Logo (Dark) uploaded successfully");
                           } catch (err) {
                             console.error(err);
                             toast.error("Upload failed");
@@ -324,6 +454,8 @@ export default function ClientSettingsPage() {
                               return;
                             }
                             setBranding((b) => ({ ...b, email_logo_url: data.url }));
+                            setEmailLogoFile(null); // Clear file input after successful upload
+                            toast.success("Email logo uploaded successfully");
                           } catch (err) {
                             console.error(err);
                             toast.error("Upload failed");
@@ -347,14 +479,14 @@ export default function ClientSettingsPage() {
                   <div className="space-y-2">
                     <div className="text-sm font-medium">Favicon (32x32)</div>
                     <div className="flex items-center gap-2">
-                      <Input type="file" accept="image/*" onChange={(e) => setEmailLogoFile(e.target.files?.[0] || null)} />
+                      <Input type="file" accept="image/*" onChange={(e) => setFaviconFile(e.target.files?.[0] || null)} />
                       <Button
                         variant="outline"
                         onClick={async () => {
-                          if (!emailLogoFile) return;
+                          if (!faviconFile) return;
                           try {
                             const form = new FormData();
-                            form.append("file", emailLogoFile);
+                            form.append("file", faviconFile);
                             form.append("kind", "favicon");
                             const res = await fetch("/api/org/branding/upload", {
                               method: "POST",
@@ -367,6 +499,7 @@ export default function ClientSettingsPage() {
                               return;
                             }
                             setBranding((b) => ({ ...b, favicon_url: data.url }));
+                            setFaviconFile(null); // Clear file input after successful upload
                             // Update head link for live preview
                             const link: HTMLLinkElement =
                               (document.querySelector('link[rel="icon"]') as HTMLLinkElement) ||
@@ -377,6 +510,7 @@ export default function ClientSettingsPage() {
                                 return l;
                               })();
                             link.href = data.url;
+                            toast.success("Favicon uploaded successfully");
                           } catch (err) {
                             console.error(err);
                             toast.error("Upload failed");
@@ -391,21 +525,55 @@ export default function ClientSettingsPage() {
                     ) : null}
                   </div>
                   <div className="space-y-2">
-                    <div className="text-sm font-medium">Support Email</div>
+                    <Label htmlFor="support_email" className="text-sm font-medium">
+                      Support Email
+                    </Label>
                     <Input
+                      id="support_email"
                       type="email"
                       value={branding.support_email}
-                      onChange={(e) => setBranding((b) => ({ ...b, support_email: e.target.value }))}
+                      onChange={(e) => {
+                        setBranding((b) => ({ ...b, support_email: e.target.value }));
+                        // Clear error when user starts typing
+                        if (validationErrors.support_email) {
+                          setValidationErrors((prev) => ({ ...prev, support_email: undefined }));
+                        }
+                      }}
+                      onBlur={() => {
+                        const error = validateEmail(branding.support_email);
+                        setValidationErrors((prev) => ({ ...prev, support_email: error }));
+                      }}
                       placeholder="support@yourorg.com"
+                      className={validationErrors.support_email ? "border-red-500" : ""}
                     />
+                    {validationErrors.support_email && (
+                      <p className="text-sm text-red-500">{validationErrors.support_email}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
-                    <div className="text-sm font-medium">Support Phone</div>
+                    <Label htmlFor="support_phone" className="text-sm font-medium">
+                      Support Phone
+                    </Label>
                     <Input
+                      id="support_phone"
                       value={branding.support_phone}
-                      onChange={(e) => setBranding((b) => ({ ...b, support_phone: e.target.value }))}
+                      onChange={(e) => {
+                        setBranding((b) => ({ ...b, support_phone: e.target.value }));
+                        // Clear error when user starts typing
+                        if (validationErrors.support_phone) {
+                          setValidationErrors((prev) => ({ ...prev, support_phone: undefined }));
+                        }
+                      }}
+                      onBlur={() => {
+                        const error = validatePhone(branding.support_phone);
+                        setValidationErrors((prev) => ({ ...prev, support_phone: error }));
+                      }}
                       placeholder="+1 555-123-4567"
+                      className={validationErrors.support_phone ? "border-red-500" : ""}
                     />
+                    {validationErrors.support_phone && (
+                      <p className="text-sm text-red-500">{validationErrors.support_phone}</p>
+                    )}
                   </div>
                   <div className="space-y-2">
                     <div className="text-sm font-medium">Primary Color (hex)</div>
@@ -468,6 +636,12 @@ export default function ClientSettingsPage() {
                 <div className="flex justify-end">
                   <Button
                     onClick={async () => {
+                      // Validate before saving
+                      if (!validateForm()) {
+                        toast.error("Please fix validation errors before saving");
+                        return;
+                      }
+
                       try {
                         setSaving(true);
                         const res = await fetch("/api/org/branding", {
@@ -500,6 +674,8 @@ export default function ClientSettingsPage() {
                           link.href = branding.favicon_url;
                         }
                         toast.success("Branding updated successfully");
+                        // Clear validation errors on successful save
+                        setValidationErrors({});
                       } catch (err) {
                         console.error(err);
                         toast.error("Something went wrong");
@@ -507,7 +683,7 @@ export default function ClientSettingsPage() {
                         setSaving(false);
                       }
                     }}
-                    disabled={saving}
+                    disabled={saving || Object.keys(validationErrors).length > 0}
                   >
                     <Save className={`h-4 w-4 mr-2 ${saving ? "animate-pulse" : ""}`} />
                     {saving ? "Saving..." : "Save Changes"}
@@ -516,7 +692,320 @@ export default function ClientSettingsPage() {
               </CardContent>
             </Card>
 
-            {/* Notifications UI removed by requirement */}
+            {/* SSO Configuration */}
+            {user.role === "admin" && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Key className="h-5 w-5" />
+                    Single Sign-On (SSO)
+                  </CardTitle>
+                  <CardDescription>
+                    Configure SSO authentication for your organization
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-4">
+                    {/* Enable SSO Toggle */}
+                    <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
+                      <div>
+                        <Label htmlFor="sso_enabled" className="text-sm font-medium cursor-pointer">
+                          Enable SSO
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          Allow users to sign in with SSO provider
+                        </p>
+                      </div>
+                      <Checkbox
+                        id="sso_enabled"
+                        checked={ssoConfig.sso_enabled}
+                        onCheckedChange={(checked) =>
+                          setSsoConfig((c) => ({ ...c, sso_enabled: !!checked }))
+                        }
+                      />
+                    </div>
+
+                    {ssoConfig.sso_enabled && (
+                      <>
+                        {/* SSO Provider */}
+                        <div className="space-y-2">
+                          <Label htmlFor="sso_provider">SSO Provider</Label>
+                          <Select
+                            value={ssoConfig.sso_provider}
+                            onValueChange={(value) =>
+                              setSsoConfig((c) => ({ ...c, sso_provider: value as any }))
+                            }
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select provider" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="azure">Azure AD</SelectItem>
+                              <SelectItem value="google">Google Workspace</SelectItem>
+                              <SelectItem value="oidc">Generic OIDC</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+
+                        {/* Client ID */}
+                        <div className="space-y-2">
+                          <Label htmlFor="sso_client_id">Client ID *</Label>
+                          <Input
+                            id="sso_client_id"
+                            value={ssoConfig.sso_client_id}
+                            onChange={(e) =>
+                              setSsoConfig((c) => ({ ...c, sso_client_id: e.target.value }))
+                            }
+                            placeholder="Enter OAuth Client ID"
+                          />
+                        </div>
+
+                        {/* Client Secret */}
+                        <div className="space-y-2">
+                          <Label htmlFor="sso_client_secret">Client Secret *</Label>
+                          <Input
+                            id="sso_client_secret"
+                            type="password"
+                            value={ssoConfig.sso_client_secret}
+                            onChange={(e) =>
+                              setSsoConfig((c) => ({ ...c, sso_client_secret: e.target.value }))
+                            }
+                            placeholder={ssoConfig.sso_client_secret ? "••••••••" : "Enter OAuth Client Secret"}
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Leave empty to keep existing secret
+                          </p>
+                        </div>
+
+                        {/* Issuer URL (for OIDC) */}
+                        {ssoConfig.sso_provider === "oidc" && (
+                          <div className="space-y-2">
+                            <Label htmlFor="sso_issuer_url">Issuer URL *</Label>
+                            <Input
+                              id="sso_issuer_url"
+                              value={ssoConfig.sso_issuer_url}
+                              onChange={(e) =>
+                                setSsoConfig((c) => ({ ...c, sso_issuer_url: e.target.value }))
+                              }
+                              placeholder="https://your-oidc-provider.com"
+                            />
+                          </div>
+                        )}
+
+                        {/* Redirect URL */}
+                        <div className="space-y-2">
+                          <Label htmlFor="sso_redirect_url">Redirect URL</Label>
+                          <Input
+                            id="sso_redirect_url"
+                            value={ssoConfig.sso_redirect_url}
+                            onChange={(e) =>
+                              setSsoConfig((c) => ({ ...c, sso_redirect_url: e.target.value }))
+                            }
+                            placeholder="Auto-generated if left empty"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            This is your app&apos;s callback URL where Supabase will redirect after OAuth. 
+                            Default: {typeof window !== 'undefined' ? window.location.origin : ''}/org/{organization.subdomain}/sso/callback
+                          </p>
+                          <p className="text-xs text-amber-600 dark:text-amber-400">
+                            ⚠️ Note: Google Cloud Console should use Supabase&apos;s callback URL: https://[project-ref].supabase.co/auth/v1/callback
+                          </p>
+                        </div>
+
+                        {/* Domain Restriction (Optional) */}
+                        <div className="space-y-2">
+                          <Label htmlFor="sso_domain_restriction">Domain Restriction (Optional)</Label>
+                          <Input
+                            id="sso_domain_restriction"
+                            value={ssoConfig.sso_domain_restriction}
+                            onChange={(e) =>
+                              setSsoConfig((c) => ({ ...c, sso_domain_restriction: e.target.value }))
+                            }
+                            placeholder="example.com"
+                          />
+                          <p className="text-xs text-muted-foreground">
+                            Only allow emails from this domain (e.g., example.com)
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end pt-2">
+                    <Button
+                      onClick={async () => {
+                        try {
+                          setSavingSSO(true);
+                          const res = await fetch("/api/org/sso", {
+                            method: "PUT",
+                            headers: { "Content-Type": "application/json" },
+                            credentials: "include",
+                            body: JSON.stringify(ssoConfig),
+                          });
+                          const data = await res.json();
+                          if (!res.ok || !data.success) {
+                            toast.error(data.error || "Failed to save SSO configuration");
+                            return;
+                          }
+                          toast.success("SSO configuration updated successfully");
+                          // Reload config to get updated redirect URL
+                          await loadSSOConfig();
+                        } catch (err) {
+                          console.error(err);
+                          toast.error("Something went wrong");
+                        } finally {
+                          setSavingSSO(false);
+                        }
+                      }}
+                      disabled={savingSSO}
+                    >
+                      <Save className={`h-4 w-4 mr-2 ${savingSSO ? "animate-pulse" : ""}`} />
+                      {savingSSO ? "Saving..." : "Save SSO Configuration"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Notification Preferences */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bell className="h-5 w-5" />
+                  Notification Preferences
+                </CardTitle>
+                <CardDescription>
+                  Choose which notifications you want to receive
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-md bg-primary/10">
+                        <FileText className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <Label htmlFor="new_report" className="text-sm font-medium cursor-pointer">
+                          New Report
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          Get notified when a new report is submitted
+                        </p>
+                      </div>
+                    </div>
+                    <Checkbox
+                      id="new_report"
+                      checked={notifPrefs.new_report}
+                      onCheckedChange={(checked) =>
+                        setNotifPrefs((p) => ({ ...p, new_report: !!checked }))
+                      }
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-md bg-primary/10">
+                        <MessageSquare className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <Label htmlFor="reporter_message" className="text-sm font-medium cursor-pointer">
+                          Reporter Message
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          Get notified when a reporter sends a message
+                        </p>
+                      </div>
+                    </div>
+                    <Checkbox
+                      id="reporter_message"
+                      checked={notifPrefs.reporter_message}
+                      onCheckedChange={(checked) =>
+                        setNotifPrefs((p) => ({ ...p, reporter_message: !!checked }))
+                      }
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-md bg-primary/10">
+                        <UserCheck className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <Label htmlFor="assignment_change" className="text-sm font-medium cursor-pointer">
+                          Assignment Change
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          Get notified when a report is assigned or reassigned
+                        </p>
+                      </div>
+                    </div>
+                    <Checkbox
+                      id="assignment_change"
+                      checked={notifPrefs.assignment_change}
+                      onCheckedChange={(checked) =>
+                        setNotifPrefs((p) => ({ ...p, assignment_change: !!checked }))
+                      }
+                    />
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 rounded-lg border bg-card">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-md bg-primary/10">
+                        <CheckCircle2 className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <Label htmlFor="status_change" className="text-sm font-medium cursor-pointer">
+                          Status Change
+                        </Label>
+                        <p className="text-xs text-muted-foreground">
+                          Get notified when a report status is updated
+                        </p>
+                      </div>
+                    </div>
+                    <Checkbox
+                      id="status_change"
+                      checked={notifPrefs.status_change}
+                      onCheckedChange={(checked) =>
+                        setNotifPrefs((p) => ({ ...p, status_change: !!checked }))
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <Button
+                    onClick={async () => {
+                      try {
+                        setSavingNotifPrefs(true);
+                        const res = await fetch("/api/me/notifications", {
+                          method: "PUT",
+                          headers: { "Content-Type": "application/json" },
+                          credentials: "include",
+                          body: JSON.stringify({ preferences: notifPrefs }),
+                        });
+                        const data = await res.json();
+                        if (!res.ok || !data.success) {
+                          toast.error(data.error || "Failed to save notification preferences");
+                          return;
+                        }
+                        toast.success("Notification preferences updated successfully");
+                      } catch (err) {
+                        console.error(err);
+                        toast.error("Something went wrong");
+                      } finally {
+                        setSavingNotifPrefs(false);
+                      }
+                    }}
+                    disabled={savingNotifPrefs}
+                  >
+                    <Save className={`h-4 w-4 mr-2 ${savingNotifPrefs ? "animate-pulse" : ""}`} />
+                    {savingNotifPrefs ? "Saving..." : "Save Preferences"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Organization Info */}
             <Card>
               <CardHeader>
@@ -770,8 +1259,13 @@ function UsageItem({
   percentage: number;
   unit?: string;
 }) {
-  const isNearLimit = percentage >= 80;
-  const isOverLimit = percentage >= 100;
+  // Ensure percentage is a valid number between 0 and 100
+  const safePercentage = isNaN(percentage) || !isFinite(percentage) ? 0 : Math.max(0, Math.min(100, percentage));
+  const safeCurrent = isNaN(current) || !isFinite(current) ? 0 : current;
+  const safeMax = isNaN(max) || !isFinite(max) || max === 0 ? 0 : max;
+
+  const isNearLimit = safePercentage >= 80;
+  const isOverLimit = safePercentage >= 100;
 
   return (
     <div>
@@ -781,11 +1275,11 @@ function UsageItem({
           <span className="font-medium">{label}</span>
         </div>
         <span className={`text-sm font-mono ${isOverLimit ? "text-red-600" : isNearLimit ? "text-amber-600" : ""}`}>
-          {current.toLocaleString()} / {max.toLocaleString()} {unit}
+          {safeCurrent.toLocaleString()} / {safeMax > 0 ? safeMax.toLocaleString() : "∞"} {unit}
         </span>
       </div>
       <Progress 
-        value={Math.min(percentage, 100)} 
+        value={safePercentage} 
         className={isOverLimit ? "bg-red-200" : isNearLimit ? "bg-amber-200" : ""}
       />
     </div>

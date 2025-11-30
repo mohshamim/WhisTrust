@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import type { ElementType, ReactNode } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { getCurrentClientAdmin } from "@/lib/services/client-auth";
 import { sendAdminMessage, getReportMessages } from "@/lib/services/messages";
@@ -87,9 +88,14 @@ export default function ClientReportsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [sortBy, setSortBy] = useState("created_at"); // created_at, priority, status
+  const [assignmentFilter, setAssignmentFilter] = useState("all"); // investigator-specific
+  const [assignedUserFilter, setAssignedUserFilter] = useState("all");
+  const [dateRangeFilter, setDateRangeFilter] = useState("all");
   
   // Get user permissions
-  const permissions = user ? getPermissions(user.role as import("@/lib/permissions").UserRole) : null;
+  const permissions = user
+    ? getPermissions(user.role as import("@/lib/permissions").UserRole)
+    : null;
   
   // Drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -135,6 +141,60 @@ export default function ClientReportsPage() {
     enabled: !!selectedReport?.id,
   });
 
+  const FILTER_TRIGGER_CLASS =
+    "h-10 min-w-[150px] rounded-full border border-border/60 bg-card/80 px-3 text-sm font-medium text-foreground/80 justify-start gap-2 hover:bg-muted/40 focus:ring-0";
+
+  const hasActiveFilters =
+    searchQuery.trim().length > 0 ||
+    statusFilter !== "all" ||
+    priorityFilter !== "all" ||
+    sortBy !== "created_at" ||
+    assignmentFilter !== "all" ||
+    assignedUserFilter !== "all" ||
+    dateRangeFilter !== "all";
+
+  const activeFiltersCount = [
+    searchQuery.trim().length > 0,
+    statusFilter !== "all",
+    priorityFilter !== "all",
+    sortBy !== "created_at",
+    assignmentFilter !== "all",
+    assignedUserFilter !== "all",
+    dateRangeFilter !== "all",
+  ].filter(Boolean).length;
+
+  const resetFilters = () => {
+    setSearchQuery("");
+    setStatusFilter("all");
+    setPriorityFilter("all");
+    setSortBy("created_at");
+    setAssignmentFilter("all");
+    setAssignedUserFilter("all");
+    setDateRangeFilter("all");
+  };
+
+  const FilterSelect = ({
+    value,
+    onValueChange,
+    icon: Icon,
+    placeholder,
+    children,
+  }: {
+    value: string;
+    onValueChange: (value: string) => void;
+    icon?: ElementType;
+    placeholder: string;
+    children: ReactNode;
+  }) => (
+    <Select value={value} onValueChange={onValueChange}>
+      <SelectTrigger className={FILTER_TRIGGER_CLASS}>
+        {Icon ? <Icon className="h-4 w-4 text-muted-foreground" /> : null}
+        <SelectValue placeholder={placeholder} />
+      </SelectTrigger>
+      <SelectContent sideOffset={6}>{children}</SelectContent>
+    </Select>
+  );
+
   // Apply status filter from URL params
   useEffect(() => {
     const statusParam = searchParams.get('status');
@@ -149,7 +209,17 @@ export default function ClientReportsPage() {
 
   useEffect(() => {
     filterReports();
-  }, [searchQuery, statusFilter, priorityFilter, sortBy, reports]);
+  }, [
+    searchQuery,
+    statusFilter,
+    priorityFilter,
+    sortBy,
+    reports,
+    assignmentFilter,
+    assignedUserFilter,
+    dateRangeFilter,
+    user,
+  ]);
 
   // Load admin users when component mounts
   useEffect(() => {
@@ -231,6 +301,34 @@ export default function ClientReportsPage() {
       filtered = filtered.filter(r => r.priority === priorityFilter);
     }
 
+    // Investigator "assigned to me" filter
+    if (user?.role === "investigator") {
+      if (assignmentFilter === "assigned_to_me") {
+        filtered = filtered.filter(r => r.assigned_to === user.id);
+      } else if (assignmentFilter === "unassigned") {
+        filtered = filtered.filter(r => !r.assigned_to);
+      }
+    }
+
+    // Assigned user filter (all roles)
+    if (assignedUserFilter === "unassigned") {
+      filtered = filtered.filter(r => !r.assigned_to);
+    } else if (assignedUserFilter !== "all") {
+      filtered = filtered.filter(r => r.assigned_to === assignedUserFilter);
+    }
+
+    // Date range filter
+    if (dateRangeFilter !== "all") {
+      const days = parseInt(dateRangeFilter, 10);
+      if (!isNaN(days)) {
+        const threshold = new Date();
+        threshold.setDate(threshold.getDate() - days);
+        filtered = filtered.filter(
+          (r) => new Date(r.created_at).getTime() >= threshold.getTime()
+        );
+      }
+    }
+
     // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter(r =>
@@ -258,32 +356,84 @@ export default function ClientReportsPage() {
   };
 
   const handleSaveReport = async () => {
-    if (!selectedReport) return;
+    if (!selectedReport || !permissions) return;
 
-    setSaving(true);
-    try {
-      const { createMultiTenantClient } = await import("@/lib/supabase/multi-tenant-client");
-      const supabase = createMultiTenantClient();
+    // Build minimal update payload based on role/permissions
+    const updateData: any = {
+      updated_at: new Date().toISOString(),
+    };
 
-      // Prepare update data
-      const updateData: any = {
-        status: editData.status,
-        priority: editData.priority,
-        internal_notes: editData.internal_notes,
-        updated_at: new Date().toISOString(),
-      };
+    // ---- STATUS (with investigator-specific rules) ----
+    if (permissions.canEditStatus) {
+      const currentStatus = selectedReport.status;
+      const nextStatus = editData.status;
 
-      // Handle assignment
+      if (user?.role === "investigator") {
+        const isAssignedToMe =
+          !!selectedReport.assigned_to &&
+          selectedReport.assigned_to === user.id;
+
+        if (!isAssignedToMe) {
+          const { toast } = await import("sonner");
+          toast.error(
+            "You can only change the status for cases that are assigned to you."
+          );
+          return;
+        }
+
+        const allowedTransitions: Record<string, string[]> = {
+          // Investigator lifecycle (PO guidance)
+          submitted: ["under_review", "investigating"],
+          under_review: ["investigating", "resolved"],
+          investigating: ["under_review", "resolved"],
+        };
+
+        const allowedNext = allowedTransitions[currentStatus] || [];
+        if (!allowedNext.includes(nextStatus)) {
+          const { toast } = await import("sonner");
+          toast.error(
+            `You can't change the status from "${currentStatus.replace(
+              "_",
+              " "
+            )}" to "${nextStatus.replace("_", " ")}".`
+          );
+          return;
+        }
+      }
+
+      updateData.status = nextStatus;
+    }
+
+    // ---- PRIORITY (admin/manager only) ----
+    if (permissions.canEditPriority) {
+      updateData.priority = editData.priority;
+    }
+
+    // ---- ASSIGNMENT (admin/manager only) ----
+    if (permissions.canAssignCases) {
       if (editData.assigned_to) {
         updateData.assigned_to = editData.assigned_to;
-        // Set assigned_at only if it's a new assignment
-        if (!selectedReport.assigned_to || selectedReport.assigned_to !== editData.assigned_to) {
+        if (
+          !selectedReport.assigned_to ||
+          selectedReport.assigned_to !== editData.assigned_to
+        ) {
           updateData.assigned_at = new Date().toISOString();
         }
       } else {
         updateData.assigned_to = null;
         updateData.assigned_at = null;
       }
+    }
+
+    // ---- INTERNAL NOTES (always editable for case handlers) ----
+    updateData.internal_notes = editData.internal_notes;
+
+    setSaving(true);
+    try {
+      const { createMultiTenantClient } = await import(
+        "@/lib/supabase/multi-tenant-client"
+      );
+      const supabase = createMultiTenantClient();
 
       const { error } = await supabase
         .from("reports")
@@ -297,20 +447,15 @@ export default function ClientReportsPage() {
         return;
       }
 
-      // Notifications disabled by requirement
-
       // Update local state
-      setReports(prev =>
-        prev.map(r =>
-          r.id === selectedReport.id
-            ? { ...r, ...editData, ...updateData }
-            : r
+      setReports((prev) =>
+        prev.map((r) =>
+          r.id === selectedReport.id ? { ...r, ...updateData } : r
         )
       );
 
       setSelectedReport({
         ...selectedReport,
-        ...editData,
         ...updateData,
       });
 
@@ -576,83 +721,130 @@ export default function ClientReportsPage() {
         userRole={user.role}
       />
       <SidebarInset>
-        <header className="flex h-14 shrink-0 items-center gap-2 transition-[width,height] ease-linear border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-          <div className="flex items-center gap-2 px-4 w-full">
-            <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            <div className="flex-1 flex items-center justify-between">
+        <div className="flex flex-col h-full">
+          <header className="flex items-center justify-between border-b px-6 py-4">
+            <div className="flex items-center gap-4">
+              <SidebarTrigger />
               <div>
-                <h1 className="text-lg font-semibold">Reports</h1>
+                <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                  <FileSearch className="h-6 w-6 text-primary" />
+                  Reports
+                </h1>
                 <p className="text-sm text-muted-foreground">
-                  {filteredReports.length} report{filteredReports.length !== 1 ? 's' : ''}
+                  {filteredReports.length} report{filteredReports.length !== 1 ? "s" : ""}
                 </p>
               </div>
             </div>
-          </div>
-        </header>
+          </header>
 
-        <div className="flex flex-1 flex-col gap-4 md:gap-6 p-4 md:p-6 lg:p-8">
+          <div className="flex flex-1 flex-col gap-4 md:gap-6 p-4 md:p-6 lg:p-8">
           {/* Filters */}
           <Card className="shadow-sm hover:shadow-md transition-shadow">
-            <CardContent className="pt-6">
-              <div className="flex flex-col gap-4">
-                {/* Search Bar */}
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
+            <CardContent className="space-y-5 py-5">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div className="relative w-full md:max-w-2xl">
+                  <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search by case number, title, or category..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10"
+                    className="h-12 rounded-full border border-border/60 bg-card/80 pl-11 pr-4 text-sm"
                   />
                 </div>
-                
-                {/* Filter & Sort Row */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                  {/* Status Filter */}
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger className="h-11 sm:w-[200px]">
-                      <Filter className="w-4 h-4 mr-2" />
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="submitted">Submitted</SelectItem>
-                      <SelectItem value="under_review">Under Review</SelectItem>
-                      <SelectItem value="investigating">Investigating</SelectItem>
-                      <SelectItem value="resolved">Resolved</SelectItem>
-                      <SelectItem value="closed">Closed</SelectItem>
-                      <SelectItem value="dismissed">Dismissed</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  {/* Priority Filter */}
-                  <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                    <SelectTrigger className="h-11 sm:w-[200px]">
-                      <Filter className="w-4 h-4 mr-2" />
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Priority</SelectItem>
-                      <SelectItem value="critical">Critical</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="low">Low</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  {/* Sort By */}
-                  <Select value={sortBy} onValueChange={setSortBy}>
-                    <SelectTrigger className="h-11 sm:w-[200px]">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="created_at">Newest First</SelectItem>
-                      <SelectItem value="priority">Priority</SelectItem>
-                      <SelectItem value="status">Status</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="flex items-center gap-3">
+                  {hasActiveFilters ? (
+                    <Badge variant="outline" className="rounded-full px-3 py-1 text-xs font-medium">
+                      {activeFiltersCount} active filter{activeFiltersCount > 1 ? "s" : ""}
+                    </Badge>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No filters applied</p>
+                  )}
+                  {hasActiveFilters && (
+                    <Button variant="ghost" size="sm" onClick={resetFilters} className="rounded-full">
+                      Clear
+                    </Button>
+                  )}
                 </div>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <FilterSelect
+                  value={statusFilter}
+                  onValueChange={setStatusFilter}
+                  icon={Filter}
+                  placeholder="All Status"
+                >
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="submitted">Submitted</SelectItem>
+                  <SelectItem value="under_review">Under Review</SelectItem>
+                  <SelectItem value="investigating">Investigating</SelectItem>
+                  <SelectItem value="resolved">Resolved</SelectItem>
+                  <SelectItem value="closed">Closed</SelectItem>
+                  <SelectItem value="dismissed">Dismissed</SelectItem>
+                </FilterSelect>
+
+                <FilterSelect
+                  value={priorityFilter}
+                  onValueChange={setPriorityFilter}
+                  icon={Filter}
+                  placeholder="All Priority"
+                >
+                  <SelectItem value="all">All Priority</SelectItem>
+                  <SelectItem value="critical">Critical</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
+                </FilterSelect>
+
+                <FilterSelect
+                  value={sortBy}
+                  onValueChange={setSortBy}
+                  placeholder="Sort order"
+                >
+                  <SelectItem value="created_at">Newest First</SelectItem>
+                  <SelectItem value="priority">Priority</SelectItem>
+                  <SelectItem value="status">Status</SelectItem>
+                </FilterSelect>
+
+                {user?.role === "investigator" && (
+                  <FilterSelect
+                    value={assignmentFilter}
+                    onValueChange={setAssignmentFilter}
+                    icon={User}
+                    placeholder="Assignment"
+                  >
+                    <SelectItem value="all">All Cases</SelectItem>
+                    <SelectItem value="assigned_to_me">Assigned to Me</SelectItem>
+                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                  </FilterSelect>
+                )}
+
+                <FilterSelect
+                  value={assignedUserFilter}
+                  onValueChange={setAssignedUserFilter}
+                  icon={User}
+                  placeholder="All Assignees"
+                >
+                  <SelectItem value="all">All Assignees</SelectItem>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
+                  {adminUsers.map((admin) => (
+                    <SelectItem key={admin.id} value={admin.id}>
+                      {admin.full_name || admin.email}
+                    </SelectItem>
+                  ))}
+                </FilterSelect>
+
+                <FilterSelect
+                  value={dateRangeFilter}
+                  onValueChange={setDateRangeFilter}
+                  icon={Calendar}
+                  placeholder="All Dates"
+                >
+                  <SelectItem value="all">All Dates</SelectItem>
+                  <SelectItem value="7">Last 7 days</SelectItem>
+                  <SelectItem value="30">Last 30 days</SelectItem>
+                  <SelectItem value="90">Last 90 days</SelectItem>
+                </FilterSelect>
               </div>
             </CardContent>
           </Card>
@@ -761,6 +953,7 @@ export default function ClientReportsPage() {
               )}
             </CardContent>
           </Card>
+        </div>
         </div>
       </SidebarInset>
 

@@ -54,13 +54,13 @@ export function getPermissions(role: UserRole): Permission {
       // Investigator can update cases but not manage org
       return {
         canEditStatus: true,
-        canEditPriority: false,
-        canAssignCases: false,
+        canEditPriority: false,   // PO: cannot manage priority
+        canAssignCases: false,    // PO: cannot assign/reassign
         canDeleteReports: false,
         canManageUsers: false,
         canViewAuditLogs: false,
         canManageSettings: false,
-        canAddLabels: true,
+        canAddLabels: false,      // PO: cannot manage labels
         canSendMessages: true,
         canViewAnalytics: false,
       };

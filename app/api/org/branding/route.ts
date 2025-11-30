@@ -80,14 +80,15 @@ export async function PUT(request: NextRequest) {
 
     const nextBranding = {
       ...(org.branding || {}),
+      ...(body.logo_url !== undefined ? { logo_url: body.logo_url } : {}),
+      ...(body.logo_light_url !== undefined ? { logo_light_url: body.logo_light_url } : {}),
+      ...(body.logo_dark_url !== undefined ? { logo_dark_url: body.logo_dark_url } : {}),
+      ...(body.email_logo_url !== undefined ? { email_logo_url: body.email_logo_url } : {}),
+      ...(body.favicon_url !== undefined ? { favicon_url: body.favicon_url } : {}),
       ...(body.support_email !== undefined ? { support_email: body.support_email } : {}),
       ...(body.support_phone !== undefined ? { support_phone: body.support_phone } : {}),
       ...(body.primary_color !== undefined ? { primary_color: body.primary_color } : {}),
       ...(body.theme_mode !== undefined ? { theme_mode: body.theme_mode } : {}),
-      ...(body.email_logo_url !== undefined ? { email_logo_url: body.email_logo_url } : {}),
-      ...(body.favicon_url !== undefined ? { favicon_url: body.favicon_url } : {}),
-      ...(body.logo_light_url !== undefined ? { logo_light_url: body.logo_light_url } : {}),
-      ...(body.logo_dark_url !== undefined ? { logo_dark_url: body.logo_dark_url } : {}),
     };
 
     const updateData: any = {

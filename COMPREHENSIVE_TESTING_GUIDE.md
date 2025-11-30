@@ -34,27 +34,27 @@
 
 ### Production URLs
 
-| Portal | URL |
-|--------|-----|
-| Homepage | `https://www.whistrust.com` |
-| **Multi-Tenant AISAR** | |
-| AISAR Report | `https://www.whistrust.com/org/aisar/report` |
-| AISAR Track | `https://www.whistrust.com/org/aisar/track` |
-| AISAR Admin Login | `https://www.whistrust.com/org/aisar/login` |
-| AISAR Admin Dashboard | `https://www.whistrust.com/org/aisar/dashboard` |
-| AISAR Admin Cases | `https://www.whistrust.com/org/aisar/reports` |
-| **Multi-Tenant CodeSquare** | |
-| CodeSquare Report | `https://www.whistrust.com/org/codesquare/report` |
-| CodeSquare Track | `https://www.whistrust.com/org/codesquare/track` |
-| CodeSquare Admin Login | `https://www.whistrust.com/org/codesquare/login` |
-| CodeSquare Admin Dashboard | `https://www.whistrust.com/org/codesquare/dashboard` |
-| CodeSquare Admin Cases | `https://www.whistrust.com/org/codesquare/reports` |
-| **Super Admin** | |
-| Super Admin Login | `https://www.whistrust.com/superadmin/login` |
-| Super Admin Dashboard | `https://www.whistrust.com/superadmin/dashboard` |
-| Super Admin Organizations | `https://www.whistrust.com/superadmin/organizations` |
-| **Test & Diagnostics** | |
-| Connection Test | `https://www.whistrust.com/test/connection` |
+| Portal                      | URL                                                  |
+| --------------------------- | ---------------------------------------------------- |
+| Homepage                    | `https://www.whistrust.com`                          |
+| **Multi-Tenant AISAR**      |                                                      |
+| AISAR Report                | `https://www.whistrust.com/org/aisar/report`         |
+| AISAR Track                 | `https://www.whistrust.com/org/aisar/track`          |
+| AISAR Admin Login           | `https://www.whistrust.com/org/aisar/login`          |
+| AISAR Admin Dashboard       | `https://www.whistrust.com/org/aisar/dashboard`      |
+| AISAR Admin Cases           | `https://www.whistrust.com/org/aisar/reports`        |
+| **Multi-Tenant CodeSquare** |                                                      |
+| CodeSquare Report           | `https://www.whistrust.com/org/codesquare/report`    |
+| CodeSquare Track            | `https://www.whistrust.com/org/codesquare/track`     |
+| CodeSquare Admin Login      | `https://www.whistrust.com/org/codesquare/login`     |
+| CodeSquare Admin Dashboard  | `https://www.whistrust.com/org/codesquare/dashboard` |
+| CodeSquare Admin Cases      | `https://www.whistrust.com/org/codesquare/reports`   |
+| **Super Admin**             |                                                      |
+| Super Admin Login           | `https://www.whistrust.com/superadmin/login`         |
+| Super Admin Dashboard       | `https://www.whistrust.com/superadmin/dashboard`     |
+| Super Admin Organizations   | `https://www.whistrust.com/superadmin/organizations` |
+| **Test & Diagnostics**      |                                                      |
+| Connection Test             | `https://www.whistrust.com/test/connection`          |
 
 ---
 
@@ -64,15 +64,15 @@
 
 **Purpose:** Manage all organizations and platform settings
 
-| Field | Value |
-|-------|-------|
-| **Portal** | Super Admin |
-| **URL** | `/superadmin/login` |
-| **Email** | `sup-adm@whistrust.com` |
-| **Password** | `sup-pass-adm!1@3#5` |
-| **Role** | Super Admin |
-| **Organization** | Platform (no tenant) |
-| **Permissions** | Full platform access, create/manage organizations |
+| Field            | Value                                             |
+| ---------------- | ------------------------------------------------- |
+| **Portal**       | Super Admin                                       |
+| **URL**          | `/superadmin/login`                               |
+| **Email**        | `sup-adm@whistrust.com`                           |
+| **Password**     | `sup-pass-adm!1@3#5`                              |
+| **Role**         | Super Admin                                       |
+| **Organization** | Platform (no tenant)                              |
+| **Permissions**  | Full platform access, create/manage organizations |
 
 ---
 
@@ -80,16 +80,16 @@
 
 **Purpose:** Test multi-tenant organization features
 
-| Field | Value |
-|-------|-------|
-| **Portal** | AISAR Tenant Admin |
-| **URL** | `/org/aisar/login` |
-| **Email** | `admin@aisar.com` |
-| **Password** | `Aisar@123!` |
-| **Role** | Admin |
-| **Organization** | `aisar` |
-| **Subdomain** | `aisar` |
-| **Permissions** | Full access to AISAR portal |
+| Field            | Value                       |
+| ---------------- | --------------------------- |
+| **Portal**       | AISAR Tenant Admin          |
+| **URL**          | `/org/aisar/login`          |
+| **Email**        | `admin@aisar.com`           |
+| **Password**     | `Aisar@123!`                |
+| **Role**         | Admin                       |
+| **Organization** | `aisar`                     |
+| **Subdomain**    | `aisar`                     |
+| **Permissions**  | Full access to AISAR portal |
 
 **Note:** Additional AISAR users (Manager, HR) can be created through the admin portal.
 
@@ -99,16 +99,16 @@
 
 **Purpose:** Test multi-tenant organization features
 
-| Field | Value |
-|-------|-------|
-| **Portal** | CodeSquare Tenant Admin |
-| **URL** | `/org/codesquare/login` |
-| **Email** | `admin@codesquare.com` |
-| **Password** | Set during user creation |
-| **Role** | Admin |
-| **Organization** | `codesquare` |
-| **Subdomain** | `codesquare` |
-| **Permissions** | Full access to CodeSquare portal |
+| Field            | Value                            |
+| ---------------- | -------------------------------- |
+| **Portal**       | CodeSquare Tenant Admin          |
+| **URL**          | `/org/codesquare/login`          |
+| **Email**        | `admin@codesquare.com`           |
+| **Password**     | Set during user creation         |
+| **Role**         | Admin                            |
+| **Organization** | `codesquare`                     |
+| **Subdomain**    | `codesquare`                     |
+| **Permissions**  | Full access to CodeSquare portal |
 
 ---
 
@@ -116,13 +116,13 @@
 
 **Purpose:** Submit reports anonymously
 
-| Field | Value |
-|-------|-------|
-| **Portal** | Public Report Form |
-| **URL** | `/org/{subdomain}/report` (multi-tenant) |
-| **Authentication** | None (anonymous) |
-| **Access Method** | Tracking code only |
-| **Permissions** | Submit reports, track cases, send messages |
+| Field              | Value                                      |
+| ------------------ | ------------------------------------------ |
+| **Portal**         | Public Report Form                         |
+| **URL**            | `/org/{subdomain}/report` (multi-tenant)   |
+| **Authentication** | None (anonymous)                           |
+| **Access Method**  | Tracking code only                         |
+| **Permissions**    | Submit reports, track cases, send messages |
 
 ---
 
@@ -141,33 +141,37 @@
 ### Sample Report Descriptions
 
 #### Sample 1: Fraud Report (50+ characters)
+
 ```
-I have discovered evidence of financial fraud in the accounting department. 
-Multiple invoices have been falsified over the past 6 months, totaling 
-approximately $250,000. The invoices appear to be for services that were 
+I have discovered evidence of financial fraud in the accounting department.
+Multiple invoices have been falsified over the past 6 months, totaling
+approximately $250,000. The invoices appear to be for services that were
 never rendered. I have attached supporting documents showing the discrepancies.
 ```
 
 #### Sample 2: Harassment Report (50+ characters)
+
 ```
-I have been experiencing ongoing harassment from my supervisor for the past 
-3 months. The behavior includes inappropriate comments, unwanted physical 
-contact, and threats of retaliation if I report the incidents. I have 
+I have been experiencing ongoing harassment from my supervisor for the past
+3 months. The behavior includes inappropriate comments, unwanted physical
+contact, and threats of retaliation if I report the incidents. I have
 witnesses who can corroborate these events.
 ```
 
 #### Sample 3: Safety Violation (50+ characters)
+
 ```
-There are serious safety violations in the manufacturing facility. 
-Emergency exits are blocked, fire extinguishers are expired, and workers 
-are not provided with required protective equipment. This poses immediate 
+There are serious safety violations in the manufacturing facility.
+Emergency exits are blocked, fire extinguishers are expired, and workers
+are not provided with required protective equipment. This poses immediate
 danger to all employees.
 ```
 
 #### Sample 4: Ethics Violation (50+ characters)
+
 ```
-A senior executive has been accepting gifts from vendors in exchange for 
-contracts. This violates our company's ethics policy and creates a conflict 
+A senior executive has been accepting gifts from vendors in exchange for
+contracts. This violates our company's ethics policy and creates a conflict
 of interest. I have email evidence of these transactions.
 ```
 
@@ -183,15 +187,17 @@ of interest. I have email evidence of these transactions.
 ### Sample Messages
 
 #### From Reporter:
+
 ```
-Thank you for acknowledging my report. I have additional information 
+Thank you for acknowledging my report. I have additional information
 that may be relevant. Can I provide more details?
 ```
 
 #### From Admin:
+
 ```
-Thank you for your report. We take these matters seriously and have 
-assigned an investigator to review your case. We will keep you updated 
+Thank you for your report. We take these matters seriously and have
+assigned an investigator to review your case. We will keep you updated
 through this secure messaging system.
 ```
 
@@ -204,6 +210,7 @@ through this secure messaging system.
 #### 1.1 Submit Report (Multi-Tenant - AISAR)
 
 **Steps:**
+
 1. Navigate to: `https://www.whistrust.com/org/aisar/report`
 2. **Select Category:** Choose "Fraud & Financial Misconduct"
 3. **Enter Description:** Use Sample Report 1 (Fraud) - ensure 50+ characters
@@ -220,6 +227,7 @@ through this secure messaging system.
    - Verify button is disabled (gray) if description is too short
 
 **Expected Results:**
+
 - ✅ Form validation works (category required, 50+ characters)
 - ✅ Character counter shows "X/50" and turns green at 50+
 - ✅ File upload shows progress
@@ -232,6 +240,7 @@ through this secure messaging system.
 - ✅ Report is associated with AISAR organization
 
 **Success Page Verification:**
+
 - ✅ Tracking code displayed prominently
 - ✅ "Copy Code" button works
 - ✅ "Track Your Case" link navigates to track page
@@ -242,6 +251,7 @@ through this secure messaging system.
 #### 1.2 Track Case (Multi-Tenant - AISAR)
 
 **Steps:**
+
 1. Copy tracking code from success page (or use a known tracking code)
 2. Navigate to: `https://www.whistrust.com/org/aisar/track`
 3. **Enter Tracking Code:**
@@ -261,6 +271,7 @@ through this secure messaging system.
    - Verify real-time updates (if admin responds)
 
 **Expected Results:**
+
 - ✅ Tracking code input accepts valid codes
 - ✅ Invalid tracking code shows error message
 - ✅ Case details load correctly
@@ -277,6 +288,7 @@ through this secure messaging system.
 #### 1.3 Submit Report (Multi-Tenant - CodeSquare)
 
 **Steps:**
+
 1. Navigate to: `https://www.whistrust.com/org/codesquare/report`
 2. Follow same steps as 1.1, but verify:
    - URL shows `/org/codesquare/report`
@@ -285,6 +297,7 @@ through this secure messaging system.
 3. Submit report and save tracking code
 
 **Expected Results:**
+
 - ✅ Report submitted to CodeSquare organization
 - ✅ Tracking code works on `/org/codesquare/track`
 - ✅ Admin can see report in CodeSquare admin portal
@@ -297,6 +310,7 @@ through this secure messaging system.
 #### 2.1 Login
 
 **Steps:**
+
 1. Navigate to: `https://www.whistrust.com/org/aisar/login`
 2. **Enter Credentials:**
    - Email: `admin@aisar.com`
@@ -305,6 +319,7 @@ through this secure messaging system.
 4. Verify redirect to AISAR dashboard
 
 **Expected Results:**
+
 - ✅ Login form validates email format
 - ✅ Password field is secure (masked)
 - ✅ Invalid credentials show error message
@@ -320,6 +335,7 @@ through this secure messaging system.
 #### 2.2 Dashboard Overview
 
 **Steps:**
+
 1. After login, verify AISAR dashboard loads
 2. **Verify Organization Context:**
    - Dashboard shows AISAR-specific data
@@ -340,6 +356,7 @@ through this secure messaging system.
    - Logout button
 
 **Expected Results:**
+
 - ✅ Dashboard loads AISAR-specific data
 - ✅ Data isolation maintained
 - ✅ Statistics cards display correct numbers (AISAR only)
@@ -355,6 +372,7 @@ through this secure messaging system.
 #### 2.3 View Cases
 
 **Steps:**
+
 1. Navigate to: `https://www.whistrust.com/org/aisar/reports`
 2. **Verify Case List:**
    - All reports displayed in table/list
@@ -375,6 +393,7 @@ through this secure messaging system.
      - Message thread
 
 **Expected Results:**
+
 - ✅ Case list loads all reports
 - ✅ Case details drawer opens correctly
 - ✅ All case information visible
@@ -386,6 +405,7 @@ through this secure messaging system.
 #### 2.4 Update Case Status
 
 **Steps:**
+
 1. Open a case from the cases list
 2. **Change Status:**
    - Find status dropdown/selector
@@ -397,6 +417,7 @@ through this secure messaging system.
    - Audit log entry created (if visible)
 
 **Expected Results:**
+
 - ✅ Status dropdown shows all available statuses
 - ✅ Status update saves successfully
 - ✅ UI updates immediately
@@ -404,6 +425,7 @@ through this secure messaging system.
 - ✅ Status persists after page refresh
 
 **Available Statuses:**
+
 - Pending
 - Under Review
 - In Progress
@@ -415,6 +437,7 @@ through this secure messaging system.
 #### 2.5 Update Case Priority
 
 **Steps:**
+
 1. Open a case from the cases list
 2. **Change Priority:**
    - Find priority dropdown/selector
@@ -425,6 +448,7 @@ through this secure messaging system.
    - Priority updates in case list
 
 **Expected Results:**
+
 - ✅ Priority dropdown shows all options (Low, Medium, High, Critical)
 - ✅ Priority update saves successfully
 - ✅ UI updates immediately
@@ -435,6 +459,7 @@ through this secure messaging system.
 #### 2.6 Assign Case
 
 **Steps:**
+
 1. Open a case from the cases list
 2. **Assign to User:**
    - Find assignment dropdown/selector
@@ -446,6 +471,7 @@ through this secure messaging system.
    - Audit log entry created
 
 **Expected Results:**
+
 - ✅ Assignment dropdown shows available users
 - ✅ Assignment saves successfully
 - ✅ Assigned user name displays correctly
@@ -456,6 +482,7 @@ through this secure messaging system.
 #### 2.7 Add Internal Notes
 
 **Steps:**
+
 1. Open a case from the cases list
 2. **Add Note:**
    - Find "Internal Notes" section
@@ -466,6 +493,7 @@ through this secure messaging system.
    - Author and timestamp displayed
 
 **Expected Results:**
+
 - ✅ Notes section visible (admin-only)
 - ✅ Note saves successfully
 - ✅ Notes list displays chronologically
@@ -476,6 +504,7 @@ through this secure messaging system.
 #### 2.8 Add/Remove Labels
 
 **Steps:**
+
 1. Open a case from the cases list
 2. **Add Label:**
    - Find "Labels" section
@@ -488,6 +517,7 @@ through this secure messaging system.
    - Labels persist after page refresh
 
 **Expected Results:**
+
 - ✅ Labels can be added
 - ✅ Labels can be removed
 - ✅ Labels display as colored badges
@@ -498,6 +528,7 @@ through this secure messaging system.
 #### 2.9 Send Message to Reporter
 
 **Steps:**
+
 1. Open a case from the cases list
 2. **Send Message:**
    - Scroll to message thread
@@ -510,6 +541,7 @@ through this secure messaging system.
    - Reporter can see message on track page
 
 **Expected Results:**
+
 - ✅ Message sends successfully
 - ✅ Message appears in thread immediately
 - ✅ Real-time updates work
@@ -521,6 +553,7 @@ through this secure messaging system.
 #### 2.10 Download Attachments
 
 **Steps:**
+
 1. Open a case with attachments
 2. **Download File:**
    - Find "Attachments" section
@@ -531,6 +564,7 @@ through this secure messaging system.
    - File name matches original
 
 **Expected Results:**
+
 - ✅ Attachments list displays
 - ✅ Download link works
 - ✅ File downloads successfully
@@ -541,6 +575,7 @@ through this secure messaging system.
 #### 2.4 User Management (If Available)
 
 **Steps:**
+
 1. Navigate to user management page (if available)
 2. **Create User:**
    - Click "Add User" or "Create User"
@@ -557,6 +592,7 @@ through this secure messaging system.
    - User has correct role permissions
 
 **Expected Results:**
+
 - ✅ User creation works
 - ✅ User receives credentials/invitation
 - ✅ User can login
@@ -569,6 +605,7 @@ through this secure messaging system.
 #### 3.1 Login
 
 **Steps:**
+
 1. Navigate to: `https://www.whistrust.com/org/codesquare/login`
 2. **Enter Credentials:**
    - Email: `admin@codesquare.com`
@@ -577,6 +614,7 @@ through this secure messaging system.
 4. Verify redirect to CodeSquare dashboard
 
 **Expected Results:**
+
 - ✅ Login works for tenant-specific URL
 - ✅ Redirects to `/org/codesquare/dashboard`
 - ✅ Session scoped to CodeSquare organization
@@ -587,6 +625,7 @@ through this secure messaging system.
 #### 3.2 Dashboard & Case Management
 
 **Steps:**
+
 1. After login, verify CodeSquare dashboard loads
 2. **Verify Organization Context:**
    - Dashboard shows CodeSquare-specific data
@@ -598,6 +637,7 @@ through this secure messaging system.
    - Verify all features work in CodeSquare context
 
 **Expected Results:**
+
 - ✅ Dashboard loads CodeSquare-specific data
 - ✅ Only CodeSquare reports visible
 - ✅ All case management features work
@@ -611,6 +651,7 @@ through this secure messaging system.
 #### 4.1 Login
 
 **Steps:**
+
 1. Navigate to: `https://www.whistrust.com/superadmin/login`
 2. **Enter Credentials:**
    - Email: `sup-adm@whistrust.com`
@@ -619,6 +660,7 @@ through this secure messaging system.
 4. Verify redirect to super admin dashboard
 
 **Expected Results:**
+
 - ✅ Login works
 - ✅ Redirects to `/superadmin/dashboard`
 - ✅ Platform-wide access granted
@@ -628,6 +670,7 @@ through this secure messaging system.
 #### 4.2 Dashboard Overview
 
 **Steps:**
+
 1. After login, verify super admin dashboard loads
 2. **Check Platform Statistics:**
    - Total organizations count
@@ -640,6 +683,7 @@ through this secure messaging system.
    - Logout button
 
 **Expected Results:**
+
 - ✅ Platform statistics display
 - ✅ Navigation menu works
 - ✅ User profile shows super admin email
@@ -649,6 +693,7 @@ through this secure messaging system.
 #### 4.3 View Organizations
 
 **Steps:**
+
 1. Navigate to: `https://www.whistrust.com/superadmin/organizations`
 2. **Verify Organization List:**
    - All organizations displayed
@@ -665,6 +710,7 @@ through this secure messaging system.
    - Sort by various columns
 
 **Expected Results:**
+
 - ✅ Organization list loads
 - ✅ All organizations visible
 - ✅ Filters/search work
@@ -675,6 +721,7 @@ through this secure messaging system.
 #### 4.4 Create Organization
 
 **Steps:**
+
 1. Navigate to organizations page
 2. **Click "Create Organization" or "Add Organization"**
 3. **Fill Form:**
@@ -693,17 +740,19 @@ through this secure messaging system.
    - Organization data isolated
 
 **Expected Results:**
+
 - ✅ Organization created successfully
-   - ✅ Subdomain validation works
-   - ✅ Organization accessible via URL
-   - ✅ Data isolation maintained
-   - ✅ Toast notification confirms creation
+  - ✅ Subdomain validation works
+  - ✅ Organization accessible via URL
+  - ✅ Data isolation maintained
+  - ✅ Toast notification confirms creation
 
 ---
 
 #### 4.5 Edit Organization
 
 **Steps:**
+
 1. Click on an organization in the list
 2. **Edit Details:**
    - Change status (Active → Suspended)
@@ -715,6 +764,7 @@ through this secure messaging system.
    - Verify changes persist
 
 **Expected Results:**
+
 - ✅ Organization details editable
 - ✅ Changes save successfully
 - ✅ Status changes affect organization access
@@ -725,6 +775,7 @@ through this secure messaging system.
 #### 4.6 Suspend Organization
 
 **Steps:**
+
 1. Edit an organization
 2. **Change Status to "Suspended"**
 3. **Save Changes**
@@ -735,6 +786,7 @@ through this secure messaging system.
    - Verify access blocked or limited
 
 **Expected Results:**
+
 - ✅ Status change saves
 - ✅ Report submission blocked for suspended org
 - ✅ Admin access limited/blocked
@@ -747,10 +799,12 @@ through this secure messaging system.
 #### 5.1 Manager Role
 
 **Login:**
+
 - Create Manager user in AISAR or CodeSquare organization through admin portal
 - Use credentials set during user creation
 
 **Test Permissions:**
+
 1. ✅ Can view all reports
 2. ✅ Can edit report status
 3. ✅ Can edit priority
@@ -764,6 +818,7 @@ through this secure messaging system.
 11. ❌ Cannot manage settings
 
 **Steps:**
+
 1. Login as Manager
 2. Navigate to cases/reports page
 3. Open a case
@@ -781,6 +836,7 @@ through this secure messaging system.
    - Try to access `/admin/users`: ❌ Should be blocked or not visible
 
 **Expected Results:**
+
 - ✅ UI shows/hides elements based on permissions
 - ✅ Allowed actions work
 - ✅ Restricted actions blocked or hidden
@@ -790,10 +846,12 @@ through this secure messaging system.
 #### 5.2 Investigator Role
 
 **Login:**
+
 - Create Investigator user in AISAR or CodeSquare organization through admin portal
 - Use credentials set during user creation
 
 **Test Permissions:**
+
 1. ✅ Can view all reports
 2. ✅ Can edit report status
 3. ✅ Can send messages
@@ -806,6 +864,7 @@ through this secure messaging system.
 10. ❌ Cannot manage users
 
 **Steps:**
+
 1. Login as Investigator
 2. Navigate to cases/reports page
 3. Open a case
@@ -822,6 +881,7 @@ through this secure messaging system.
    - Try to access `/admin/analytics`: ❌ Should be blocked
 
 **Expected Results:**
+
 - ✅ UI shows/hides elements based on permissions
 - ✅ Allowed actions work
 - ✅ Restricted actions blocked or hidden
@@ -831,10 +891,12 @@ through this secure messaging system.
 #### 5.3 HR Role
 
 **Login:**
+
 - Create HR user in AISAR or CodeSquare organization through admin portal
 - Use credentials set during user creation
 
 **Test Permissions:**
+
 1. ✅ Can view all reports
 2. ✅ Can edit report status
 3. ✅ Can send messages
@@ -847,11 +909,13 @@ through this secure messaging system.
 10. ❌ Cannot manage users
 
 **Steps:**
+
 1. Login as HR
 2. Follow same steps as Investigator (5.2)
 3. Verify same permission restrictions
 
 **Expected Results:**
+
 - ✅ Same as Investigator permissions
 - ✅ UI reflects HR role limitations
 
@@ -864,6 +928,7 @@ through this secure messaging system.
 **Test Cases:**
 
 1. **Valid Submission**
+
    - Category selected
    - Description 50+ characters
    - Optional fields filled
@@ -871,26 +936,31 @@ through this secure messaging system.
    - ✅ Should submit successfully
 
 2. **Invalid Submission - Missing Category**
+
    - Category not selected
    - Description provided
    - ❌ Should show validation error
 
 3. **Invalid Submission - Short Description**
+
    - Category selected
    - Description < 50 characters
    - ❌ Should show character count error
    - ❌ Submit button disabled
 
 4. **File Upload - Valid File**
+
    - PDF file < 10 MB
    - ✅ Should upload successfully
    - ✅ Progress indicator shows
 
 5. **File Upload - Invalid Type**
+
    - Executable file (.exe)
    - ❌ Should reject with error message
 
 6. **File Upload - Too Large**
+
    - File > 10 MB
    - ❌ Should reject with size limit error
 
@@ -906,19 +976,23 @@ through this secure messaging system.
 **Test Cases:**
 
 1. **Valid Tracking Code**
+
    - Enter valid tracking code
    - ✅ Should load case details
    - ✅ All information displayed
 
 2. **Invalid Tracking Code**
+
    - Enter random string
    - ❌ Should show "Case not found" error
 
 3. **Empty Tracking Code**
+
    - Submit without entering code
    - ❌ Should show validation error
 
 4. **Case Status Display**
+
    - Verify status badge shows correct color
    - ✅ Pending = yellow/orange
    - ✅ Under Review = blue
@@ -938,16 +1012,19 @@ through this secure messaging system.
 **Test Cases:**
 
 1. **Send Message from Reporter**
+
    - Type message and send
    - ✅ Message appears immediately
    - ✅ Admin sees message in real-time
 
 2. **Send Message from Admin**
+
    - Admin sends message
    - ✅ Message appears in admin view
    - ✅ Reporter sees message on track page in real-time
 
 3. **Connection Status**
+
    - Verify connection indicator
    - ✅ Shows "Online" when connected
    - ✅ Shows "Offline" when disconnected
@@ -965,23 +1042,27 @@ through this secure messaging system.
 **Test Cases:**
 
 1. **Status Update**
+
    - Change status
    - ✅ Saves successfully
    - ✅ UI updates immediately
    - ✅ Audit log entry created
 
 2. **Priority Update**
+
    - Change priority
    - ✅ Saves successfully
    - ✅ Priority badge updates
 
 3. **Case Assignment**
+
    - Assign to user
    - ✅ Assignment saves
    - ✅ Assigned user name displays
    - ✅ Audit log entry created
 
 4. **Label Management**
+
    - Add label
    - ✅ Label appears as badge
    - Remove label
@@ -1001,16 +1082,19 @@ through this secure messaging system.
 **Test Cases:**
 
 1. **Upload Attachment**
+
    - Upload file during report submission
    - ✅ File uploads successfully
    - ✅ File appears in case details
 
 2. **Download Attachment**
+
    - Click download link
    - ✅ File downloads
    - ✅ File integrity maintained
 
 3. **Multiple Attachments**
+
    - Upload multiple files
    - ✅ All files listed
    - ✅ All files downloadable
@@ -1027,16 +1111,19 @@ through this secure messaging system.
 **Test Cases:**
 
 1. **Dashboard Statistics**
+
    - Verify counts are accurate
    - ✅ Total reports = sum of all statuses
    - ✅ Statistics update in real-time
 
 2. **Category Statistics**
+
    - View reports by category
    - ✅ Category breakdown accurate
    - ✅ Charts/graphs display (if available)
 
 3. **Status Distribution**
+
    - View reports by status
    - ✅ Status counts accurate
    - ✅ Visual representation (if available)
@@ -1053,16 +1140,19 @@ through this secure messaging system.
 **Test Cases:**
 
 1. **Create User (Admin Only)**
+
    - Fill user creation form
    - ✅ User created successfully
    - ✅ User receives credentials/invitation
 
 2. **Edit User**
+
    - Update user details
    - ✅ Changes save
    - ✅ User profile updates
 
 3. **Deactivate User**
+
    - Deactivate user account
    - ✅ User cannot login
    - ✅ User hidden from lists
@@ -1079,16 +1169,19 @@ through this secure messaging system.
 **Test Cases:**
 
 1. **Status Change Logging**
+
    - Change case status
    - ✅ Audit log entry created
    - ✅ Entry shows: user, action, timestamp, details
 
 2. **Assignment Logging**
+
    - Assign case
    - ✅ Audit log entry created
    - ✅ Entry shows assignment details
 
 3. **View Audit Logs**
+
    - Navigate to audit logs page
    - ✅ Logs display chronologically
    - ✅ Filters work (if available)
@@ -1107,24 +1200,29 @@ through this secure messaging system.
 **Objective:** Test full cycle from submission to resolution
 
 **Steps:**
+
 1. **Submit Report (Reporter)**
+
    - Go to `https://www.whistrust.com/org/aisar/report`
    - Submit report with sample content
    - Save tracking code
 
 2. **Track Case (Reporter)**
+
    - Go to `https://www.whistrust.com/org/aisar/track`
    - Enter tracking code
    - Verify case status is "Pending"
    - Send initial message: "Thank you for acknowledging..."
 
 3. **Admin Review (Admin)**
+
    - Login as `admin@aisar.com`
    - Navigate to cases/reports
    - Find the submitted report
    - Open case details
 
 4. **Admin Actions (Admin)**
+
    - Update status to "Under Review"
    - Assign to Investigator
    - Add label: "Urgent"
@@ -1132,18 +1230,21 @@ through this secure messaging system.
    - Send message to reporter: "We have received your report..."
 
 5. **Reporter Response (Reporter)**
+
    - Return to track page
    - Verify status updated to "Under Review"
    - See admin message
    - Send reply: "I have additional information..."
 
 6. **Investigation (Investigator)**
+
    - Login as Investigator
    - View assigned case
    - Update status to "In Progress"
    - Send message: "We are investigating your concerns..."
 
 7. **Resolution (Admin)**
+
    - Admin updates status to "Resolved"
    - Sends final message: "Your case has been resolved..."
    - Adds internal note: "Investigation complete. Action taken."
@@ -1155,6 +1256,7 @@ through this secure messaging system.
    - Case complete
 
 **Expected Results:**
+
 - ✅ All steps complete successfully
 - ✅ Status updates visible to reporter
 - ✅ Messages exchanged in real-time
@@ -1168,23 +1270,28 @@ through this secure messaging system.
 **Objective:** Verify organizations cannot access each other's data
 
 **Steps:**
+
 1. **Submit Report to AISAR**
+
    - Go to `https://www.whistrust.com/org/aisar/report`
    - Submit report
    - Save tracking code
 
 2. **Submit Report to CodeSquare**
+
    - Go to `https://www.whistrust.com/org/codesquare/report`
    - Submit report
    - Save tracking code
 
 3. **Login as AISAR Admin**
+
    - Login at `https://www.whistrust.com/org/aisar/login`
    - View reports
    - ✅ Should only see AISAR reports
    - ❌ Should NOT see CodeSquare reports
 
 4. **Login as CodeSquare Admin**
+
    - Login at `https://www.whistrust.com/org/codesquare/login`
    - View reports
    - ✅ Should only see CodeSquare reports
@@ -1197,6 +1304,7 @@ through this secure messaging system.
    - CodeSquare tracking code on `https://www.whistrust.com/org/aisar/track`: ❌ Should fail
 
 **Expected Results:**
+
 - ✅ Complete data isolation
 - ✅ Reports only visible to correct organization
 - ✅ Tracking codes scoped to organization
@@ -1209,11 +1317,14 @@ through this secure messaging system.
 **Objective:** Verify RBAC works correctly across all roles
 
 **Steps:**
+
 1. **Create Test Case**
+
    - Submit a report
    - Admin assigns to Investigator
 
 2. **Test as Admin**
+
    - Login as Admin
    - ✅ Can view all reports
    - ✅ Can edit status, priority
@@ -1223,6 +1334,7 @@ through this secure messaging system.
    - ✅ Can view audit logs
 
 3. **Test as Manager**
+
    - Login as Manager
    - ✅ Can view all reports
    - ✅ Can edit status, priority
@@ -1233,6 +1345,7 @@ through this secure messaging system.
    - ❌ Cannot delete reports
 
 4. **Test as Investigator**
+
    - Login as Investigator
    - ✅ Can view assigned case
    - ✅ Can edit status
@@ -1252,6 +1365,7 @@ through this secure messaging system.
    - ❌ Cannot view analytics
 
 **Expected Results:**
+
 - ✅ All permissions enforced correctly
 - ✅ UI shows/hides elements based on role
 - ✅ API endpoints reject unauthorized actions
@@ -1264,12 +1378,15 @@ through this secure messaging system.
 **Objective:** Test organization suspension and its effects
 
 **Steps:**
+
 1. **Submit Report to Organization**
+
    - Go to `https://www.whistrust.com/org/aisar/report`
    - Submit report
    - Verify success
 
 2. **Suspend Organization (Super Admin)**
+
    - Login as Super Admin at `https://www.whistrust.com/superadmin/login`
    - Navigate to organizations
    - Edit AISAR organization
@@ -1277,15 +1394,18 @@ through this secure messaging system.
    - Save
 
 3. **Test Report Submission (Blocked)**
+
    - Try to submit report via `https://www.whistrust.com/org/aisar/report`
    - ❌ Should show error: "Organization is not active"
    - ❌ Report should not be submitted
 
 4. **Test Admin Login (Limited)**
+
    - Try to login as AISAR admin at `https://www.whistrust.com/org/aisar/login`
    - ❌ Should be blocked or show suspension message
 
 5. **Test Existing Reports (Access)**
+
    - Existing reports should still be accessible
    - ✅ Reporter can still track case
    - ✅ Admin can still view/manage existing cases (if allowed)
@@ -1296,6 +1416,7 @@ through this secure messaging system.
    - ✅ Admin login works again
 
 **Expected Results:**
+
 - ✅ Suspension blocks new submissions
 - ✅ Suspension limits admin access
 - ✅ Existing data remains accessible (if configured)
@@ -1310,10 +1431,12 @@ through this secure messaging system.
 #### 1. Login Fails
 
 **Symptoms:**
+
 - "Invalid credentials" error
 - Redirects back to login page
 
 **Solutions:**
+
 - Verify email and password are correct
 - Check if user account is active
 - Verify Supabase connection (check `/test/connection`)
@@ -1325,10 +1448,12 @@ through this secure messaging system.
 #### 2. Reports Not Loading
 
 **Symptoms:**
+
 - Case list is empty
 - "No reports found" message
 
 **Solutions:**
+
 - Verify Supabase connection
 - Check RLS policies are enabled
 - Verify user has correct role/permissions
@@ -1340,10 +1465,12 @@ through this secure messaging system.
 #### 3. Real-Time Updates Not Working
 
 **Symptoms:**
+
 - Messages don't appear immediately
 - Status updates not reflected in real-time
 
 **Solutions:**
+
 - Check connection status indicator
 - Verify Supabase real-time is enabled
 - Check browser console for WebSocket errors
@@ -1355,10 +1482,12 @@ through this secure messaging system.
 #### 4. File Upload Fails
 
 **Symptoms:**
+
 - Upload progress stuck
 - Error message on upload
 
 **Solutions:**
+
 - Verify file size < 10 MB
 - Check file type is allowed (PDF, DOC, DOCX, TXT, JPG, PNG)
 - Verify Supabase Storage bucket exists
@@ -1370,10 +1499,12 @@ through this secure messaging system.
 #### 5. Tracking Code Not Found
 
 **Symptoms:**
+
 - "Case not found" error
 - Tracking code doesn't work
 
 **Solutions:**
+
 - Verify tracking code is correct (copy-paste recommended)
 - Check if report was submitted to correct organization
 - Verify organization subdomain matches
@@ -1385,11 +1516,13 @@ through this secure messaging system.
 #### 6. Permission Errors
 
 **Symptoms:**
+
 - "Access denied" messages
 - UI elements missing
 - Actions blocked
 
 **Solutions:**
+
 - Verify user role is correct
 - Check role permissions in database
 - Verify RLS policies allow access
@@ -1401,10 +1534,12 @@ through this secure messaging system.
 #### 7. Environment Detection Issues
 
 **Symptoms:**
+
 - Wrong Supabase database used
 - Wrong organization data displayed
 
 **Solutions:**
+
 - Check `/test/connection` page
 - Verify environment variables in Vercel (production)
 - Verify URL path/subdomain detection
@@ -1418,15 +1553,18 @@ through this secure messaging system.
 When reporting issues, include:
 
 1. **Environment:**
+
    - [ ] Production URL accessed
    - [ ] Browser and version
 
 2. **User Context:**
+
    - [ ] Role
    - [ ] Organization (if multi-tenant)
    - [ ] Login status
 
 3. **Error Details:**
+
    - [ ] Error message (exact text)
    - [ ] Browser console errors
    - [ ] Network tab errors
@@ -1441,6 +1579,7 @@ When reporting issues, include:
 ## Test Completion Checklist
 
 ### Core Flows
+
 - [ ] Anonymous reporter can submit report (AISAR)
 - [ ] Anonymous reporter can submit report (CodeSquare)
 - [ ] Reporter can track case (AISAR)
@@ -1461,6 +1600,7 @@ When reporting issues, include:
 - [ ] Super Admin can suspend organization
 
 ### Features
+
 - [ ] Report submission validation
 - [ ] File upload/download
 - [ ] Real-time messaging
@@ -1475,6 +1615,7 @@ When reporting issues, include:
 - [ ] Role-based permissions
 
 ### Security & Isolation
+
 - [ ] Multi-tenant data isolation
 - [ ] RLS policies enforced
 - [ ] Role permissions enforced
@@ -1483,6 +1624,7 @@ When reporting issues, include:
 - [ ] File attachment security
 
 ### UI/UX
+
 - [ ] All pages load correctly
 - [ ] Navigation works
 - [ ] Forms validate correctly
@@ -1499,21 +1641,25 @@ When reporting issues, include:
 ### Best Practices
 
 1. **Use Sample Content:**
+
    - Use provided sample descriptions (50+ characters)
    - Use test files for attachments
    - Use realistic but test data
 
 2. **Test Production Environment:**
+
    - Test on production URLs
    - Note any issues or differences
 
 3. **Document Issues:**
+
    - Take screenshots of errors
    - Note exact steps to reproduce
    - Include browser console errors
    - Note environment details
 
 4. **Test Edge Cases:**
+
    - Very long descriptions
    - Special characters in input
    - Multiple file uploads
@@ -1532,11 +1678,13 @@ When reporting issues, include:
 For issues or questions during testing:
 
 1. **Check Documentation:**
+
    - `README.md` - Project overview
    - `CREDENTIALS_SUMMARY.md` - All credentials
    - `README_MULTI_TENANT.md` - Multi-tenant setup
 
 2. **Check Test Page:**
+
    - `/test/connection` - Environment diagnostics
 
 3. **Review Logs:**

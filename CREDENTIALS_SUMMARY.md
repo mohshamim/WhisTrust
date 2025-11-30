@@ -29,6 +29,7 @@ Source: `CREDENTIALS_FOR_TESTER.txt`
 - Password: `Aisar@123!`
 
 Additional roles (if created):
+
 - Manager: `manager@aisar.com` (password set during user creation)
 - HR: `hr@aisar.com` (password set during user creation)
 
@@ -56,6 +57,7 @@ Source: `CREDENTIALS_FOR_TESTER.txt`
 - Password: `Admin@WhistTrust2025`
 
 Additional demo roles (examples):
+
 - Manager (HR): `hassan.hr@whistrust.com` / `Manager@WhistTrust2025`
 - Manager (Finance): `omar.finance@whistrust.com` / `Manager@WhistTrust2025`
 - Investigator: `yusuf.investigator@whistrust.com` / `Investigator@WhistTrust2025`
@@ -79,6 +81,4 @@ Source: `DEMO_CREDENTIALS.md`
 - `CREDENTIALS_FOR_TESTER.txt` (superadmin, AISAR, CodeSquare)
 - `README_MULTI_TENANT.md`, `MULTI_TENANT_SETUP_GUIDE.md` (environment/URLs)
 
-If you need this in CSV or a redacted/exportable format, let me know and I’ll generate it. 
-
-
+If you need this in CSV or a redacted/exportable format, let me know and I’ll generate it.

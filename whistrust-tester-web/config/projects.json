@@ -1,0 +1,62 @@
+{
+  "projects": [
+    {
+      "id": "whistrust",
+      "name": "WhisTrust",
+      "description": "Multi-tenant anonymous reporting platform",
+      "config": {
+        "local": "http://localhost:3001",
+        "demo": "https://demo.whistrust.com",
+        "production": "https://www.whistrust.com"
+      }
+    },
+    {
+      "id": "custom",
+      "name": "Custom Project",
+      "description": "Add your own project configuration",
+      "config": {
+        "local": "http://localhost:3001",
+        "demo": "",
+        "production": ""
+      }
+    }
+  ],
+  "testTypes": [
+    {
+      "id": "e2e",
+      "name": "End-to-End Tests",
+      "description": "Complete user workflows",
+      "testFiles": [
+        "superadmin-login.spec.ts",
+        "organization-login.spec.ts",
+        "report-submission.spec.ts",
+        "anonymous-tracking.spec.ts"
+      ]
+    },
+    {
+      "id": "ui",
+      "name": "UI Tests",
+      "description": "User interface element verification",
+      "testFiles": [
+        "dashboard-ui.spec.ts",
+        "reports-list.spec.ts",
+        "visual-regression.spec.ts"
+      ]
+    },
+    {
+      "id": "rbac",
+      "name": "Role-Based Access",
+      "description": "Permission and access control tests",
+      "testFiles": [
+        "role-based-access.spec.ts"
+      ]
+    },
+    {
+      "id": "all",
+      "name": "All Tests",
+      "description": "Run all available tests",
+      "testFiles": []
+    }
+  ]
+}
+

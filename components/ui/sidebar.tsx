@@ -157,11 +157,17 @@ function Sidebar({
   collapsible = "offcanvas",
   className,
   children,
+  mobileTitle = "Workspace navigation",
+  mobileDescription = "Select a destination to keep working.",
+  mobileHeader,
   ...props
 }: React.ComponentProps<"div"> & {
   side?: "left" | "right";
   variant?: "sidebar" | "floating" | "inset";
   collapsible?: "offcanvas" | "icon" | "none";
+  mobileTitle?: string;
+  mobileDescription?: string;
+  mobileHeader?: React.ReactNode;
 }) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
 
@@ -195,9 +201,17 @@ function Sidebar({
           }
           side={side}
         >
-          <SheetHeader className="sr-only">
-            <SheetTitle>Sidebar</SheetTitle>
-            <SheetDescription>Displays the mobile sidebar.</SheetDescription>
+          <SheetHeader className="border-b border-sidebar-border px-4 py-3">
+            {mobileHeader ? (
+              mobileHeader
+            ) : (
+              <>
+                <SheetTitle>{mobileTitle}</SheetTitle>
+                {mobileDescription ? (
+                  <SheetDescription>{mobileDescription}</SheetDescription>
+                ) : null}
+              </>
+            )}
           </SheetHeader>
           <div className="flex h-full w-full flex-col">{children}</div>
         </SheetContent>

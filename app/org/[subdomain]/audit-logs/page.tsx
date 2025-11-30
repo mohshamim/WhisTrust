@@ -55,13 +55,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { NotificationsDropdown } from "@/components/notifications-dropdown";
-import {
-  getAuditLogs,
-  getActionTypes,
-  getAuditUsers,
-  exportAuditLogsCSV,
-  type AuditLog,
-} from "@/lib/services/audit-logs";
+import { exportAuditLogsCSV, type AuditLog } from "@/lib/services/audit-logs";
 import {
   getActionLabel,
   getActionIcon,
@@ -145,15 +139,28 @@ export default function AuditLogsPage() {
     if (!organization?.id) return;
 
     try {
-      const [actions, auditUsers] = await Promise.all([
-        getActionTypes(organization.id),
-        getAuditUsers(organization.id),
-      ]);
+      const response = await fetch("/api/audit-logs/filters", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ organizationId: organization.id }),
+      });
 
-      setActionTypes(actions);
-      setUsers(auditUsers);
+      const payload = await response.json();
+      if (!response.ok || !payload.success) {
+        console.error("Error loading filter data:", payload.error || response.statusText);
+        setActionTypes([]);
+        setUsers([]);
+        return;
+      }
+
+      setActionTypes(payload.data.actions || []);
+      setUsers(payload.data.users || []);
     } catch (error) {
       console.error("Error loading filter data:", error);
+      setActionTypes([]);
+      setUsers([]);
     }
   };
 
@@ -163,28 +170,35 @@ export default function AuditLogsPage() {
     setLoadingLogs(true);
 
     try {
-      // Calculate date range
-      let range: { start: Date; end: Date } | undefined;
-      if (dateRange !== "all") {
-        const end = new Date();
-        const start = new Date();
-        start.setDate(start.getDate() - parseInt(dateRange));
-        range = { start, end };
-      }
-
-      const result = await getAuditLogs(organization.id, {
-        dateRange: range,
-        actionType: actionFilter,
-        userId: userFilter,
-        resourceType: resourceFilter,
+      const response = await fetch("/api/audit-logs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          organizationId: organization.id,
+          dateRange,
+          actionFilter,
+          userFilter,
+          resourceFilter,
+          limit: 200,
+        }),
       });
 
-      if (result.success && result.data) {
-        setLogs(result.data);
-        setFilteredLogs(result.data);
+      const payload = await response.json();
+      if (!response.ok || !payload.success) {
+        console.error("Error loading audit logs:", payload.error || response.statusText);
+        setLogs([]);
+        setFilteredLogs([]);
+        return;
       }
+
+      setLogs(payload.data || []);
+      setFilteredLogs(payload.data || []);
     } catch (error) {
       console.error("Error loading audit logs:", error);
+      setLogs([]);
+      setFilteredLogs([]);
     } finally {
       setLoadingLogs(false);
     }
