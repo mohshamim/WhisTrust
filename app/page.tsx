@@ -139,18 +139,72 @@ function HomeContent() {
         return;
       }
       
-      // If no subdomain found, log for debugging and redirect to error page
+      // If no subdomain found, log for debugging and redirect to error page with org param if we can extract it
+      let errorUrl = `/error?message=${encodeURIComponent("SSO authentication failed. Please try logging in again from your organization's login page.")}`;
+      
+      // Try one more time to extract subdomain for the error page
+      let errorOrgSubdomain: string | null = null;
+      
       if (typeof window !== 'undefined') {
+        // Try hostname
+        try {
+          const hostname = window.location.hostname;
+          const hostParts = hostname.split('.');
+          if (hostParts.length >= 3) {
+            const possibleSubdomain = hostParts[0];
+            if (possibleSubdomain && 
+                possibleSubdomain !== 'www' && 
+                possibleSubdomain !== 'demo' && 
+                possibleSubdomain !== 'superadmin') {
+              errorOrgSubdomain = possibleSubdomain;
+            }
+          }
+        } catch (e) {
+          // Ignore
+        }
+        
+        // Try referrer if still not found
+        if (!errorOrgSubdomain && document.referrer) {
+          try {
+            const referrerUrl = new URL(document.referrer);
+            const referrerHostname = referrerUrl.hostname;
+            const referrerParts = referrerHostname.split('.');
+            if (referrerParts.length >= 3) {
+              const possibleSubdomain = referrerParts[0];
+              if (possibleSubdomain && 
+                  possibleSubdomain !== 'www' && 
+                  possibleSubdomain !== 'demo' && 
+                  possibleSubdomain !== 'superadmin') {
+                errorOrgSubdomain = possibleSubdomain;
+              }
+            }
+            if (!errorOrgSubdomain) {
+              const pathMatch = referrerUrl.pathname.match(/\/org\/([a-z0-9-]+)/);
+              if (pathMatch) {
+                errorOrgSubdomain = pathMatch[1];
+              }
+            }
+          } catch (e) {
+            // Ignore
+          }
+        }
+        
         console.error('[SSO Fallback] Could not determine organization subdomain', {
           hostname: window.location.hostname,
           referrer: document.referrer,
           hasLocalStorage: !!localStorage.getItem("sso_org_subdomain"),
           cookies: document.cookie,
+          extractedOrg: errorOrgSubdomain,
         });
+        
+        // Add org parameter if we found it
+        if (errorOrgSubdomain) {
+          errorUrl += `&org=${errorOrgSubdomain}`;
+        }
       }
       
-      // Redirect to error page with helpful message
-      window.location.replace(`/error?message=${encodeURIComponent("SSO authentication failed. Please try logging in again from your organization's login page.")}`);
+      // Redirect to error page
+      window.location.replace(errorUrl);
     }
   }, [searchParams, router]);
 
