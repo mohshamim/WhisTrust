@@ -434,7 +434,7 @@ export default function ClientLoginPage() {
                     size="lg"
                     variant="default"
                     className="w-full h-12 rounded-lg shadow-md hover:shadow-lg focus-visible:ring-4"
-                    disabled={isLoading || ssoLoading}
+                    disabled={isLoading || ssoLoading !== null}
                   >
                     {isLoading ? "Signing in..." : (
                       <>
