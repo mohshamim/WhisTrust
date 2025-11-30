@@ -21,7 +21,7 @@ export default function ClientLoginPage() {
   const [organization, setOrganization] = useState<ClientOrganization | null>(null);
   const [loading, setLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
-  const [ssoLoading, setSsoLoading] = useState(false);
+  const [ssoLoading, setSsoLoading] = useState<SSOProvider | null>(null); // Track which provider is loading
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -154,7 +154,7 @@ export default function ClientLoginPage() {
   };
 
   const handleSSOLogin = async (provider: SSOProvider) => {
-    setSsoLoading(true);
+    setSsoLoading(provider); // Set which provider is loading
     setError("");
 
     try {
@@ -162,18 +162,21 @@ export default function ClientLoginPage() {
       
       if (!result.success) {
         setError(result.error || "Failed to initiate SSO login");
-        setSsoLoading(false);
+        setSsoLoading(null);
         return;
       }
 
       // Redirect to OAuth provider
       if (result.redirectUrl) {
+        // Don't reset loading state - we're redirecting
         window.location.href = result.redirectUrl;
+      } else {
+        setSsoLoading(null);
       }
     } catch (err: any) {
       console.error("SSO login error:", err);
       setError("An unexpected error occurred. Please try again.");
-      setSsoLoading(false);
+      setSsoLoading(null);
     }
   };
 
@@ -320,10 +323,10 @@ export default function ClientLoginPage() {
                       variant="ghost"
                       className="w-full h-12 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 shadow-sm transition-all duration-200 font-medium text-gray-700 dark:text-gray-200"
                       onClick={() => handleSSOLogin("google")}
-                      disabled={ssoLoading || isLoading}
+                      disabled={ssoLoading !== null || isLoading}
                     >
                       <div className="flex items-center justify-center gap-3 w-full">
-                        {ssoLoading ? (
+                        {ssoLoading === "google" ? (
                           <>
                             <div className="h-5 w-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                             <span>Redirecting...</span>
@@ -361,10 +364,10 @@ export default function ClientLoginPage() {
                       variant="ghost"
                       className="w-full h-12 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-300 dark:hover:border-gray-600 shadow-sm transition-all duration-200 font-medium text-gray-700 dark:text-gray-200"
                       onClick={() => handleSSOLogin("azure")}
-                      disabled={ssoLoading || isLoading}
+                      disabled={ssoLoading !== null || isLoading}
                     >
                       <div className="flex items-center justify-center gap-3 w-full">
-                        {ssoLoading ? (
+                        {ssoLoading === "azure" ? (
                           <>
                             <div className="h-5 w-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                             <span>Redirecting...</span>
@@ -406,7 +409,7 @@ export default function ClientLoginPage() {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       required
-                      disabled={isLoading || ssoLoading}
+                      disabled={isLoading || ssoLoading !== null}
                       className="h-11"
                     />
                   </div>
@@ -420,7 +423,7 @@ export default function ClientLoginPage() {
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                       required
-                      disabled={isLoading || ssoLoading}
+                      disabled={isLoading || ssoLoading !== null}
                       className="h-11"
                     />
                   </div>

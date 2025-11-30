@@ -140,6 +140,13 @@ export async function initiateSSOLogin(
       : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000');
     const redirectUrl = config.sso_redirect_url || 
       `${baseUrl}/org/${organizationSubdomain}/sso/callback`;
+    
+    // Log for debugging (remove in production if needed)
+    if (typeof window !== 'undefined') {
+      console.log('[SSO] Redirect URL:', redirectUrl);
+      console.log('[SSO] Provider:', provider);
+      console.log('[SSO] Organization:', organizationSubdomain);
+    }
 
     // Map provider to Supabase provider name
     let supabaseProvider: string;
