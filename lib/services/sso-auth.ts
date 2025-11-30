@@ -138,8 +138,19 @@ export async function initiateSSOLogin(
     const baseUrl = typeof window !== 'undefined' 
       ? window.location.origin 
       : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000');
-    const redirectUrl = config.sso_redirect_url || 
+    
+    // Always use the configured redirect URL or build it explicitly
+    // This ensures Supabase redirects directly to our callback route
+    let redirectUrl = config.sso_redirect_url || 
       `${baseUrl}/org/${organizationSubdomain}/sso/callback`;
+    
+    // Ensure the redirect URL is absolute and correct
+    if (!redirectUrl.startsWith('http://') && !redirectUrl.startsWith('https://')) {
+      // If relative URL, make it absolute
+      redirectUrl = redirectUrl.startsWith('/') 
+        ? `${baseUrl}${redirectUrl}`
+        : `${baseUrl}/${redirectUrl}`;
+    }
     
     // Log for debugging (remove in production if needed)
     if (typeof window !== 'undefined') {
