@@ -809,11 +809,20 @@ export default function ClientSettingsPage() {
                             placeholder="Auto-generated if left empty"
                           />
                           <p className="text-xs text-muted-foreground">
-                            This is your app&apos;s callback URL where Supabase will redirect after OAuth. 
-                            Default: {typeof window !== 'undefined' ? window.location.origin : ''}/org/{organization.subdomain}/sso/callback
+                            This is your app&apos;s callback URL where Supabase will redirect after OAuth.
+                            <br />
+                            <strong className="text-foreground">For Production:</strong> Use your production domain (e.g., <code className="text-xs bg-muted px-1 rounded">https://yourdomain.com/org/{organization.subdomain}/sso/callback</code>)
+                            <br />
+                            <strong className="text-foreground">For Local:</strong> Use <code className="text-xs bg-muted px-1 rounded">http://localhost:3000/org/{organization.subdomain}/sso/callback</code>
                           </p>
-                          <p className="text-xs text-amber-600 dark:text-amber-400">
-                            ⚠️ Note: Google Cloud Console should use Supabase&apos;s callback URL: https://[project-ref].supabase.co/auth/v1/callback
+                          <p className="text-xs text-amber-600 dark:text-amber-400 font-medium">
+                            ⚠️ Important: This URL must also be configured in:
+                            <br />
+                            • Your identity provider (Google Cloud Console / Azure AD)
+                            <br />
+                            • Supabase Dashboard (for each OAuth provider)
+                            <br />
+                            <span className="text-xs">Note: Google Cloud Console should use Supabase&apos;s callback URL: https://[project-ref].supabase.co/auth/v1/callback</span>
                           </p>
                         </div>
 
