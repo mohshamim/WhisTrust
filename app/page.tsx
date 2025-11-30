@@ -59,17 +59,48 @@ function HomeContent() {
   useEffect(() => {
     const code = searchParams.get("code");
     if (code) {
-      // Try to get organization from localStorage (set before SSO redirect)
-      const orgSubdomain = localStorage.getItem("sso_org_subdomain");
+      // Try multiple methods to get organization subdomain
+      let orgSubdomain: string | null = null;
+      
+      // Method 1: Try localStorage (set before SSO redirect)
+      orgSubdomain = localStorage.getItem("sso_org_subdomain");
+      
+      // Method 2: Try cookie (more reliable, set before SSO redirect)
+      if (!orgSubdomain && typeof document !== 'undefined') {
+        const cookies = document.cookie.split(';');
+        const ssoCookie = cookies.find(c => c.trim().startsWith('sso_org_subdomain='));
+        if (ssoCookie) {
+          orgSubdomain = ssoCookie.split('=')[1]?.trim() || null;
+        }
+      }
+      
+      // Method 3: Try to extract from referrer URL
+      if (!orgSubdomain && typeof document !== 'undefined' && document.referrer) {
+        try {
+          const referrerUrl = new URL(document.referrer);
+          const referrerPath = referrerUrl.pathname;
+          const pathMatch = referrerPath.match(/\/org\/([a-z0-9-]+)/);
+          if (pathMatch) {
+            orgSubdomain = pathMatch[1];
+          }
+        } catch (e) {
+          // Ignore URL parsing errors
+        }
+      }
+      
       if (orgSubdomain) {
         // Clear the stored subdomain
         localStorage.removeItem("sso_org_subdomain");
+        if (typeof document !== 'undefined') {
+          document.cookie = 'sso_org_subdomain=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        }
         // Redirect to the correct callback route
         router.replace(`/org/${orgSubdomain}/sso/callback?code=${code}`);
         return;
       }
-      // If no subdomain found, show error or redirect to a generic error page
-      console.error("SSO callback received but no organization subdomain found");
+      
+      // If no subdomain found, redirect to error page with helpful message
+      router.replace(`/error?message=${encodeURIComponent("SSO authentication failed. Please try logging in again from your organization's login page.")}`);
     }
   }, [searchParams, router]);
 

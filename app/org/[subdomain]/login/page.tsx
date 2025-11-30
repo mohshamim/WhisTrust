@@ -158,10 +158,12 @@ export default function ClientLoginPage() {
     setError("");
 
     try {
-      // Store organization subdomain in localStorage as fallback
+      // Store organization subdomain in both localStorage and cookie as fallback
       // This helps if Supabase redirects to root URL instead of callback route
       if (typeof window !== 'undefined') {
         localStorage.setItem("sso_org_subdomain", subdomain);
+        // Also set cookie (more reliable, survives redirects better)
+        document.cookie = `sso_org_subdomain=${subdomain}; path=/; max-age=300; SameSite=Lax`; // 5 minutes
       }
 
       const result = await initiateSSOLogin(subdomain, provider);
