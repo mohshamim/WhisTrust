@@ -59,7 +59,11 @@ function HomeContent() {
   // Handle OAuth callback that lands on homepage (fallback)
   useEffect(() => {
     const code = searchParams.get("code");
-    if (code) {
+    const error = searchParams.get("error");
+    const errorDescription = searchParams.get("error_description");
+    
+    // Handle both successful OAuth (code) and failed OAuth (error)
+    if (code || error) {
       setIsRedirecting(true); // Prevent page from rendering
       
       // Try multiple methods to get organization subdomain
@@ -160,15 +164,22 @@ function HomeContent() {
         if (typeof document !== 'undefined') {
           document.cookie = 'sso_org_subdomain=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         }
-        // Redirect immediately to the correct callback route
-        window.location.replace(`/org/${orgSubdomain}/sso/callback?code=${code}`);
-        return;
+        
+        // If we have a code, redirect to callback route
+        if (code) {
+          window.location.replace(`/org/${orgSubdomain}/sso/callback?code=${code}`);
+          return;
+        }
+        
+        // If we have an error, redirect to login page with error message
+        if (error) {
+          const errorMsg = errorDescription || error || "SSO authentication failed";
+          window.location.replace(`/org/${orgSubdomain}/login?error=${encodeURIComponent(errorMsg)}`);
+          return;
+        }
       }
       
-      // If no subdomain found, log for debugging and redirect to error page with org param if we can extract it
-      let errorUrl = `/error?message=${encodeURIComponent("SSO authentication failed. Please try logging in again from your organization's login page.")}`;
-      
-      // Try one more time to extract subdomain for the error page
+      // If no subdomain found, try one more time to extract subdomain
       let errorOrgSubdomain: string | null = null;
       
       if (typeof window !== 'undefined') {
@@ -221,15 +232,23 @@ function HomeContent() {
           hasLocalStorage: !!localStorage.getItem("sso_org_subdomain"),
           cookies: document.cookie,
           extractedOrg: errorOrgSubdomain,
+          hasCode: !!code,
+          hasError: !!error,
         });
         
-        // Add org parameter if we found it
+        // If we found an org, redirect to login page with error
         if (errorOrgSubdomain) {
-          errorUrl += `&org=${errorOrgSubdomain}`;
+          const errorMsg = errorDescription || error || "SSO authentication failed";
+          window.location.replace(`/org/${errorOrgSubdomain}/login?error=${encodeURIComponent(errorMsg)}`);
+          return;
         }
       }
       
-      // Redirect to error page
+      // Last resort: redirect to error page
+      let errorUrl = `/error?message=${encodeURIComponent("SSO authentication failed. Please try logging in again from your organization's login page.")}`;
+      if (errorOrgSubdomain) {
+        errorUrl += `&org=${errorOrgSubdomain}`;
+      }
       window.location.replace(errorUrl);
     }
   }, [searchParams, router]);
