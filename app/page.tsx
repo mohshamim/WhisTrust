@@ -77,14 +77,51 @@ function HomeContent() {
         }
       }
       
-      // Method 3: Try to extract from referrer URL
+      // Method 3: Try to extract from current hostname (for subdomain-based routing in production)
+      if (!orgSubdomain && typeof window !== 'undefined') {
+        try {
+          const hostname = window.location.hostname;
+          // Check if we're on a subdomain (e.g., codesquare.whistrust.app)
+          const hostParts = hostname.split('.');
+          if (hostParts.length >= 3) {
+            // e.g., codesquare.whistrust.app -> codesquare
+            const possibleSubdomain = hostParts[0];
+            // Exclude known non-tenant subdomains
+            if (possibleSubdomain && 
+                possibleSubdomain !== 'www' && 
+                possibleSubdomain !== 'demo' && 
+                possibleSubdomain !== 'superadmin') {
+              orgSubdomain = possibleSubdomain;
+            }
+          }
+        } catch (e) {
+          // Ignore errors
+        }
+      }
+      
+      // Method 4: Try to extract from referrer URL
       if (!orgSubdomain && typeof document !== 'undefined' && document.referrer) {
         try {
           const referrerUrl = new URL(document.referrer);
-          const referrerPath = referrerUrl.pathname;
-          const pathMatch = referrerPath.match(/\/org\/([a-z0-9-]+)/);
-          if (pathMatch) {
-            orgSubdomain = pathMatch[1];
+          const referrerHostname = referrerUrl.hostname;
+          // Try subdomain from referrer hostname
+          const referrerParts = referrerHostname.split('.');
+          if (referrerParts.length >= 3) {
+            const possibleSubdomain = referrerParts[0];
+            if (possibleSubdomain && 
+                possibleSubdomain !== 'www' && 
+                possibleSubdomain !== 'demo' && 
+                possibleSubdomain !== 'superadmin') {
+              orgSubdomain = possibleSubdomain;
+            }
+          }
+          // Also try path-based routing from referrer
+          if (!orgSubdomain) {
+            const referrerPath = referrerUrl.pathname;
+            const pathMatch = referrerPath.match(/\/org\/([a-z0-9-]+)/);
+            if (pathMatch) {
+              orgSubdomain = pathMatch[1];
+            }
           }
         } catch (e) {
           // Ignore URL parsing errors
@@ -102,7 +139,17 @@ function HomeContent() {
         return;
       }
       
-      // If no subdomain found, redirect to error page with helpful message
+      // If no subdomain found, log for debugging and redirect to error page
+      if (typeof window !== 'undefined') {
+        console.error('[SSO Fallback] Could not determine organization subdomain', {
+          hostname: window.location.hostname,
+          referrer: document.referrer,
+          hasLocalStorage: !!localStorage.getItem("sso_org_subdomain"),
+          cookies: document.cookie,
+        });
+      }
+      
+      // Redirect to error page with helpful message
       window.location.replace(`/error?message=${encodeURIComponent("SSO authentication failed. Please try logging in again from your organization's login page.")}`);
     }
   }, [searchParams, router]);
