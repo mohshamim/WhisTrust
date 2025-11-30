@@ -163,7 +163,11 @@ export default function ClientLoginPage() {
       if (typeof window !== 'undefined') {
         localStorage.setItem("sso_org_subdomain", subdomain);
         // Also set cookie (more reliable, survives redirects better)
-        document.cookie = `sso_org_subdomain=${subdomain}; path=/; max-age=300; SameSite=Lax`; // 5 minutes
+        // Use domain-agnostic cookie that works across subdomains
+        const domain = window.location.hostname === 'localhost' 
+          ? '' 
+          : `.${window.location.hostname.split('.').slice(-2).join('.')}`; // e.g., .whistrust.app
+        document.cookie = `sso_org_subdomain=${subdomain}; path=/; max-age=300; SameSite=Lax${domain ? `; domain=${domain}` : ''}`; // 5 minutes
       }
 
       const result = await initiateSSOLogin(subdomain, provider);
