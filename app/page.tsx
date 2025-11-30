@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, Suspense } from "react";
+import { useEffect, Suspense, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -54,11 +54,14 @@ import {
 function HomeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const [isRedirecting, setIsRedirecting] = useState(false);
 
   // Handle OAuth callback that lands on homepage (fallback)
   useEffect(() => {
     const code = searchParams.get("code");
     if (code) {
+      setIsRedirecting(true); // Prevent page from rendering
+      
       // Try multiple methods to get organization subdomain
       let orgSubdomain: string | null = null;
       
@@ -94,15 +97,27 @@ function HomeContent() {
         if (typeof document !== 'undefined') {
           document.cookie = 'sso_org_subdomain=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         }
-        // Redirect to the correct callback route
-        router.replace(`/org/${orgSubdomain}/sso/callback?code=${code}`);
+        // Redirect immediately to the correct callback route
+        window.location.replace(`/org/${orgSubdomain}/sso/callback?code=${code}`);
         return;
       }
       
       // If no subdomain found, redirect to error page with helpful message
-      router.replace(`/error?message=${encodeURIComponent("SSO authentication failed. Please try logging in again from your organization's login page.")}`);
+      window.location.replace(`/error?message=${encodeURIComponent("SSO authentication failed. Please try logging in again from your organization's login page.")}`);
     }
   }, [searchParams, router]);
+
+  // Show loading state while redirecting (prevents homepage flash)
+  if (isRedirecting || searchParams.get("code")) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">Completing sign in...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
