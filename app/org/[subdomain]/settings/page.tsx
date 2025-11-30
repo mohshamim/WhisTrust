@@ -83,7 +83,12 @@ export default function ClientSettingsPage() {
     primary_color: "",
     theme_mode: "system",
   });
-  const [notifPrefs, setNotifPrefs] = useState<any>({
+  const [notifPrefs, setNotifPrefs] = useState<{
+    new_report: boolean;
+    reporter_message: boolean;
+    assignment_change: boolean;
+    status_change: boolean;
+  }>({
     new_report: true,
     reporter_message: true,
     assignment_change: true,
@@ -898,7 +903,7 @@ export default function ClientSettingsPage() {
                       id="new_report"
                       checked={notifPrefs.new_report}
                       onCheckedChange={(checked) =>
-                        setNotifPrefs((p) => ({ ...p, new_report: !!checked }))
+                        setNotifPrefs((p: typeof notifPrefs) => ({ ...p, new_report: !!checked }))
                       }
                     />
                   </div>
@@ -921,7 +926,7 @@ export default function ClientSettingsPage() {
                       id="reporter_message"
                       checked={notifPrefs.reporter_message}
                       onCheckedChange={(checked) =>
-                        setNotifPrefs((p) => ({ ...p, reporter_message: !!checked }))
+                        setNotifPrefs((p: typeof notifPrefs) => ({ ...p, reporter_message: !!checked }))
                       }
                     />
                   </div>
@@ -944,7 +949,7 @@ export default function ClientSettingsPage() {
                       id="assignment_change"
                       checked={notifPrefs.assignment_change}
                       onCheckedChange={(checked) =>
-                        setNotifPrefs((p) => ({ ...p, assignment_change: !!checked }))
+                        setNotifPrefs((p: typeof notifPrefs) => ({ ...p, assignment_change: !!checked }))
                       }
                     />
                   </div>
@@ -967,7 +972,7 @@ export default function ClientSettingsPage() {
                       id="status_change"
                       checked={notifPrefs.status_change}
                       onCheckedChange={(checked) =>
-                        setNotifPrefs((p) => ({ ...p, status_change: !!checked }))
+                        setNotifPrefs((p: typeof notifPrefs) => ({ ...p, status_change: !!checked }))
                       }
                     />
                   </div>
