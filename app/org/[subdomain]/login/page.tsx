@@ -158,11 +158,21 @@ export default function ClientLoginPage() {
     setError("");
 
     try {
+      // Store organization subdomain in localStorage as fallback
+      // This helps if Supabase redirects to root URL instead of callback route
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("sso_org_subdomain", subdomain);
+      }
+
       const result = await initiateSSOLogin(subdomain, provider);
       
       if (!result.success) {
         setError(result.error || "Failed to initiate SSO login");
         setSsoLoading(null);
+        // Clear stored subdomain on error
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem("sso_org_subdomain");
+        }
         return;
       }
 
@@ -172,11 +182,19 @@ export default function ClientLoginPage() {
         window.location.href = result.redirectUrl;
       } else {
         setSsoLoading(null);
+        // Clear stored subdomain if no redirect
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem("sso_org_subdomain");
+        }
       }
     } catch (err: any) {
       console.error("SSO login error:", err);
       setError("An unexpected error occurred. Please try again.");
       setSsoLoading(null);
+      // Clear stored subdomain on error
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem("sso_org_subdomain");
+      }
     }
   };
 

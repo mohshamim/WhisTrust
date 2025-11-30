@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -48,6 +52,27 @@ import {
 } from "@/components/structured-data";
 
 export default function Home() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  // Handle OAuth callback that lands on homepage (fallback)
+  useEffect(() => {
+    const code = searchParams.get("code");
+    if (code) {
+      // Try to get organization from localStorage (set before SSO redirect)
+      const orgSubdomain = localStorage.getItem("sso_org_subdomain");
+      if (orgSubdomain) {
+        // Clear the stored subdomain
+        localStorage.removeItem("sso_org_subdomain");
+        // Redirect to the correct callback route
+        router.replace(`/org/${orgSubdomain}/sso/callback?code=${code}`);
+        return;
+      }
+      // If no subdomain found, show error or redirect to a generic error page
+      console.error("SSO callback received but no organization subdomain found");
+    }
+  }, [searchParams, router]);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Structured Data for SEO */}
