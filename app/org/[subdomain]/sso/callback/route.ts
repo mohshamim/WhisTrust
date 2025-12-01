@@ -17,28 +17,14 @@ export async function GET(request: NextRequest) {
     const cookieStore = await cookies();
     const config = getSupabaseConfig();
     
-        // Get organization subdomain from URL
+        // Get organization subdomain from URL path (most reliable - it's in the route)
         const hostname = request.headers.get("host") || "";
         const pathname = request.nextUrl.pathname;
         let organizationSubdomain = getOrganizationFromRequest(hostname, pathname);
         
-        // If not found in URL, try to extract from state parameter (OAuth state)
+        // Fallback: Try to get from query parameter (we pass it in queryParams)
         if (!organizationSubdomain) {
-          const stateParam = request.nextUrl.searchParams.get("state");
-          if (stateParam) {
-            try {
-              // Try to decode base64 JSON state
-              const decoded = JSON.parse(Buffer.from(stateParam, 'base64').toString());
-              if (decoded.org) {
-                organizationSubdomain = decoded.org;
-              }
-            } catch (e) {
-              // If not JSON, might be plain subdomain
-              if (stateParam && stateParam.length < 50) {
-                organizationSubdomain = stateParam;
-              }
-            }
-          }
+          organizationSubdomain = request.nextUrl.searchParams.get("organization_subdomain") || null;
         }
 
         if (!organizationSubdomain) {

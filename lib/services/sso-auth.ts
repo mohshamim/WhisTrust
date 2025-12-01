@@ -179,26 +179,17 @@ export async function initiateSSOLogin(
     }
 
     // Configure OAuth options
-    // Store organization subdomain in state parameter (most reliable - survives OAuth redirect)
+    // IMPORTANT: Do NOT override the 'state' parameter - Supabase manages it automatically for CSRF protection
+    // The organization subdomain is already in the redirect URL path, so we can extract it from there
     const options: any = {
       redirectTo: redirectUrl,
       queryParams: {
+        // Pass organization subdomain as a query param (will be preserved in callback)
+        // This is a fallback in case we can't extract from URL path
         organization_subdomain: organizationSubdomain,
       },
-      // Use state parameter to pass organization subdomain (most reliable method)
-      // This will be available in the callback URL
       skipBrowserRedirect: false,
     };
-    
-    // Encode organization subdomain in state (Supabase will return this in callback)
-    // Format: base64(JSON.stringify({org: subdomain}))
-    try {
-      const stateData = Buffer.from(JSON.stringify({ org: organizationSubdomain })).toString('base64');
-      options.queryParams.state = stateData;
-    } catch (e) {
-      // Fallback: just use the subdomain as state
-      options.queryParams.state = organizationSubdomain;
-    }
 
     // For OIDC, add issuer URL and scopes
     if (provider === "oidc" && config.sso_issuer_url) {

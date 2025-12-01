@@ -69,28 +69,9 @@ function HomeContent() {
       // Try multiple methods to get organization subdomain
       let orgSubdomain: string | null = null;
       
-      // Method 1: Try to extract from OAuth state parameter (most reliable)
-      // Supabase may pass state in URL or we can decode it
-      if (!orgSubdomain && typeof window !== 'undefined') {
-        try {
-          const stateParam = searchParams.get("state");
-          if (stateParam) {
-            // Try to decode base64 JSON state (browser-compatible)
-            try {
-              const decoded = JSON.parse(atob(stateParam));
-              if (decoded.org) {
-                orgSubdomain = decoded.org;
-              }
-            } catch (e) {
-              // If not JSON, might be plain subdomain
-              if (stateParam && stateParam.length < 50 && /^[a-z0-9-]+$/i.test(stateParam)) {
-                orgSubdomain = stateParam;
-              }
-            }
-          }
-        } catch (e) {
-          // Ignore decoding errors
-        }
+      // Method 1: Try to get from query parameter (we pass it in queryParams)
+      if (!orgSubdomain) {
+        orgSubdomain = searchParams.get("organization_subdomain");
       }
       
       // Method 2: Try localStorage (set before SSO redirect)
