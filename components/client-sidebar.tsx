@@ -23,6 +23,13 @@ import {
 } from "@/components/ui/sidebar";
 import { SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { getOrganizationBySubdomain } from "@/lib/services/client-auth";
+import { LogOut } from "lucide-react";
+import {
+  SidebarGroup,
+  SidebarMenu,
+  SidebarMenuItem,
+  SidebarMenuButton,
+} from "@/components/ui/sidebar";
 
 interface ClientSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: {
@@ -103,6 +110,25 @@ export function ClientSidebar({
   const params = useParams();
   const subdomain = params.subdomain as string;
   const [branding, setBranding] = React.useState<any>(null);
+
+  const handleLogout = async () => {
+    try {
+      const { signOutClient } = await import("@/lib/services/client-auth");
+      const result = await signOutClient();
+
+      if (result.success) {
+        window.location.href = `/org/${subdomain}/login`;
+      } else {
+        console.error("Logout failed:", result.error);
+        const { toast } = await import("sonner");
+        toast.error("Failed to logout. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error during logout:", error);
+      const { toast } = await import("sonner");
+      toast.error("An error occurred during logout.");
+    }
+  };
 
   // Apply organization branding theme globally
   React.useEffect(() => {
@@ -247,6 +273,20 @@ export function ClientSidebar({
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
+        <SidebarGroup className="mt-auto">
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                size="sm"
+                className="text-destructive hover:bg-destructive/10 mt-2"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Log out</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
