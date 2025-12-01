@@ -171,7 +171,9 @@ export default function AnalyticsPage() {
         byStatus,
         byCategory,
         byPriority,
-        categoryMetrics
+        categoryMetrics,
+        // Prefer organization branding primary color if available
+        (organization as any)?.branding?.primary_color || null
       );
     }
   };

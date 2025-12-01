@@ -7,6 +7,27 @@ import { createServiceClient } from "@/lib/supabase/service-client";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
+// Helper: convert HEX to RGB tuple
+function hexToRgb(hex: string): [number, number, number] {
+  let normalized = hex.replace("#", "").trim();
+  if (normalized.length === 3) {
+    normalized = normalized
+      .split("")
+      .map((c) => c + c)
+      .join("");
+  }
+
+  const r = parseInt(normalized.substring(0, 2), 16);
+  const g = parseInt(normalized.substring(2, 4), 16);
+  const b = parseInt(normalized.substring(4, 6), 16);
+
+  if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) {
+    return [38, 50, 56];
+  }
+
+  return [r, g, b];
+}
+
 export interface AnalyticsSummary {
   totalReports: number;
   reportsThisMonth: number;
@@ -394,31 +415,69 @@ export function exportAnalyticsPDF(
   byStatus: ReportsByStatus[],
   byCategory: ReportsByCategory[],
   byPriority: ReportsByPriority[],
-  categoryMetrics: CategoryMetrics[]
+  categoryMetrics: CategoryMetrics[],
+  brandHex?: string | null,
+  organizationName?: string | null,
+  dateRangeLabel?: string | null
 ): void {
+  // Try to align PDF styling with the organization's branding color
+  const getBrandColorRGB = (): [number, number, number] => {
+    // 1) Prefer explicit brandHex passed from React (organization.branding.primary_color)
+    if (brandHex && typeof brandHex === "string") {
+      return hexToRgb(brandHex);
+    }
+
+    // 2) Hard-coded fallback to WhisTrust primary brand color
+    // This is tuned to closely match the primary button / \"Save Changes\" color.
+    return hexToRgb("#c45a3a");
+  };
+
+  const brandColor = getBrandColorRGB();
+
   const doc = new jsPDF({
     orientation: "landscape",
     unit: "pt",
     format: "a4",
   });
 
+  const pageWidth = doc.internal.pageSize.getWidth();
   const marginLeft = 40;
   const marginTop = 40;
 
-  // Title
+  // Top brand banner
+  doc.setFillColor(brandColor[0], brandColor[1], brandColor[2]);
+  doc.rect(0, 0, pageWidth, 70, "F");
+
+  // Title in banner
+  doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(18);
-  doc.text("WhisTrust Analytics Report", marginLeft, marginTop);
+  doc.setFontSize(20);
+  doc.text("WhisTrust Analytics Report", marginLeft, marginTop - 5);
 
   doc.setFontSize(10);
   doc.setFont("helvetica", "normal");
-  doc.text(
-    `Generated on ${new Date().toLocaleString()}`,
-    marginLeft,
-    marginTop + 16
-  );
+  const generatedText = `Generated on ${new Date().toLocaleString()}`;
+  doc.text(generatedText, marginLeft, marginTop + 10);
 
-  let finalY = marginTop + 32;
+  if (organizationName) {
+    const orgLine = organizationName;
+    doc.text(orgLine, marginLeft, marginTop + 24);
+  }
+
+  if (dateRangeLabel) {
+    const label = `Range: ${dateRangeLabel}`;
+    const textWidth = doc.getTextWidth(label);
+    doc.text(
+      label,
+      pageWidth - marginLeft - textWidth,
+      marginTop + 10
+    );
+  }
+
+  // Reset text color for body
+  doc.setTextColor(0, 0, 0);
+
+  let finalY = marginTop + 40;
 
   const addTable = (
     title: string,
@@ -447,17 +506,19 @@ export function exportAnalyticsPDF(
       styles: {
         fontSize: 9,
         cellPadding: 4,
+        textColor: [55, 65, 81], // neutral-700
       },
       headStyles: {
-        fillColor: [38, 50, 56],
+        fillColor: brandColor,
         textColor: 255,
         halign: "left",
       },
-      alternateRowStyles: { fillColor: [245, 247, 250] },
+      alternateRowStyles: { fillColor: [252, 248, 246] }, // warm, subtle striping
+      lineColor: [229, 231, 235],
+      lineWidth: 0.25,
       margin: { left: marginLeft, right: marginLeft },
     });
 
-    // @ts-expect-error - autoTable attaches lastAutoTable at runtime
     finalY = (doc as any).lastAutoTable.finalY + 20;
   };
 
