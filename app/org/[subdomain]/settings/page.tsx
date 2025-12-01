@@ -803,9 +803,14 @@ export default function ClientSettingsPage() {
                           <Input
                             id="sso_redirect_url"
                             value={ssoConfig.sso_redirect_url}
-                            onChange={(e) =>
-                              setSsoConfig((c) => ({ ...c, sso_redirect_url: e.target.value }))
-                            }
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              // Warn if localhost in production
+                              if (value.includes('localhost') && typeof window !== 'undefined' && !window.location.hostname.includes('localhost')) {
+                                toast.warning("Warning: localhost URLs won't work in production. Use your production domain instead.");
+                              }
+                              setSsoConfig((c) => ({ ...c, sso_redirect_url: value }));
+                            }}
                             placeholder="Auto-generated if left empty"
                           />
                           <p className="text-xs text-muted-foreground">
