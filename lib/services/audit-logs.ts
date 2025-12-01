@@ -288,7 +288,6 @@ export function exportAuditLogsPDF(
       fontSize: 8,
       cellPadding: 4,
       textColor: [55, 65, 81],
-      overflow: "line",
     },
     headStyles: {
       fillColor: brandColor,
