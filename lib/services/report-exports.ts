@@ -115,6 +115,8 @@ export function exportReportsPDF(
       fontSize: 9,
       cellPadding: 4,
       textColor: [55, 65, 81],
+      lineColor: [229, 231, 235],
+      lineWidth: 0.25,
     },
     headStyles: {
       fillColor: brandColor,
@@ -122,8 +124,6 @@ export function exportReportsPDF(
       halign: "left",
     },
     alternateRowStyles: { fillColor: [252, 248, 246] },
-    lineColor: [229, 231, 235],
-    lineWidth: 0.25,
     margin: { left: marginLeft, right: marginLeft },
   });
 
