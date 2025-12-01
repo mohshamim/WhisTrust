@@ -4,6 +4,8 @@
  */
 
 import { createServiceClient } from "@/lib/supabase/service-client";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export interface AnalyticsSummary {
   totalReports: number;
@@ -385,58 +387,133 @@ export async function getCategoryMetrics(
 }
 
 /**
- * Export analytics data as CSV
+ * Export analytics data as a nicely formatted PDF
  */
-export function exportAnalyticsCSV(
+export function exportAnalyticsPDF(
   summary: AnalyticsSummary,
   byStatus: ReportsByStatus[],
   byCategory: ReportsByCategory[],
-  byPriority: ReportsByPriority[]
+  byPriority: ReportsByPriority[],
+  categoryMetrics: CategoryMetrics[]
 ): void {
-  const csv: string[] = [];
-
-  // Summary section
-  csv.push("Analytics Summary");
-  csv.push("");
-  csv.push("Metric,Value");
-  csv.push(`Total Reports,${summary.totalReports}`);
-  csv.push(`Reports This Month,${summary.reportsThisMonth}`);
-  csv.push(`Avg Response Time (hours),${summary.avgResponseTimeHours}`);
-  csv.push(`Resolution Rate (%),${summary.resolutionRate}`);
-  csv.push(`Critical/High Priority,${summary.criticalHighCount}`);
-  csv.push("");
-
-  // By Status
-  csv.push("Reports by Status");
-  csv.push("Status,Count,Percentage");
-  byStatus.forEach((item) => {
-    csv.push(`${item.status},${item.count},${item.percentage}%`);
-  });
-  csv.push("");
-
-  // By Category
-  csv.push("Reports by Category");
-  csv.push("Category,Count,Percentage");
-  byCategory.forEach((item) => {
-    csv.push(`${item.category},${item.count},${item.percentage}%`);
-  });
-  csv.push("");
-
-  // By Priority
-  csv.push("Reports by Priority");
-  csv.push("Priority,Count,Percentage");
-  byPriority.forEach((item) => {
-    csv.push(`${item.priority},${item.count},${item.percentage}%`);
+  const doc = new jsPDF({
+    orientation: "landscape",
+    unit: "pt",
+    format: "a4",
   });
 
-  // Create download
-  const blob = new Blob([csv.join("\n")], { type: "text/csv" });
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `analytics-${new Date().toISOString().split("T")[0]}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  window.URL.revokeObjectURL(url);
+  const marginLeft = 40;
+  const marginTop = 40;
+
+  // Title
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.text("WhisTrust Analytics Report", marginLeft, marginTop);
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    `Generated on ${new Date().toLocaleString()}`,
+    marginLeft,
+    marginTop + 16
+  );
+
+  let finalY = marginTop + 32;
+
+  const addTable = (
+    title: string,
+    head: string[],
+    body: (string | number)[][]
+  ) => {
+    if (!body.length) return;
+
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const startYThreshold = pageHeight - 160;
+
+    if (finalY > startYThreshold) {
+      doc.addPage();
+      finalY = marginTop;
+    }
+
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.text(title, marginLeft, finalY);
+    finalY += 8;
+
+    autoTable(doc, {
+      startY: finalY,
+      head: [head],
+      body,
+      styles: {
+        fontSize: 9,
+        cellPadding: 4,
+      },
+      headStyles: {
+        fillColor: [38, 50, 56],
+        textColor: 255,
+        halign: "left",
+      },
+      alternateRowStyles: { fillColor: [245, 247, 250] },
+      margin: { left: marginLeft, right: marginLeft },
+    });
+
+    // @ts-expect-error - autoTable attaches lastAutoTable at runtime
+    finalY = (doc as any).lastAutoTable.finalY + 20;
+  };
+
+  // Summary table
+  addTable("Summary", ["Metric", "Value"], [
+    ["Total Reports", summary.totalReports],
+    ["Reports This Month", summary.reportsThisMonth],
+    ["Avg Response Time (hours)", summary.avgResponseTimeHours],
+    ["Resolution Rate (%)", summary.resolutionRate],
+    ["Critical / High Priority Cases", summary.criticalHighCount],
+  ]);
+
+  // Reports by Status
+  addTable(
+    "Reports by Status",
+    ["Status", "Count", "Percentage"],
+    byStatus.map((item) => [
+      item.status,
+      item.count,
+      `${item.percentage}%`,
+    ])
+  );
+
+  // Reports by Category
+  addTable(
+    "Reports by Category",
+    ["Category", "Count", "Percentage"],
+    byCategory.map((item) => [
+      item.category.replace("_", " "),
+      item.count,
+      `${item.percentage}%`,
+    ])
+  );
+
+  // Reports by Priority
+  addTable(
+    "Reports by Priority",
+    ["Priority", "Count", "Percentage"],
+    byPriority.map((item) => [
+      item.priority,
+      item.count,
+      `${item.percentage}%`,
+    ])
+  );
+
+  // Category Metrics
+  addTable(
+    "Category Performance Metrics",
+    ["Category", "Total Reports", "Avg Response Time (hours)", "Closure Rate"],
+    categoryMetrics.map((metric) => [
+      metric.category.replace("_", " "),
+      metric.total,
+      metric.avgResponseHours > 0 ? metric.avgResponseHours : "N/A",
+      `${metric.closureRate}%`,
+    ])
+  );
+
+  doc.save(`whistrust-analytics-${new Date().toISOString().split("T")[0]}.pdf`);
 }

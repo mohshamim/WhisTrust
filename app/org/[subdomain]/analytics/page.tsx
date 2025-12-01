@@ -47,7 +47,7 @@ import {
 } from "lucide-react";
 import { NotificationsDropdown } from "@/components/notifications-dropdown";
 import {
-  exportAnalyticsCSV,
+  exportAnalyticsPDF,
   type AnalyticsSummary,
   type ReportsByStatus,
   type ReportsByCategory,
@@ -160,8 +160,19 @@ export default function AnalyticsPage() {
   };
 
   const handleExport = () => {
-    if (summary && byStatus.length && byCategory.length && byPriority.length) {
-      exportAnalyticsCSV(summary, byStatus, byCategory, byPriority);
+    if (
+      summary &&
+      byStatus.length &&
+      byCategory.length &&
+      byPriority.length
+    ) {
+      exportAnalyticsPDF(
+        summary,
+        byStatus,
+        byCategory,
+        byPriority,
+        categoryMetrics
+      );
     }
   };
 
@@ -237,7 +248,7 @@ export default function AnalyticsPage() {
               </Select>
               <Button onClick={handleExport} variant="outline">
                 <Download className="h-4 w-4 mr-2" />
-                Export CSV
+                Export PDF
               </Button>
               <NotificationsDropdown userId={user?.id || ""} organizationId={organization?.id || ""} />
             </div>
