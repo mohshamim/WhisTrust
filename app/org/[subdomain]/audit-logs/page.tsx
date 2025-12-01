@@ -55,7 +55,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { NotificationsDropdown } from "@/components/notifications-dropdown";
-import { exportAuditLogsCSV, type AuditLog } from "@/lib/services/audit-logs";
+import { exportAuditLogsPDF, type AuditLog } from "@/lib/services/audit-logs";
 import {
   getActionLabel,
   getActionIcon,
@@ -224,7 +224,18 @@ export default function AuditLogsPage() {
 
   const handleExport = () => {
     if (filteredLogs.length > 0) {
-      exportAuditLogsCSV(filteredLogs);
+      exportAuditLogsPDF(
+        filteredLogs,
+        organization?.name,
+        dateRange === "7"
+          ? "Last 7 Days"
+          : dateRange === "30"
+          ? "Last 30 Days"
+          : dateRange === "90"
+          ? "Last 90 Days"
+          : "All Time",
+        (organization as any)?.branding?.primary_color || null
+      );
     }
   };
 
@@ -277,7 +288,7 @@ export default function AuditLogsPage() {
             <div className="flex items-center gap-4">
               <Button onClick={handleExport} variant="outline" disabled={filteredLogs.length === 0}>
                 <Download className="h-4 w-4 mr-2" />
-                Export CSV
+                Export PDF
               </Button>
               <NotificationsDropdown userId={user?.id || ""} organizationId={organization?.id || ""} />
             </div>
