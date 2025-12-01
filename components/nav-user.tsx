@@ -116,8 +116,8 @@ export function NavUser({
                 <AvatarFallback className="rounded-lg">CN</AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
-                <span className="truncate font-semibold text-sidebar-foreground flex items-center gap-2">
-                  {user.name}
+                <span className="flex items-center gap-2 text-sidebar-foreground">
+                  <span className="truncate font-semibold">{user.name}</span>
                   {role && (
                     <Badge
                       variant="default"
@@ -145,8 +145,8 @@ export function NavUser({
                   <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium flex items-center gap-2">
-                    {user.name}
+                  <span className="flex items-center gap-2">
+                    <span className="truncate font-medium">{user.name}</span>
                     {role && (
                       <Badge
                         variant="default"
