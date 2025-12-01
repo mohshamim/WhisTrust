@@ -52,6 +52,17 @@ export default function ClientLoginPage() {
     }
   }, [organization, subdomain]);
 
+  // Reload SSO config periodically to catch changes (e.g., if enabled in another tab)
+  useEffect(() => {
+    if (!organization) return;
+    
+    const interval = setInterval(() => {
+      loadSSOConfig();
+    }, 5000); // Check every 5 seconds
+    
+    return () => clearInterval(interval);
+  }, [organization, subdomain]);
+
   // Apply branding theme and favicon live
   useEffect(() => {
     if (!organization) return;
@@ -223,7 +234,14 @@ export default function ClientLoginPage() {
       router.refresh();
     } catch (err: any) {
       console.error("Login error:", err);
-      setError("An unexpected error occurred. Please try again.");
+      // Provide more specific error messages
+      if (err.message?.includes('fetch') || err.message?.includes('network')) {
+        setError("Network error. Please check your internet connection and try again.");
+      } else if (err.message?.includes('timeout')) {
+        setError("Request timed out. Please try again.");
+      } else {
+        setError(err.message || "An unexpected error occurred. Please try again.");
+      }
       setIsLoading(false);
     }
   };

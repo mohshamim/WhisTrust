@@ -867,8 +867,10 @@ export default function ClientSettingsPage() {
                             return;
                           }
                           toast.success("SSO configuration updated successfully");
-                          // Reload config to get updated redirect URL
+                          // Reload config to get updated redirect URL and refresh UI
                           await loadSSOConfig();
+                          // Force a page refresh to ensure SSO section visibility updates
+                          window.location.reload();
                         } catch (err) {
                           console.error(err);
                           toast.error("Something went wrong");

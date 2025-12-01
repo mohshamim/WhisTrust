@@ -48,9 +48,16 @@ export async function signInClient(email: string, password: string, organization
     });
 
     if (authError || !authData.user) {
+      // Provide more specific error messages
+      let errorMessage = authError?.message || "Authentication failed";
+      if (authError?.message?.includes('fetch') || authError?.message?.includes('network')) {
+        errorMessage = "Network error. Please check your internet connection and try again.";
+      } else if (authError?.message?.includes('Invalid login credentials')) {
+        errorMessage = "Invalid email or password. Please try again.";
+      }
       return {
         success: false,
-        error: authError?.message || "Authentication failed",
+        error: errorMessage,
       };
     }
 

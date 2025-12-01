@@ -281,7 +281,7 @@ export default function ClientDashboardPage() {
         stats.pendingReports > 0
           ? "Jump directly into reports that still need a response."
           : "Check your pipeline to stay ahead of new submissions.",
-      href: `/org/${subdomain}/reports?status=under_review`,
+      href: `/org/${subdomain}/reports?status=submitted,under_review,investigating`,
       icon: ClipboardCheck,
     },
     {
@@ -527,7 +527,7 @@ export default function ClientDashboardPage() {
                     Requires attention ({rangeDescription})
                   </p>
                   <Link
-                    href={`/org/${subdomain}/reports?status=under_review`}
+                    href={`/org/${subdomain}/reports?status=submitted,under_review,investigating`}
                     className="text-xs font-semibold text-amber-600 hover:underline inline-flex items-center gap-1 mt-2"
                   >
                     Review cases →

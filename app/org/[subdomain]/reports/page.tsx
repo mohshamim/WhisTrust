@@ -291,9 +291,10 @@ export default function ClientReportsPage() {
   const filterReports = () => {
     let filtered = reports;
 
-    // Filter by status
+    // Filter by status - support comma-separated multiple statuses
     if (statusFilter !== "all") {
-      filtered = filtered.filter(r => r.status === statusFilter);
+      const statuses = statusFilter.split(',').map(s => s.trim());
+      filtered = filtered.filter(r => statuses.includes(r.status));
     }
 
     // Filter by priority

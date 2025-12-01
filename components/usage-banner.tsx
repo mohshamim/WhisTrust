@@ -21,6 +21,12 @@ export function UsageBanner({ organization }: UsageBannerProps) {
   const storagePct = pct(organization.current_storage_mb, organization.max_storage_mb);
 
   const nearLimit = (v: number) => v >= 80;
+  
+  // Format display values - show "Unlimited" if max is 0
+  const formatValue = (current: number, max: number) => {
+    if (max === 0) return `${current} / Unlimited`;
+    return `${current} / ${max}`;
+  };
 
   return (
     <Card className="p-3 sm:p-4 border-amber-200 bg-amber-50 dark:bg-amber-950/20">
@@ -29,7 +35,7 @@ export function UsageBanner({ organization }: UsageBannerProps) {
           <div className="flex justify-between text-xs mb-1">
             <span>Users</span>
             <span>
-              {organization.current_admin_users}/{organization.max_admin_users}
+              {formatValue(organization.current_admin_users, organization.max_admin_users)}
             </span>
           </div>
           <Progress value={usersPct} className={nearLimit(usersPct) ? "bg-amber-100" : undefined} />
@@ -38,7 +44,7 @@ export function UsageBanner({ organization }: UsageBannerProps) {
           <div className="flex justify-between text-xs mb-1">
             <span>Reports (month)</span>
             <span>
-              {organization.current_reports_count}/{organization.max_reports_per_month}
+              {formatValue(organization.current_reports_count, organization.max_reports_per_month)}
             </span>
           </div>
           <Progress value={reportsPct} className={nearLimit(reportsPct) ? "bg-amber-100" : undefined} />
@@ -47,7 +53,7 @@ export function UsageBanner({ organization }: UsageBannerProps) {
           <div className="flex justify-between text-xs mb-1">
             <span>Storage (MB)</span>
             <span>
-              {organization.current_storage_mb}/{organization.max_storage_mb}
+              {formatValue(organization.current_storage_mb, organization.max_storage_mb)}
             </span>
           </div>
           <Progress value={storagePct} className={nearLimit(storagePct) ? "bg-amber-100" : undefined} />

@@ -107,11 +107,12 @@ export default function AnonymousReportPage() {
         }),
       });
 
-      const data = await response.json();
-
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit report');
+        const errorData = await response.json().catch(() => ({ error: 'Network error' }));
+        throw new Error(errorData.error || `Failed to submit report (${response.status})`);
       }
+
+      const data = await response.json();
 
       // Step 2: Upload file if present
       if (formData.file && data.reportId) {
