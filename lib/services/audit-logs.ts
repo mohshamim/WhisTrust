@@ -4,6 +4,8 @@
  */
 
 import { createServiceClient } from "@/lib/supabase/service-client";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 export interface AuditLog {
   id: string;
@@ -173,35 +175,132 @@ export async function getAuditUsers(
 }
 
 /**
- * Export audit logs as CSV
+ * Helper: convert HEX color to RGB tuple
  */
-export function exportAuditLogsCSV(logs: AuditLog[]): void {
-  const csv: string[] = [];
+function hexToRgb(hex: string): [number, number, number] {
+  let normalized = hex.replace("#", "").trim();
+  if (normalized.length === 3) {
+    normalized = normalized
+      .split("")
+      .map((c) => c + c)
+      .join("");
+  }
 
-  // Header
-  csv.push("Timestamp,User,Action,Resource Type,Resource ID,Details");
+  const r = parseInt(normalized.substring(0, 2), 16);
+  const g = parseInt(normalized.substring(2, 4), 16);
+  const b = parseInt(normalized.substring(4, 6), 16);
 
-  // Data
-  logs.forEach((log) => {
-    const timestamp = new Date(log.created_at).toLocaleString();
-    const user = log.user_name || "System";
-    const action = log.action;
-    const resourceType = log.resource_type || "N/A";
-    const resourceId = log.resource_id || "N/A";
-    const details = JSON.stringify(log.details || {}).replace(/"/g, '""'); // Escape quotes
+  if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) {
+    return [38, 50, 56];
+  }
 
-    csv.push(`"${timestamp}","${user}","${action}","${resourceType}","${resourceId}","${details}"`);
+  return [r, g, b];
+}
+
+/**
+ * Export audit logs as a branded PDF
+ */
+export function exportAuditLogsPDF(
+  logs: AuditLog[],
+  organizationName?: string | null,
+  dateRangeLabel?: string | null,
+  brandHex?: string | null
+): void {
+  if (!logs.length) return;
+
+  const getBrandColorRGB = (): [number, number, number] => {
+    if (brandHex && typeof brandHex === "string") {
+      return hexToRgb(brandHex);
+    }
+    // Fallback to WhisTrust primary brand color
+    return hexToRgb("#c45a3a");
+  };
+
+  const brandColor = getBrandColorRGB();
+
+  const doc = new jsPDF({
+    orientation: "landscape",
+    unit: "pt",
+    format: "a4",
   });
 
-  // Create download
-  const blob = new Blob([csv.join("\n")], { type: "text/csv" });
-  const url = window.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = `audit-logs-${new Date().toISOString().split("T")[0]}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  window.URL.revokeObjectURL(url);
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const marginLeft = 40;
+  const marginTop = 40;
+
+  // Top banner
+  doc.setFillColor(brandColor[0], brandColor[1], brandColor[2]);
+  doc.rect(0, 0, pageWidth, 70, "F");
+
+  // Title
+  doc.setTextColor(255, 255, 255);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.text("WhisTrust Audit Log Export", marginLeft, marginTop - 5);
+
+  doc.setFontSize(10);
+  doc.setFont("helvetica", "normal");
+  doc.text(
+    `Generated on ${new Date().toLocaleString()}`,
+    marginLeft,
+    marginTop + 10
+  );
+
+  if (organizationName) {
+    doc.text(organizationName, marginLeft, marginTop + 24);
+  }
+
+  if (dateRangeLabel) {
+    const label = `Range: ${dateRangeLabel}`;
+    const textWidth = doc.getTextWidth(label);
+    doc.text(
+      label,
+      pageWidth - marginLeft - textWidth,
+      marginTop + 10
+    );
+  }
+
+  doc.setTextColor(0, 0, 0);
+
+  const rows: (string | number)[][] = logs.map((log) => [
+    new Date(log.created_at).toLocaleString(),
+    log.user_name || "System",
+    log.action,
+    log.resource_type || "N/A",
+    log.resource_id || "N/A",
+    JSON.stringify(log.details || {}),
+  ]);
+
+  autoTable(doc, {
+    startY: marginTop + 40,
+    head: [
+      [
+        "Timestamp",
+        "User",
+        "Action",
+        "Resource Type",
+        "Resource ID",
+        "Details",
+      ],
+    ],
+    body: rows,
+    styles: {
+      fontSize: 8,
+      cellPadding: 4,
+      textColor: [55, 65, 81],
+      overflow: "line",
+    },
+    headStyles: {
+      fillColor: brandColor,
+      textColor: 255,
+      halign: "left",
+    },
+    alternateRowStyles: { fillColor: [252, 248, 246] },
+    lineColor: [229, 231, 235],
+    lineWidth: 0.25,
+    margin: { left: marginLeft, right: marginLeft },
+  });
+
+  doc.save(`audit-logs-${new Date().toISOString().split("T")[0]}.pdf`);
 }
 

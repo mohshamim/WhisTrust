@@ -54,6 +54,11 @@ import {
   Calendar,
   User,
 } from "lucide-react";
+import {
+  exportReportsPDF,
+  exportReportsExcelProtected,
+  type ReportExportRow,
+} from "@/lib/services/report-exports";
 
 interface Report {
   id: string;
@@ -171,6 +176,73 @@ export default function ClientReportsPage() {
     setAssignmentFilter("all");
     setAssignedUserFilter("all");
     setDateRangeFilter("all");
+  };
+
+  const buildExportRows = (): ReportExportRow[] => {
+    return filteredReports.map((report) => {
+      const assigneeName = report.assigned_to
+        ? adminUsers.find((a) => a.id === report.assigned_to)?.full_name ||
+          adminUsers.find((a) => a.id === report.assigned_to)?.email ||
+          "Unknown"
+        : "Unassigned";
+
+      return {
+        caseNumber: report.case_number,
+        category: report.category.replace("_", " "),
+        status: report.status.replace("_", " "),
+        priority: report.priority,
+        assignee: assigneeName,
+        createdAt: new Date(report.created_at).toLocaleString(),
+      };
+    });
+  };
+
+  const getFiltersLabel = () => {
+    const parts: string[] = [];
+
+    if (statusFilter !== "all") parts.push(`Status: ${statusFilter}`);
+    if (priorityFilter !== "all") parts.push(`Priority: ${priorityFilter}`);
+    if (assignedUserFilter !== "all") {
+      parts.push(
+        `Assignee: ${
+          assignedUserFilter === "unassigned" ? "Unassigned" : "Selected"
+        }`
+      );
+    }
+    if (dateRangeFilter !== "all") {
+      parts.push(
+        `Date: ${
+          dateRangeFilter === "7"
+            ? "Last 7 Days"
+            : dateRangeFilter === "30"
+            ? "Last 30 Days"
+            : "Last 90 Days"
+        }`
+      );
+    }
+    if (searchQuery) parts.push(`Search: "${searchQuery}"`);
+
+    return parts.join(" | ");
+  };
+
+  const handleExportPdf = () => {
+    if (!filteredReports.length || !organization) return;
+
+    const rows = buildExportRows();
+    exportReportsPDF(
+      rows,
+      organization.name,
+      getFiltersLabel(),
+      (organization as any)?.branding?.primary_color || null
+    );
+  };
+
+  const handleExportExcel = () => {
+    if (!filteredReports.length) return;
+    const rows = buildExportRows();
+    exportReportsExcelProtected(rows, {
+      organizationName: organization?.name,
+    });
   };
 
   const FilterSelect = ({
@@ -853,12 +925,32 @@ export default function ClientReportsPage() {
           {/* Reports Table */}
           <Card className="shadow-sm">
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-4">
                 <div>
                   <CardTitle>All Reports</CardTitle>
                   <CardDescription>
-                    {filteredReports.length} report{filteredReports.length !== 1 ? 's' : ''} found
+                    {filteredReports.length} report{filteredReports.length !== 1 ? "s" : ""} found
                   </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleExportPdf}
+                    disabled={filteredReports.length === 0}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Export PDF
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleExportExcel}
+                    disabled={filteredReports.length === 0}
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Export Excel
+                  </Button>
                 </div>
               </div>
             </CardHeader>
