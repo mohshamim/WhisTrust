@@ -2,7 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createClient } from "@/lib/supabase/client";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend only if API key is available
+const resend = process.env.RESEND_API_KEY 
+  ? new Resend(process.env.RESEND_API_KEY)
+  : null;
 
 export async function POST(request: NextRequest) {
   try {
@@ -149,6 +152,19 @@ ${message ? `\nMessage:\n${message}` : ''}
 Submission ID: ${submission.id}
 Received: ${new Date().toLocaleString()}
 `;
+
+    // Send email only if Resend is configured
+    if (!resend) {
+      console.warn("Resend not configured - email not sent");
+      return NextResponse.json(
+        {
+          success: true,
+          message: "Form submitted successfully (email not configured)",
+          submissionId: submission.id,
+        },
+        { status: 200 }
+      );
+    }
 
     const { data: emailData, error: emailError } = await resend.emails.send({
       from: "WhisTrust Contact <onboarding@resend.dev>", // Change this to your verified domain
