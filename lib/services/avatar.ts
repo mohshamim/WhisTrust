@@ -11,6 +11,23 @@ export interface AvatarUploadResult {
   error?: string;
 }
 
+// Available avatar styles from Dicebear - Professional & Beautiful options
+export const AVATAR_STYLES = [
+  { id: 'notionists', name: 'Professional', description: 'Clean business style' },
+  { id: 'avataaars', name: 'Modern', description: 'Contemporary look' },
+  { id: 'lorelei', name: 'Elegant', description: 'Sophisticated design' },
+  { id: 'big-smile', name: 'Friendly', description: 'Warm & approachable' },
+  { id: 'personas', name: 'Creative', description: 'Artistic style' },
+  { id: 'adventurer', name: 'Bold', description: 'Confident appearance' },
+  { id: 'initials', name: 'Minimal', description: 'Simple & clean' },
+  { id: 'shapes', name: 'Abstract', description: 'Geometric design' },
+] as const;
+
+export type AvatarStyle = typeof AVATAR_STYLES[number]['id'];
+
+// Default avatar style - Professional by default
+export const DEFAULT_AVATAR_STYLE: AvatarStyle = 'notionists';
+
 /**
  * Upload user avatar to Supabase Storage
  */
@@ -134,12 +151,58 @@ export async function deleteAvatar(userId: string): Promise<AvatarUploadResult> 
 /**
  * Get avatar URL for a user (with fallback to Dicebear)
  */
-export function getAvatarUrl(user: { avatar_url?: string | null; email: string }): string {
-  if (user.avatar_url) {
+export function getAvatarUrl(
+  user: { avatar_url?: string | null; email: string; avatar_style?: string | null },
+  style?: AvatarStyle
+): string {
+  // If user has uploaded a custom avatar, use it
+  if (user.avatar_url && !user.avatar_url.includes('dicebear.com')) {
     return user.avatar_url;
   }
   
-  // Fallback to Dicebear generated avatar
-  return `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.email)}`;
+  // Use specified style, user's preferred style, or default
+  const avatarStyle = style || user.avatar_style || DEFAULT_AVATAR_STYLE;
+  
+  // Generate Dicebear avatar
+  return `https://api.dicebear.com/7.x/${avatarStyle}/svg?seed=${encodeURIComponent(user.email)}`;
+}
+
+/**
+ * Set user's preferred avatar style
+ */
+export async function setAvatarStyle(userId: string, style: AvatarStyle): Promise<AvatarUploadResult> {
+  try {
+    const supabase = createMultiTenantClient();
+
+    // Generate the Dicebear URL with the new style
+    const { data: profile } = await supabase
+      .from("admin_profiles")
+      .select("email")
+      .eq("id", userId)
+      .single();
+
+    if (!profile) {
+      return { success: false, error: "User not found" };
+    }
+
+    const avatarUrl = `https://api.dicebear.com/7.x/${style}/svg?seed=${encodeURIComponent(profile.email)}`;
+
+    // Update profile with new avatar style and URL
+    const { error: updateError } = await supabase
+      .from("admin_profiles")
+      .update({ 
+        avatar_url: avatarUrl,
+        avatar_style: style 
+      })
+      .eq("id", userId);
+
+    if (updateError) {
+      return { success: false, error: "Failed to update avatar style" };
+    }
+
+    return { success: true, avatarUrl };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Failed to set avatar style" };
+  }
 }
 

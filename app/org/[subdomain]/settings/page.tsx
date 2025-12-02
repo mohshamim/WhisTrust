@@ -50,7 +50,7 @@ import {
   ColorPickerSelection,
 } from "@/components/ui/shadcn-io/color-picker";
 import { UsageBanner } from "@/components/usage-banner";
-import { uploadAvatar, deleteAvatar, getAvatarUrl } from "@/lib/services/avatar";
+import { uploadAvatar, deleteAvatar, getAvatarUrl, setAvatarStyle, AVATAR_STYLES, type AvatarStyle } from "@/lib/services/avatar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function ClientSettingsPage() {
@@ -107,6 +107,7 @@ export default function ClientSettingsPage() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const [selectedAvatarStyle, setSelectedAvatarStyle] = useState<AvatarStyle>('avataaars');
 
   // Validation state
   const [validationErrors, setValidationErrors] = useState<{
@@ -215,6 +216,33 @@ export default function ClientSettingsPage() {
     }
   };
 
+  const handleAvatarStyleChange = async (style: AvatarStyle) => {
+    if (!user?.id) return;
+
+    setSelectedAvatarStyle(style);
+    setUploadingAvatar(true);
+    
+    try {
+      const result = await setAvatarStyle(user.id, style);
+      
+      if (result.success) {
+        toast.success("Avatar style updated successfully");
+        
+        // Refresh user data
+        const { user: updatedUser } = await getCurrentClientAdmin();
+        if (updatedUser) {
+          setUser(updatedUser);
+        }
+      } else {
+        toast.error(result.error || "Failed to update avatar style");
+      }
+    } catch (error) {
+      toast.error("An error occurred while updating avatar style");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
   const checkAuth = async () => {
     try {
       const { user: clientUser, organization: org } = await getCurrentClientAdmin();
@@ -237,6 +265,11 @@ export default function ClientSettingsPage() {
 
       setUser(clientUser);
       setOrganization(org);
+
+      // Initialize avatar style from user's profile
+      if ((clientUser as any).avatar_style) {
+        setSelectedAvatarStyle((clientUser as any).avatar_style);
+      }
 
       // Initialize branding state
       const initial = {
@@ -433,7 +466,7 @@ export default function ClientSettingsPage() {
                       )}
                     </div>
 
-                    {user?.avatar_url && (
+                    {user?.avatar_url && !user.avatar_url.includes('dicebear.com') && (
                       <Button
                         variant="outline"
                         onClick={handleAvatarDelete}
@@ -441,9 +474,55 @@ export default function ClientSettingsPage() {
                         className="gap-2"
                       >
                         <Trash2 className="h-4 w-4" />
-                        Remove Avatar
+                        Remove Custom Avatar
                       </Button>
                     )}
+
+                    <Separator />
+
+                    {/* Avatar Style Picker */}
+                    <div className="space-y-3">
+                      <div className="space-y-1">
+                        <Label className="text-sm font-medium">Choose Avatar Style</Label>
+                        <p className="text-xs text-muted-foreground">
+                          Select a default avatar style (or upload your own above)
+                        </p>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        {AVATAR_STYLES.map((style) => {
+                          const isActive = selectedAvatarStyle === style.id;
+                          const previewUrl = `https://api.dicebear.com/7.x/${style.id}/svg?seed=${encodeURIComponent(user?.email || 'preview')}`;
+                          
+                          return (
+                            <button
+                              key={style.id}
+                              onClick={() => handleAvatarStyleChange(style.id)}
+                              disabled={uploadingAvatar}
+                              className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 transition-all hover:border-primary/50 ${
+                                isActive ? 'border-primary bg-primary/5' : 'border-border'
+                              }`}
+                            >
+                              <Avatar className="h-16 w-16">
+                                <AvatarImage src={previewUrl} alt={style.name} />
+                                <AvatarFallback>{style.name[0]}</AvatarFallback>
+                              </Avatar>
+                              <div className="text-center">
+                                <p className="text-xs font-medium">{style.name}</p>
+                                <p className="text-[10px] text-muted-foreground">{style.description}</p>
+                              </div>
+                              {isActive && (
+                                <Badge variant="default" className="text-[10px] h-4 px-1.5">
+                                  Active
+                                </Badge>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <Separator />
 
                     <div className="space-y-2">
                       <Label htmlFor="full_name">Full Name</Label>

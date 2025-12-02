@@ -361,43 +361,51 @@ export default function DocumentationPage() {
         </header>
 
         <div className="flex-1 overflow-auto">
+          {/* Fixed Header Section */}
+          <div className="sticky top-0 z-10 bg-background border-b">
+            <div className="container mx-auto px-4 py-6">
+              <div className="flex items-start justify-between gap-4 mb-4">
+                <div>
+                  <h1 className="text-3xl font-bold tracking-tight">
+                    {organization?.name} Documentation
+                  </h1>
+                  <p className="text-muted-foreground mt-1">
+                    Everything you need to know about using the compliance platform
+                  </p>
+                </div>
+                <Badge variant="outline" className="mt-1">
+                  <FileText className="h-3 w-3 mr-1" />
+                  {sections.length} Sections
+                </Badge>
+              </div>
+
+              {/* Search */}
+              <div className="relative max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="Search documentation..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Scrollable Content Area */}
           <div className="container mx-auto px-4 py-6">
-            <div className="flex items-start justify-between gap-4 mb-4">
-              <div>
-                <h1 className="text-3xl font-bold tracking-tight">
-                  {organization?.name} Documentation
-                </h1>
-                <p className="text-muted-foreground mt-1">
-                  Everything you need to know about using the compliance platform
-                </p>
-              </div>
-              <Badge variant="outline" className="mt-1">
-                <FileText className="h-3 w-3 mr-1" />
-                {sections.length} Sections
-              </Badge>
-            </div>
-
-            {/* Search */}
-            <div className="relative max-w-md mb-8">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search documentation..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-
-            {/* Two-column Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
-          {/* Sidebar Navigation */}
-          <aside className="hidden lg:block">
-            <div className="sticky top-24 space-y-1">
-              <div className="px-3 py-2 mb-4">
-                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                  Contents
-                </h2>
-              </div>
+            {/* Two-column Layout with Fixed Sidebar */}
+            <div className="relative flex gap-8">
+          {/* Sidebar Navigation - Fixed Position */}
+          <aside className="hidden lg:block w-[280px] flex-shrink-0">
+            <div className="sticky top-[280px] space-y-4 max-h-[calc(100vh-300px)] overflow-y-auto">
+              <Card className="border-muted">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm uppercase tracking-wider">
+                    Contents
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-1 p-3 pt-0">
               <nav className="space-y-1">
                 {filteredSections.map((section) => {
                   const Icon = section.icon;
@@ -413,32 +421,34 @@ export default function DocumentationPage() {
                   );
                 })}
               </nav>
+                </CardContent>
+              </Card>
 
-              {/* Quick Links Card */}
-              <Card className="mt-8 border-primary/20">
+              {/* Quick Actions Card */}
+              <Card className="border-primary/20">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm flex items-center gap-2">
                     <Shield className="h-4 w-4 text-primary" />
                     Quick Actions
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-2 p-3 pt-0">
                   <a
-                    href="/org/demo/report"
+                    href={`/org/${subdomain}/report`}
                     className="flex items-center gap-2 p-2 rounded text-sm hover:bg-muted transition-colors"
                   >
                     <FileText className="h-3.5 w-3.5 text-muted-foreground" />
                     <span>Submit Report</span>
                   </a>
                   <a
-                    href="/org/demo/track"
+                    href={`/org/${subdomain}/track`}
                     className="flex items-center gap-2 p-2 rounded text-sm hover:bg-muted transition-colors"
                   >
                     <Search className="h-3.5 w-3.5 text-muted-foreground" />
                     <span>Track Case</span>
                   </a>
                   <a
-                    href="/org/demo/dashboard"
+                    href={`/org/${subdomain}/dashboard`}
                     className="flex items-center gap-2 p-2 rounded text-sm hover:bg-muted transition-colors"
                   >
                     <Users className="h-3.5 w-3.5 text-muted-foreground" />
@@ -449,8 +459,8 @@ export default function DocumentationPage() {
             </div>
           </aside>
 
-          {/* Main Content */}
-          <div className="space-y-8">
+          {/* Main Content - Takes remaining space with left margin to avoid overlap */}
+          <div className="flex-1 min-w-0 space-y-8 lg:ml-[296px]">
             {/* Mobile Navigation (visible on small screens) */}
             <Card className="mb-8 lg:hidden border-primary/20 bg-primary/5">
               <CardHeader>
@@ -551,8 +561,8 @@ export default function DocumentationPage() {
                 </CardContent>
               </Card>
             </div>
+            </div>
           </div>
-        </div>
         </div>
       </SidebarInset>
     </SidebarProvider>
