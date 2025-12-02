@@ -107,7 +107,7 @@ export default function ClientSettingsPage() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [selectedAvatarStyle, setSelectedAvatarStyle] = useState<AvatarStyle>('avataaars');
+  const [selectedAvatarStyle, setSelectedAvatarStyle] = useState<AvatarStyle>('profile');
 
   // Validation state
   const [validationErrors, setValidationErrors] = useState<{
@@ -417,7 +417,7 @@ export default function ClientSettingsPage() {
                   <div className="flex flex-col items-center gap-3">
                     <Avatar className="h-24 w-24 border-2 border-primary/20">
                       <AvatarImage 
-                        src={avatarPreview || (user?.avatar_url) || getAvatarUrl({ avatar_url: user?.avatar_url, email: user?.email || '' })} 
+                        src={avatarPreview || (user?.avatar_url) || getAvatarUrl({ avatar_url: user?.avatar_url, email: user?.email || '', avatar_style: user?.avatar_style })} 
                         alt={user?.full_name || user?.email || 'User'} 
                       />
                       <AvatarFallback className="text-2xl">
