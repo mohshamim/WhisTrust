@@ -494,7 +494,7 @@ export default function ClientSettingsPage() {
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         {AVATAR_STYLES.map((style) => {
                           const isActive = selectedAvatarStyle === style.id;
-                          const previewUrl = `https://api.dicebear.com/7.x/${style.id}/svg?seed=${encodeURIComponent(user?.email || 'preview')}`;
+                          const previewUrl = style.image;
                           
                           return (
                             <button
