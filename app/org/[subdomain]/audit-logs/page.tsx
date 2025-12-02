@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import { ClientSidebar } from "@/components/client-sidebar";
 import { getCurrentClientAdmin } from "@/lib/services/client-auth";
 import { getPermissions, UserRole } from "@/lib/permissions";
+import { getAvatarUrl } from "@/lib/services/avatar";
 import {
   SidebarInset,
   SidebarProvider,
