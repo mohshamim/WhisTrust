@@ -11,22 +11,24 @@ export interface AvatarUploadResult {
   error?: string;
 }
 
-// Available avatar styles from Dicebear - Professional & Beautiful options
+// Available avatar styles - Professional & Beautiful options from local images
 export const AVATAR_STYLES = [
-  { id: 'notionists', name: 'Professional', description: 'Clean business style' },
-  { id: 'avataaars', name: 'Modern', description: 'Contemporary look' },
-  { id: 'lorelei', name: 'Elegant', description: 'Sophisticated design' },
-  { id: 'big-smile', name: 'Friendly', description: 'Warm & approachable' },
-  { id: 'personas', name: 'Creative', description: 'Artistic style' },
-  { id: 'adventurer', name: 'Bold', description: 'Confident appearance' },
-  { id: 'initials', name: 'Minimal', description: 'Simple & clean' },
-  { id: 'shapes', name: 'Abstract', description: 'Geometric design' },
+  { id: 'profile', name: 'Professional Man', description: 'Business professional', image: '/avatar/profile.png' },
+  { id: 'man', name: 'Business Man', description: 'Corporate style', image: '/avatar/man.png' },
+  { id: 'man-1', name: 'Executive', description: 'Leadership style', image: '/avatar/man (1).png' },
+  { id: 'man-2', name: 'Manager', description: 'Management style', image: '/avatar/man (2).png' },
+  { id: 'man-3', name: 'Analyst', description: 'Technical style', image: '/avatar/man (3).png' },
+  { id: 'boy', name: 'Young Professional', description: 'Modern professional', image: '/avatar/boy.png' },
+  { id: 'woman', name: 'Professional Woman', description: 'Business professional', image: '/avatar/woman.png' },
+  { id: 'woman-1', name: 'Executive Woman', description: 'Leadership style', image: '/avatar/woman (1).png' },
+  { id: 'moslem-woman', name: 'Modest Professional', description: 'Professional with headscarf', image: '/avatar/moslem-woman.png' },
+  { id: 'arab', name: 'Traditional Professional', description: 'Traditional business style', image: '/avatar/arab.png' },
 ] as const;
 
 export type AvatarStyle = typeof AVATAR_STYLES[number]['id'];
 
 // Default avatar style - Professional by default
-export const DEFAULT_AVATAR_STYLE: AvatarStyle = 'notionists';
+export const DEFAULT_AVATAR_STYLE: AvatarStyle = 'profile';
 
 /**
  * Upload user avatar to Supabase Storage
@@ -149,22 +151,25 @@ export async function deleteAvatar(userId: string): Promise<AvatarUploadResult> 
 }
 
 /**
- * Get avatar URL for a user (with fallback to Dicebear)
+ * Get avatar URL for a user (with fallback to local default avatars)
  */
 export function getAvatarUrl(
   user: { avatar_url?: string | null; email: string; avatar_style?: string | null },
   style?: AvatarStyle
 ): string {
   // If user has uploaded a custom avatar, use it
-  if (user.avatar_url && !user.avatar_url.includes('dicebear.com')) {
+  if (user.avatar_url && !user.avatar_url.includes('avatar/')) {
     return user.avatar_url;
   }
   
   // Use specified style, user's preferred style, or default
   const avatarStyle = style || user.avatar_style || DEFAULT_AVATAR_STYLE;
   
-  // Generate Dicebear avatar
-  return `https://api.dicebear.com/7.x/${avatarStyle}/svg?seed=${encodeURIComponent(user.email)}`;
+  // Find the avatar style configuration
+  const styleConfig = AVATAR_STYLES.find(s => s.id === avatarStyle);
+  
+  // Return the local image path
+  return styleConfig?.image || AVATAR_STYLES[0].image;
 }
 
 /**
@@ -174,24 +179,20 @@ export async function setAvatarStyle(userId: string, style: AvatarStyle): Promis
   try {
     const supabase = createMultiTenantClient();
 
-    // Generate the Dicebear URL with the new style
-    const { data: profile } = await supabase
-      .from("admin_profiles")
-      .select("email")
-      .eq("id", userId)
-      .single();
-
-    if (!profile) {
-      return { success: false, error: "User not found" };
+    // Find the avatar style configuration
+    const styleConfig = AVATAR_STYLES.find(s => s.id === style);
+    
+    if (!styleConfig) {
+      return { success: false, error: "Invalid avatar style" };
     }
 
-    const avatarUrl = `https://api.dicebear.com/7.x/${style}/svg?seed=${encodeURIComponent(profile.email)}`;
+    const avatarUrl = styleConfig.image;
 
-    // Update profile with new avatar style and URL
+    // Update profile with new avatar style (clear avatar_url since we're using default)
     const { error: updateError } = await supabase
       .from("admin_profiles")
       .update({ 
-        avatar_url: avatarUrl,
+        avatar_url: null, // Clear custom upload
         avatar_style: style 
       })
       .eq("id", userId);
