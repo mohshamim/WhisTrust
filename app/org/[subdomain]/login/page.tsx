@@ -2,23 +2,39 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, Building2, Lock, ArrowRight, AlertCircle } from "lucide-react";
-import { signInClient, getOrganizationBySubdomain } from "@/lib/services/client-auth";
+import {
+  signInClient,
+  getOrganizationBySubdomain,
+} from "@/lib/services/client-auth";
 import type { ClientOrganization } from "@/lib/services/client-auth";
-import { getSSOConfig, initiateSSOLogin, type SSOProvider } from "@/lib/services/sso-auth";
+import {
+  getSSOConfig,
+  initiateSSOLogin,
+  type SSOProvider,
+} from "@/lib/services/sso-auth";
+import { DemoModeBanner } from "@/components/demo-mode-banner";
 
 export default function ClientLoginPage() {
   const router = useRouter();
   const params = useParams();
   const searchParams = useSearchParams();
   const subdomain = params.subdomain as string;
-  
-  const [organization, setOrganization] = useState<ClientOrganization | null>(null);
+
+  const [organization, setOrganization] = useState<ClientOrganization | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [ssoLoading, setSsoLoading] = useState<SSOProvider | null>(null); // Track which provider is loading
@@ -55,11 +71,11 @@ export default function ClientLoginPage() {
   // Reload SSO config periodically to catch changes (e.g., if enabled in another tab)
   useEffect(() => {
     if (!organization) return;
-    
+
     const interval = setInterval(() => {
       loadSSOConfig();
     }, 5000); // Check every 5 seconds
-    
+
     return () => clearInterval(interval);
   }, [organization, subdomain]);
 
@@ -73,7 +89,11 @@ export default function ClientLoginPage() {
     if (hex) {
       const toHsl = (h: string) => {
         let c = h.replace("#", "");
-        if (c.length === 3) c = c.split("").map((x) => x + x).join("");
+        if (c.length === 3)
+          c = c
+            .split("")
+            .map((x) => x + x)
+            .join("");
         const r = parseInt(c.substring(0, 2), 16) / 255;
         const g = parseInt(c.substring(2, 4), 16) / 255;
         const b = parseInt(c.substring(4, 6), 16) / 255;
@@ -98,7 +118,9 @@ export default function ClientLoginPage() {
           }
           hh /= 6;
         }
-        return `${Math.round(hh * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
+        return `${Math.round(hh * 360)} ${Math.round(s * 100)}% ${Math.round(
+          l * 100
+        )}%`;
       };
       const hsl = toHsl(hex);
       document.documentElement.style.setProperty("--brand-primary", hex);
@@ -112,11 +134,16 @@ export default function ClientLoginPage() {
       const steps = [0, -10, 10, -20, 20];
       steps.forEach((delta, idx) => {
         const l = Math.max(0, Math.min(100, baseL + delta));
-        document.documentElement.style.setProperty(`--chart-${idx + 1}`, `${h} ${s} ${l}%`);
+        document.documentElement.style.setProperty(
+          `--chart-${idx + 1}`,
+          `${h} ${s} ${l}%`
+        );
       });
     }
     if (organization.branding?.favicon_url) {
-      const existing = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
+      const existing = document.querySelector(
+        'link[rel="icon"]'
+      ) as HTMLLinkElement | null;
       const link = existing || document.createElement("link");
       link.rel = "icon";
       link.href = organization.branding.favicon_url;
@@ -127,15 +154,17 @@ export default function ClientLoginPage() {
   const loadOrganization = async () => {
     try {
       const result = await getOrganizationBySubdomain(subdomain);
-      
+
       if (!result.success || !result.organization) {
         setError("Organization not found. Please check the URL.");
         setLoading(false);
         return;
       }
 
-      if (result.organization.status === 'cancelled') {
-        setError("This organization is no longer active. Please contact support.");
+      if (result.organization.status === "cancelled") {
+        setError(
+          "This organization is no longer active. Please contact support."
+        );
         setLoading(false);
         return;
       }
@@ -171,23 +200,26 @@ export default function ClientLoginPage() {
     try {
       // Store organization subdomain in both localStorage and cookie as fallback
       // This helps if Supabase redirects to root URL instead of callback route
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         localStorage.setItem("sso_org_subdomain", subdomain);
         // Also set cookie (more reliable, survives redirects better)
         // Use domain-agnostic cookie that works across subdomains
-        const domain = window.location.hostname === 'localhost' 
-          ? '' 
-          : `.${window.location.hostname.split('.').slice(-2).join('.')}`; // e.g., .whistrust.app
-        document.cookie = `sso_org_subdomain=${subdomain}; path=/; max-age=300; SameSite=Lax${domain ? `; domain=${domain}` : ''}`; // 5 minutes
+        const domain =
+          window.location.hostname === "localhost"
+            ? ""
+            : `.${window.location.hostname.split(".").slice(-2).join(".")}`; // e.g., .whistrust.app
+        document.cookie = `sso_org_subdomain=${subdomain}; path=/; max-age=300; SameSite=Lax${
+          domain ? `; domain=${domain}` : ""
+        }`; // 5 minutes
       }
 
       const result = await initiateSSOLogin(subdomain, provider);
-      
+
       if (!result.success) {
         setError(result.error || "Failed to initiate SSO login");
         setSsoLoading(null);
         // Clear stored subdomain on error
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
           localStorage.removeItem("sso_org_subdomain");
         }
         return;
@@ -200,7 +232,7 @@ export default function ClientLoginPage() {
       } else {
         setSsoLoading(null);
         // Clear stored subdomain if no redirect
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
           localStorage.removeItem("sso_org_subdomain");
         }
       }
@@ -209,12 +241,11 @@ export default function ClientLoginPage() {
       setError("An unexpected error occurred. Please try again.");
       setSsoLoading(null);
       // Clear stored subdomain on error
-      if (typeof window !== 'undefined') {
+      if (typeof window !== "undefined") {
         localStorage.removeItem("sso_org_subdomain");
       }
     }
   };
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -222,10 +253,16 @@ export default function ClientLoginPage() {
     setIsLoading(true);
 
     try {
-      const result = await signInClient(formData.email, formData.password, subdomain);
+      const result = await signInClient(
+        formData.email,
+        formData.password,
+        subdomain
+      );
 
       if (!result.success) {
-        setError(result.error || "Login failed. Please check your credentials.");
+        setError(
+          result.error || "Login failed. Please check your credentials."
+        );
         setIsLoading(false);
         return;
       }
@@ -235,12 +272,16 @@ export default function ClientLoginPage() {
     } catch (err: any) {
       console.error("Login error:", err);
       // Provide more specific error messages
-      if (err.message?.includes('fetch') || err.message?.includes('network')) {
-        setError("Network error. Please check your internet connection and try again.");
-      } else if (err.message?.includes('timeout')) {
+      if (err.message?.includes("fetch") || err.message?.includes("network")) {
+        setError(
+          "Network error. Please check your internet connection and try again."
+        );
+      } else if (err.message?.includes("timeout")) {
         setError("Request timed out. Please try again.");
       } else {
-        setError(err.message || "An unexpected error occurred. Please try again.");
+        setError(
+          err.message || "An unexpected error occurred. Please try again."
+        );
       }
       setIsLoading(false);
     }
@@ -266,8 +307,12 @@ export default function ClientLoginPage() {
               <AlertCircle className="h-8 w-8 text-destructive" />
             </div>
             <div className="space-y-2">
-              <CardTitle className="text-2xl font-bold">Organization Not Found</CardTitle>
-              <CardDescription>{error || "The organization you're looking for doesn't exist."}</CardDescription>
+              <CardTitle className="text-2xl font-bold">
+                Organization Not Found
+              </CardTitle>
+              <CardDescription>
+                {error || "The organization you're looking for doesn't exist."}
+              </CardDescription>
             </div>
           </CardHeader>
           <CardContent className="text-center">
@@ -291,20 +336,36 @@ export default function ClientLoginPage() {
           </div>
         </div>
 
+        {/* Demo Mode Banner */}
+        {subdomain === "demo" && (
+          <DemoModeBanner
+            organizationName={organization?.name}
+            showDismiss={false}
+          />
+        )}
+
         {/* Login Card */}
         <Card className="border-2 border-primary/20">
           <CardHeader className="text-center space-y-4">
             {/* Organization Logo */}
             {(() => {
-              const isDark = typeof window !== "undefined" && document.documentElement.classList.contains("dark");
+              const isDark =
+                typeof window !== "undefined" &&
+                document.documentElement.classList.contains("dark");
               const logo =
-                (isDark ? organization.branding?.logo_dark_url : organization.branding?.logo_light_url) ||
+                (isDark
+                  ? organization.branding?.logo_dark_url
+                  : organization.branding?.logo_light_url) ||
                 organization.branding?.logo_url ||
                 "";
               return (
                 <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto">
                   {logo ? (
-                    <img src={logo} alt={organization.name} className="w-12 h-12 object-contain" />
+                    <img
+                      src={logo}
+                      alt={organization.name}
+                      className="w-12 h-12 object-contain"
+                    />
                   ) : (
                     <Building2 className="h-8 w-8 text-primary" />
                   )}
@@ -314,19 +375,21 @@ export default function ClientLoginPage() {
 
             {/* Organization Title */}
             <div className="space-y-2">
-              <CardTitle className="text-3xl font-bold">{organization.name}</CardTitle>
+              <CardTitle className="text-3xl font-bold">
+                {organization.name}
+              </CardTitle>
               <CardDescription className="text-base">
                 Staff Portal - Secure Access
               </CardDescription>
             </div>
 
             {/* Status Badges */}
-            {organization.status === 'trial' && (
+            {organization.status === "trial" && (
               <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-medium">
                 Trial Account
               </span>
             )}
-            {organization.status === 'suspended' && (
+            {organization.status === "suspended" && (
               <Alert variant="destructive">
                 <AlertDescription className="text-sm">
                   Account Suspended - Contact Administrator
@@ -343,14 +406,18 @@ export default function ClientLoginPage() {
               </Alert>
             )}
 
-            {organization.status === 'suspended' ? (
+            {organization.status === "suspended" ? (
               <div className="text-center py-8 space-y-3">
                 <div className="mx-auto w-12 h-12 bg-destructive/10 rounded-full flex items-center justify-center">
                   <AlertCircle className="h-6 w-6 text-destructive" />
                 </div>
                 <div className="space-y-1">
-                  <p className="font-medium text-destructive">Account Suspended</p>
-                  <p className="text-sm text-muted-foreground">Please contact your administrator for assistance.</p>
+                  <p className="font-medium text-destructive">
+                    Account Suspended
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    Please contact your administrator for assistance.
+                  </p>
                 </div>
               </div>
             ) : (
@@ -375,7 +442,10 @@ export default function ClientLoginPage() {
                           </>
                         ) : (
                           <>
-                            <svg className="h-5 w-5 flex-shrink-0" viewBox="0 0 24 24">
+                            <svg
+                              className="h-5 w-5 flex-shrink-0"
+                              viewBox="0 0 24 24"
+                            >
                               <path
                                 fill="#4285F4"
                                 d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -393,7 +463,9 @@ export default function ClientLoginPage() {
                                 d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                               />
                             </svg>
-                            <span className="text-sm font-medium">Sign in with Google</span>
+                            <span className="text-sm font-medium">
+                              Sign in with Google
+                            </span>
                           </>
                         )}
                       </div>
@@ -416,13 +488,44 @@ export default function ClientLoginPage() {
                           </>
                         ) : (
                           <>
-                            <svg className="h-5 w-5 flex-shrink-0" viewBox="0 0 23 23" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <rect x="1" y="1" width="10" height="10" fill="#F25022" />
-                              <rect x="12" y="1" width="10" height="10" fill="#7FBA00" />
-                              <rect x="1" y="12" width="10" height="10" fill="#00A4EF" />
-                              <rect x="12" y="12" width="10" height="10" fill="#FFB900" />
+                            <svg
+                              className="h-5 w-5 flex-shrink-0"
+                              viewBox="0 0 23 23"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <rect
+                                x="1"
+                                y="1"
+                                width="10"
+                                height="10"
+                                fill="#F25022"
+                              />
+                              <rect
+                                x="12"
+                                y="1"
+                                width="10"
+                                height="10"
+                                fill="#7FBA00"
+                              />
+                              <rect
+                                x="1"
+                                y="12"
+                                width="10"
+                                height="10"
+                                fill="#00A4EF"
+                              />
+                              <rect
+                                x="12"
+                                y="12"
+                                width="10"
+                                height="10"
+                                fill="#FFB900"
+                              />
                             </svg>
-                            <span className="text-sm font-medium">Sign in with Microsoft</span>
+                            <span className="text-sm font-medium">
+                              Sign in with Microsoft
+                            </span>
                           </>
                         )}
                       </div>
@@ -433,7 +536,9 @@ export default function ClientLoginPage() {
                         <span className="w-full border-t" />
                       </div>
                       <div className="relative flex justify-center text-xs uppercase">
-                        <span className="bg-background px-2 text-muted-foreground">Or</span>
+                        <span className="bg-background px-2 text-muted-foreground">
+                          Or
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -449,7 +554,9 @@ export default function ClientLoginPage() {
                       type="email"
                       placeholder="your.email@company.com"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
                       required
                       disabled={isLoading || ssoLoading !== null}
                       className="h-11"
@@ -463,28 +570,62 @@ export default function ClientLoginPage() {
                       id="password"
                       type="password"
                       value={formData.password}
-                      onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, password: e.target.value })
+                      }
                       required
                       disabled={isLoading || ssoLoading !== null}
                       className="h-11"
                     />
                   </div>
 
-                  {/* Submit Button */}
-                  <Button
-                    type="submit"
-                    size="lg"
-                    variant="default"
-                    className="w-full h-12 rounded-lg shadow-md hover:shadow-lg focus-visible:ring-4"
-                    disabled={isLoading || ssoLoading !== null}
-                  >
-                    {isLoading ? "Signing in..." : (
-                      <>
-                        Sign In
+                  {/* Submit Buttons */}
+                  {subdomain === "demo" ? (
+                    // Demo page: Show two buttons side by side
+                    <div className="grid grid-cols-2 gap-3">
+                      <Button
+                        type="button"
+                        size="lg"
+                        className="h-12 bg-primary text-primary-foreground hover:bg-primary/90"
+                        onClick={() => router.push(`/org/${subdomain}/report`)}
+                      >
+                        Start Report Demo
                         <ArrowRight className="ml-2 h-4 w-4" />
-                      </>
-                    )}
-                  </Button>
+                      </Button>
+                      <Button
+                        type="submit"
+                        size="lg"
+                        className="h-12 bg-primary text-primary-foreground hover:bg-primary/90"
+                        disabled={isLoading || ssoLoading !== null}
+                      >
+                        {isLoading ? (
+                          "Logging in..."
+                        ) : (
+                          <>
+                            Login to Dashboard
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  ) : (
+                    // Regular login: Single Sign In button
+                    <Button
+                      type="submit"
+                      size="lg"
+                      className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90"
+                      disabled={isLoading || ssoLoading !== null}
+                    >
+                      {isLoading ? (
+                        "Signing in..."
+                      ) : (
+                        <>
+                          Sign In
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </>
+                      )}
+                    </Button>
+                  )}
                 </form>
               </div>
             )}
@@ -493,7 +634,9 @@ export default function ClientLoginPage() {
             <div className="mt-6 pt-6 border-t space-y-2 text-center">
               <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
                 <Shield className="h-3.5 w-3.5 text-primary" />
-                <span>Secure access to {organization.name} compliance portal</span>
+                <span>
+                  Secure access to {organization.name} compliance portal
+                </span>
               </div>
               <p className="text-xs text-muted-foreground">
                 Powered by <strong className="font-semibold">WhisTrust</strong>

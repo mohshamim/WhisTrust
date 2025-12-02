@@ -22,6 +22,7 @@ import {
   User,
   UserCircle2,
 } from "lucide-react";
+import { HelpTooltip } from "@/components/help-tooltip";
 import { getOrganizationBySubdomain } from "@/lib/services/client-auth";
 import type { ClientOrganization } from "@/lib/services/client-auth";
 import {
@@ -295,7 +296,10 @@ export default function TrackReportPage() {
           <CardContent>
             <form onSubmit={handleSearch} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="tracking-code">Tracking Code</Label>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="tracking-code">Tracking Code</Label>
+                  <HelpTooltip text="Enter the tracking code from your submission confirmation or email (e.g. ABC12345-WXYZ) to securely view your case." />
+                </div>
                 <div className="flex gap-2">
                   <Input
                     id="tracking-code"

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -35,9 +35,11 @@ export default function DemoPage() {
   const [loginError, setLoginError] = useState("");
 
   const demoCredentials = {
-    email: "admin@whistrust.com",
-    password: "Admin@123",
+    email: "admin@demo.com",
+    password: "Demo@2024",
   };
+
+  // No need to set CSS variables - buttons now use default Tailwind classes
 
   const copyToClipboard = (text: string, type: string) => {
     navigator.clipboard.writeText(text);
@@ -50,20 +52,23 @@ export default function DemoPage() {
     setIsLoggingIn(true);
 
     try {
-      const result = await signInAdmin({
-        email: demoCredentials.email,
-        password: demoCredentials.password,
-      });
+      // Import client auth for multi-tenant login
+      const { signInClient } = await import("@/lib/services/client-auth");
+
+      const result = await signInClient(
+        demoCredentials.email,
+        demoCredentials.password,
+        "demo" // subdomain
+      );
 
       if (result.success) {
-        router.push("/admin/dashboard");
+        // Use replace to avoid adding login to history
+        router.replace("/org/demo/dashboard");
       } else {
-        setLoginError(
-          result.error || "Login failed. Please check your credentials."
-        );
+        setLoginError(result.error || "Login failed. Please try again.");
       }
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch (error: any) {
+      console.error("Demo login error:", error);
       setLoginError("An unexpected error occurred. Please try again.");
     } finally {
       setIsLoggingIn(false);
@@ -149,8 +154,12 @@ export default function DemoPage() {
                 </div>
               </div>
 
-              <Button asChild size="lg" className="w-full h-12">
-                <Link href="/report">
+              <Button
+                asChild
+                size="lg"
+                className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90"
+              >
+                <Link href="/org/demo/report">
                   Start Report Demo
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
@@ -195,8 +204,8 @@ export default function DemoPage() {
               <Alert className="border-primary/20 bg-primary/5">
                 <Lock className="h-4 w-4 text-primary" />
                 <AlertDescription className="text-sm">
-                  <strong>Demo Credentials:</strong> Use these credentials to
-                  access the admin dashboard
+                  <strong>Demo Credentials:</strong> Test our multi-tenant
+                  platform with sample data
                 </AlertDescription>
               </Alert>
 
@@ -267,7 +276,7 @@ export default function DemoPage() {
               </div>
 
               {loginError && (
-                <Alert variant="destructive" className="mt-4">
+                <Alert variant="destructive">
                   <AlertDescription className="text-sm">
                     {loginError}
                   </AlertDescription>
@@ -301,12 +310,15 @@ export default function DemoPage() {
                 </Button>
                 <Button
                   size="lg"
-                  className="flex-1 h-12"
+                  className="flex-1 h-12 bg-primary text-primary-foreground hover:bg-primary/90"
                   onClick={handleQuickLogin}
                   disabled={isLoggingIn}
                 >
                   {isLoggingIn ? (
-                    "Logging in..."
+                    <>
+                      <div className="mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Logging in...
+                    </>
                   ) : (
                     <>
                       Login to Dashboard

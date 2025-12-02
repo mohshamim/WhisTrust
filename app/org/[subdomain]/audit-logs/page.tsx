@@ -501,19 +501,21 @@ export default function AuditLogsPage() {
 
       {/* Details Drawer */}
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+        <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto bg-background">
           <SheetHeader className="border-b pb-4">
-            <SheetTitle className="flex items-center gap-2">
+            <SheetTitle className="flex items-center gap-2 text-2xl">
               <History className="h-5 w-5 text-primary" />
               Audit Log Details
             </SheetTitle>
-            <SheetDescription>Complete information about this activity</SheetDescription>
+            <SheetDescription className="text-sm text-muted-foreground">
+              Complete information about this activity
+            </SheetDescription>
           </SheetHeader>
 
           {selectedLog && (
             <div className="space-y-6 mt-6">
               {/* Action Info */}
-              <Card>
+              <Card className="shadow-sm border-border/60">
                 <CardHeader>
                   <CardTitle className="text-base flex items-center gap-2">
                     {(() => {
@@ -523,29 +525,36 @@ export default function AuditLogsPage() {
                     Action Information
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3">
-                  <div className="grid grid-cols-2 gap-4">
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-2 gap-6">
                     <div>
                       <div className="text-sm font-medium text-muted-foreground">Action Type</div>
-                      <Badge variant={getActionColor(selectedLog.action)} className="mt-1">
+                      <Badge variant={getActionColor(selectedLog.action)} className="mt-2 px-3 py-1 rounded-full">
                         {getActionLabel(selectedLog.action)}
                       </Badge>
                     </div>
                     <div>
                       <div className="text-sm font-medium text-muted-foreground">Timestamp</div>
-                      <div className="text-sm mt-1">{new Date(selectedLog.created_at).toLocaleString()}</div>
+                      <div className="text-sm mt-2 space-y-1">
+                        <div>{new Date(selectedLog.created_at).toLocaleString()}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {getRelativeTime(selectedLog.created_at)}
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-2 gap-6">
                     <div>
                       <div className="text-sm font-medium text-muted-foreground">Resource Type</div>
-                      <div className="text-sm mt-1">{getResourceTypeLabel(selectedLog.resource_type)}</div>
+                      <div className="text-sm mt-2 capitalize">
+                        {getResourceTypeLabel(selectedLog.resource_type)}
+                      </div>
                     </div>
                     <div>
                       <div className="text-sm font-medium text-muted-foreground">Resource ID</div>
-                      <div className="text-sm mt-1 font-mono text-xs">
-                        {selectedLog.resource_id?.substring(0, 8) || "N/A"}
+                      <div className="mt-2 inline-flex items-center rounded-md bg-muted px-2 py-1 font-mono text-xs text-foreground/80">
+                        {selectedLog.resource_id || "N/A"}
                       </div>
                     </div>
                   </div>
@@ -553,7 +562,7 @@ export default function AuditLogsPage() {
               </Card>
 
               {/* User Info */}
-              <Card>
+              <Card className="shadow-sm border-border/60">
                 <CardHeader>
                   <CardTitle className="text-base">User Information</CardTitle>
                 </CardHeader>
@@ -564,8 +573,15 @@ export default function AuditLogsPage() {
                         {selectedLog.user_name?.substring(0, 2).toUpperCase() || "SY"}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
-                      <div className="font-medium">{selectedLog.user_name || "System"}</div>
+                    <div className="space-y-1">
+                      <div className="font-medium flex items-center gap-2">
+                        {selectedLog.user_name || "System"}
+                        {!selectedLog.user_name && (
+                          <Badge variant="outline" className="text-xs">
+                            System event
+                          </Badge>
+                        )}
+                      </div>
                       {selectedLog.user_email && (
                         <div className="text-sm text-muted-foreground">{selectedLog.user_email}</div>
                       )}
@@ -579,18 +595,21 @@ export default function AuditLogsPage() {
 
               {/* Details */}
               {selectedLog.details && Object.keys(selectedLog.details).length > 0 && (
-                <Card>
+                <Card className="shadow-sm border-border/60">
                   <CardHeader>
                     <CardTitle className="text-base">Additional Details</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
                       {Object.entries(selectedLog.details).map(([key, value]) => (
-                        <div key={key} className="flex justify-between py-2 border-b last:border-0">
-                          <span className="text-sm font-medium text-muted-foreground capitalize">
-                            {key.replace(/_/g, " ")}:
+                        <div
+                          key={key}
+                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 py-2 border-b last:border-0"
+                        >
+                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                            {key.replace(/_/g, " ")}
                           </span>
-                          <span className="text-sm font-mono">
+                          <span className="text-sm font-mono bg-muted px-2 py-1 rounded-md w-full sm:w-auto break-all">
                             {typeof value === "object" ? JSON.stringify(value) : String(value)}
                           </span>
                         </div>
@@ -601,29 +620,37 @@ export default function AuditLogsPage() {
               )}
 
               {/* Technical Info */}
-              <Card>
+              <Card className="shadow-sm border-border/60">
                 <CardHeader>
                   <CardTitle className="text-base">Technical Information</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div>
                     <div className="text-sm font-medium text-muted-foreground">Log ID</div>
-                    <div className="text-sm font-mono mt-1">{selectedLog.id}</div>
+                    <div className="text-xs font-mono mt-1 bg-muted px-2 py-1 rounded-md break-all">
+                      {selectedLog.id}
+                    </div>
                   </div>
                   <div>
                     <div className="text-sm font-medium text-muted-foreground">Organization ID</div>
-                    <div className="text-sm font-mono mt-1">{selectedLog.organization_id}</div>
+                    <div className="text-xs font-mono mt-1 bg-muted px-2 py-1 rounded-md break-all">
+                      {selectedLog.organization_id}
+                    </div>
                   </div>
                   {selectedLog.ip_address && (
                     <div>
                       <div className="text-sm font-medium text-muted-foreground">IP Address</div>
-                      <div className="text-sm font-mono mt-1">{selectedLog.ip_address}</div>
+                      <div className="text-xs font-mono mt-1 bg-muted px-2 py-1 rounded-md break-all">
+                        {selectedLog.ip_address}
+                      </div>
                     </div>
                   )}
                   {selectedLog.user_agent && (
                     <div>
                       <div className="text-sm font-medium text-muted-foreground">User Agent</div>
-                      <div className="text-xs font-mono mt-1 break-all">{selectedLog.user_agent}</div>
+                      <div className="text-[11px] font-mono mt-1 bg-muted px-2 py-1 rounded-md break-all">
+                        {selectedLog.user_agent}
+                      </div>
                     </div>
                   )}
                 </CardContent>

@@ -27,14 +27,18 @@ export function getEnvironment(hostname?: string, pathname?: string): Environmen
   const path = pathname || (typeof window !== 'undefined' ? window.location.pathname : '');
   
   // PATH-BASED DETECTION (highest priority)
-  // /demo path always uses Demo Supabase
-  if (path.startsWith('/demo')) {
-    return 'demo';
+  // IMPORTANT: /org/demo/* uses PRODUCTION Supabase (multi-tenant)
+  // Only the landing page /demo uses old Demo Supabase (if you still have it)
+  
+  // /superadmin, /test, or /org/* always use Production Supabase
+  if (path.startsWith('/superadmin') || path.startsWith('/test/connection') || path.startsWith('/org/')) {
+    return 'production';
   }
   
-  // /superadmin, /test, or any other path uses Production Supabase
-  if (path.startsWith('/superadmin') || path.startsWith('/test/connection')) {
-    return 'production';
+  // /demo landing page uses Demo Supabase (legacy single-tenant)
+  // BUT since we're now using /org/demo, this might not be needed
+  if (path.startsWith('/demo')) {
+    return 'production'; // Changed: now /demo also uses production for consistency
   }
   
   // HOSTNAME-BASED DETECTION

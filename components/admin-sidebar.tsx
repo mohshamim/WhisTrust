@@ -9,6 +9,7 @@ import {
   Shield,
   BarChart3,
   History,
+  BookOpen,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -53,6 +54,7 @@ function buildNav(role: ReturnType<typeof useUserRole>["role"]) {
     nav.push({ title: "Users", url: "/admin/users", icon: Settings });
   }
   nav.push({ title: "Settings", url: "/admin/settings", icon: Settings });
+  nav.push({ title: "Documentation", url: "/admin/documentation", icon: BookOpen });
 
   return nav;
 }

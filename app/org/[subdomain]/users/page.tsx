@@ -57,6 +57,7 @@ import {
   XCircle,
   AlertCircle,
 } from "lucide-react";
+import { HelpTooltip } from "@/components/help-tooltip";
 import { NotificationsDropdown } from "@/components/notifications-dropdown";
 import {
   getOrganizationUsers,
@@ -461,8 +462,15 @@ export default function UsersPage() {
             {/* Users Table */}
             <Card className="shadow-lg">
               <CardHeader>
-                <CardTitle>Organization Users</CardTitle>
-                <CardDescription>Manage admin access to your compliance portal</CardDescription>
+                <div className="flex items-center justify-between gap-2">
+                  <div>
+                    <CardTitle>Organization Users</CardTitle>
+                    <CardDescription>
+                      Manage admin access to your compliance portal
+                    </CardDescription>
+                  </div>
+                  <HelpTooltip text="Roles define permissions in WhisTrust. Use Admin for configuration, Manager for oversight, and Investigator for case work." />
+                </div>
               </CardHeader>
               <CardContent>
                 {loadingUsers ? (

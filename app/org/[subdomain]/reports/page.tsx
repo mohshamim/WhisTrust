@@ -54,6 +54,9 @@ import {
   Calendar,
   User,
 } from "lucide-react";
+import { OrgAssistantButton } from "@/components/org-assistant-button";
+import { HelpTooltip } from "@/components/help-tooltip";
+import { DemoModeBanner } from "@/components/demo-mode-banner";
 import {
   exportReportsPDF,
   exportReportsExcelProtected,
@@ -811,6 +814,11 @@ export default function ClientReportsPage() {
           </header>
 
           <div className="flex flex-1 flex-col gap-4 md:gap-6 p-4 md:p-6 lg:p-8">
+          {/* Demo Mode Banner */}
+          {subdomain === 'demo' && (
+            <DemoModeBanner organizationName={organization?.name} />
+          )}
+          
           {/* Filters */}
           <Card className="shadow-sm hover:shadow-md transition-shadow">
             <CardContent className="space-y-5 py-5">
@@ -929,10 +937,12 @@ export default function ClientReportsPage() {
                 <div>
                   <CardTitle>All Reports</CardTitle>
                   <CardDescription>
-                    {filteredReports.length} report{filteredReports.length !== 1 ? "s" : ""} found
+                    {filteredReports.length} report
+                    {filteredReports.length !== 1 ? "s" : ""} found
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
+                  <HelpTooltip text="Filter and export cases across your organization. This view is tenant-scoped and respects role permissions." />
                   <Button
                     variant="outline"
                     size="sm"
@@ -976,7 +986,10 @@ export default function ClientReportsPage() {
                       <TableHead>Case Number</TableHead>
                       <TableHead>Category</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Priority</TableHead>
+                      <TableHead className="whitespace-nowrap">
+                        Priority{" "}
+                        <HelpTooltip text="Use priority to highlight critical and high-risk cases for faster handling." />
+                      </TableHead>
                       <TableHead>Assigned To</TableHead>
                       <TableHead>Created</TableHead>
                       <TableHead>Actions</TableHead>
@@ -1048,6 +1061,12 @@ export default function ClientReportsPage() {
           </Card>
         </div>
         </div>
+        {organization?.id && (
+          <OrgAssistantButton
+            organizationId={organization.id}
+            subdomain={subdomain}
+          />
+        )}
       </SidebarInset>
 
       {/* Case Details Drawer */}
@@ -1119,12 +1138,18 @@ export default function ClientReportsPage() {
                     </div>
                     
                     <div className="space-y-2">
-                      <p className="text-sm font-medium text-muted-foreground">Title</p>
+                      <p className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
+                        Title
+                        <HelpTooltip text="Summarize the core of the case in a short sentence so it’s easy to scan in lists and reports." />
+                      </p>
                       <p className="font-semibold">{selectedReport.title}</p>
                     </div>
 
                     <div className="space-y-2">
-                      <p className="text-sm font-medium text-muted-foreground">Description</p>
+                      <p className="flex items-center gap-1 text-sm font-medium text-muted-foreground">
+                        Description
+                        <HelpTooltip text="Use clear, factual language. Avoid personal identifiers unless necessary for the investigation." />
+                      </p>
                       <p className="text-sm leading-relaxed break-words whitespace-pre-wrap">
                         {selectedReport.description}
                       </p>
@@ -1146,6 +1171,7 @@ export default function ClientReportsPage() {
                       <CardTitle className="flex items-center gap-2">
                         <User className="h-5 w-5 text-primary" />
                         Assignment
+                        <HelpTooltip text="Assign each case to a specific owner to avoid gaps. Unassigned cases can easily be missed in busy teams." />
                       </CardTitle>
                     </CardHeader>
                     <CardContent>

@@ -24,10 +24,15 @@ export async function collectPerformanceMetrics(page: Page): Promise<Performance
     const timing = performance.timing;
     const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
     
+    // Get First Contentful Paint from paint timing entries
+    const paintEntries = performance.getEntriesByType('paint') as PerformancePaintTiming[];
+    const fcp = paintEntries.find(entry => entry.name === 'first-contentful-paint');
+    const firstContentfulPaint = fcp ? fcp.startTime : 0;
+    
     return {
       pageLoadTime: timing.loadEventEnd - timing.navigationStart,
       domContentLoaded: timing.domContentLoadedEventEnd - timing.navigationStart,
-      firstContentfulPaint: navigation?.firstContentfulPaint || 0,
+      firstContentfulPaint: firstContentfulPaint,
       largestContentfulPaint: 0, // Would need to use PerformanceObserver
       timeToInteractive: timing.domInteractive - timing.navigationStart,
       totalBlockingTime: 0, // Would need to calculate from long tasks

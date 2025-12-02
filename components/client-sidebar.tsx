@@ -24,12 +24,6 @@ import {
 import { SheetDescription, SheetTitle } from "@/components/ui/sheet";
 import { getOrganizationBySubdomain } from "@/lib/services/client-auth";
 import { LogOut } from "lucide-react";
-import {
-  SidebarGroup,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-} from "@/components/ui/sidebar";
 
 interface ClientSidebarProps extends React.ComponentProps<typeof Sidebar> {
   user: {
@@ -98,6 +92,20 @@ function buildNav(subdomain: string, role: string) {
     icon: Settings 
   });
 
+  nav.push({
+    title: "Documentation",
+    url: `${baseUrl}/documentation`,
+    icon: FileSearch,
+  });
+
+  // Logout as the last item in main navigation
+  nav.push({
+    title: "Log out",
+    url: "#",
+    icon: LogOut,
+    isLogout: true,
+  });
+
   return nav;
 }
 
@@ -117,7 +125,12 @@ export function ClientSidebar({
       const result = await signOutClient();
 
       if (result.success) {
-        window.location.href = `/org/${subdomain}/login`;
+        // For demo organization, redirect to /demo page instead of login
+        if (subdomain === 'demo') {
+          window.location.href = '/demo';
+        } else {
+          window.location.href = `/org/${subdomain}/login`;
+        }
       } else {
         console.error("Logout failed:", result.error);
         const { toast } = await import("sonner");
@@ -272,21 +285,7 @@ export function ClientSidebar({
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <SidebarGroup className="mt-auto">
-          <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton
-                size="sm"
-                className="text-destructive hover:bg-destructive/10 mt-2"
-                onClick={handleLogout}
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Log out</span>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-          </SidebarMenu>
-        </SidebarGroup>
+        <NavMain items={data.navMain} onLogout={handleLogout} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />
@@ -295,4 +294,3 @@ export function ClientSidebar({
     </Sidebar>
   );
 }
-

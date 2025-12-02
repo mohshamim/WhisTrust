@@ -35,6 +35,8 @@ import {
   ArrowUpRight,
   Loader2,
 } from "lucide-react";
+import { OrgAssistantButton } from "@/components/org-assistant-button";
+import { DemoModeBanner } from "@/components/demo-mode-banner";
 import type { LucideIcon } from "lucide-react";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
 
@@ -407,6 +409,11 @@ export default function ClientDashboardPage() {
           </div>
 
           <div className="space-y-6 p-6">
+            {/* Demo Mode Banner */}
+            {subdomain === 'demo' && (
+              <DemoModeBanner organizationName={organization.name} />
+            )}
+            
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-medium">Time range</p>
@@ -953,6 +960,12 @@ export default function ClientDashboardPage() {
             </div>
           </div>
         </div>
+        {organization?.id && (
+          <OrgAssistantButton
+            organizationId={organization.id}
+            subdomain={subdomain}
+          />
+        )}
       </SidebarInset>
     </SidebarProvider>
   );

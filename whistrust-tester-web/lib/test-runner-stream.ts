@@ -3,6 +3,7 @@ import { promisify } from 'util';
 import * as fs from 'fs';
 import * as path from 'path';
 import { EventEmitter } from 'events';
+import { moveVideosToResults, convertVideoToMP4 } from './video-recorder';
 
 const execAsync = promisify(exec);
 
@@ -145,6 +146,23 @@ export class StreamingTestRunner extends EventEmitter {
               fs.rmSync(htmlReportDest, { recursive: true });
             }
             fs.renameSync(htmlReportSource, htmlReportDest);
+          }
+
+          // Move any recorded videos from Playwright's default output into this run's results directory
+          const jsonReportSource = path.join(process.cwd(), 'test-results');
+          if (fs.existsSync(jsonReportSource)) {
+            moveVideosToResults(jsonReportSource, this.resultsDir)
+              .then(async (videoFiles) => {
+                // Try to convert WEBM videos to MP4 for easier playback
+                for (const videoFile of videoFiles) {
+                  if (videoFile.toLowerCase().endsWith('.webm')) {
+                    await convertVideoToMP4(videoFile);
+                  }
+                }
+              })
+              .catch((error) => {
+                console.warn('Video processing error:', error);
+              });
           }
           
           this.emit('event', {

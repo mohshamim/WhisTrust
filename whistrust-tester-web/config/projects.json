@@ -5,7 +5,7 @@
       "name": "WhisTrust",
       "description": "Multi-tenant anonymous reporting platform",
       "config": {
-        "local": "http://localhost:3001",
+        "local": "http://localhost:3000",
         "demo": "https://demo.whistrust.com",
         "production": "https://www.whistrust.com"
       }
@@ -15,7 +15,7 @@
       "name": "Custom Project",
       "description": "Add your own project configuration",
       "config": {
-        "local": "http://localhost:3001",
+        "local": "http://localhost:3000",
         "demo": "",
         "production": ""
       }

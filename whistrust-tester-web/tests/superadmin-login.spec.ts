@@ -144,10 +144,10 @@ test('Super Admin Login Test', async ({ page }) => {
         status: 'success',
       });
       
-      // Verify dashboard content
+      // Verify dashboard content with a strict, single-element locator
       try {
         await expect(
-          page.locator('text=Super Admin').or(page.locator('text=Dashboard')).or(page.locator('h1'))
+          page.getByRole('heading', { name: 'Super Admin Dashboard' })
         ).toBeVisible({ timeout: 5000 });
         await takeScreenshot(page, {
           stepName: 'dashboard_content_verified',
@@ -155,8 +155,8 @@ test('Super Admin Login Test', async ({ page }) => {
           status: 'success',
         });
       } catch (error) {
+        // Log as a soft warning without failing the entire run
         await logError(page, error as Error, 'verify_dashboard_content', stepNumber - 1);
-        // Don't throw - dashboard might be loaded but content check failed
       }
     } else {
       await takeScreenshot(page, {

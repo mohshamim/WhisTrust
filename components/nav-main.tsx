@@ -22,6 +22,7 @@ import {
 
 export function NavMain({
   items,
+  onLogout,
 }: {
   items: {
     title: string;
@@ -32,7 +33,9 @@ export function NavMain({
       title: string;
       url: string;
     }[];
+    isLogout?: boolean;
   }[];
+  onLogout?: () => void;
 }) {
   const pathname = usePathname();
 
@@ -44,6 +47,21 @@ export function NavMain({
           const hasSubItems = item.items && item.items.length > 0;
           const isActive =
             pathname === item.url || pathname.startsWith(item.url + "/");
+
+          // Special handling for logout item (same style as others, but triggers onLogout)
+          if (item.isLogout) {
+            return (
+              <SidebarMenuItem key={item.title}>
+                <SidebarMenuButton
+                  tooltip={item.title}
+                  onClick={onLogout}
+                >
+                  {item.icon && <item.icon />}
+                  <span>{item.title}</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          }
 
           if (!hasSubItems) {
             // Simple link without sub-items

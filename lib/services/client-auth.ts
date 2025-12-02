@@ -273,8 +273,8 @@ export async function signOutClient() {
  */
 export function hasPermission(role: string, permission: string): boolean {
   const rolePermissions: Record<string, string[]> = {
-    admin: ['manage_users', 'manage_reports', 'view_reports', 'create_reports', 'manage_settings', 'view_analytics', 'view_audit_logs'],
-    manager: ['manage_users', 'manage_reports', 'view_reports', 'create_reports', 'view_analytics'],
+    admin: ['manage_users', 'manage_reports', 'view_reports', 'create_reports', 'manage_settings', 'view_analytics', 'view_audit_logs', 'manage_docs'],
+    manager: ['manage_users', 'manage_reports', 'view_reports', 'create_reports', 'view_analytics', 'manage_docs'],
     investigator: ['manage_reports', 'view_reports', 'create_reports'],
     hr: ['view_reports', 'create_reports'],
     viewer: ['view_reports'],

@@ -23,7 +23,7 @@ export function generateHTMLReport(run: TestRun, options: ReportOptions): string
   
   if (options.includeScreenshots && fs.existsSync(screenshotsDir)) {
     screenshots = fs.readdirSync(screenshotsDir, { recursive: true })
-      .filter((f: string) => f.endsWith('.png'))
+      .filter((f): f is string => typeof f === 'string' && f.endsWith('.png'))
       .map((f: string) => path.join(screenshotsDir, f));
   }
   
