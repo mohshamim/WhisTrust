@@ -39,17 +39,25 @@ export default function DocumentationPage() {
 
   const loadData = async () => {
     try {
-      const [orgResult, adminResult] = await Promise.all([
-        getOrganizationBySubdomain(subdomain),
-        getCurrentClientAdmin(subdomain),
-      ]);
+      const orgResult = await getOrganizationBySubdomain(subdomain);
 
       if (orgResult.success && orgResult.organization) {
         setOrganization(orgResult.organization);
       }
       
-      if (adminResult.success && adminResult.admin) {
-        setAdmin(adminResult.admin);
+      // Try to get admin, but don't fail if not logged in
+      try {
+        const adminResult = await getCurrentClientAdmin();
+        console.log("Admin result:", adminResult);
+        if (adminResult && adminResult.user) {
+          setAdmin(adminResult.user);
+          console.log("Admin set:", adminResult.user);
+        } else {
+          console.log("No admin found, showing standalone");
+        }
+      } catch (e) {
+        // User not logged in - that's okay, show documentation anyway
+        console.log("Error getting admin:", e);
       }
     } catch (error) {
       console.error("Error loading documentation:", error);
@@ -304,31 +312,35 @@ export default function DocumentationPage() {
     );
   }
 
-  if (!organization || !admin) {
+  if (!organization) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-center">
-          <p className="text-sm text-muted-foreground">Unable to load documentation</p>
+          <p className="text-sm text-muted-foreground">Organization not found</p>
         </div>
       </div>
     );
   }
 
-  return (
-    <SidebarProvider>
-      <ClientSidebar
-        user={{
-          name: admin.name || admin.email.split("@")[0],
-          email: admin.email,
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${admin.email}`,
-        }}
-        organization={{
-          name: organization.name,
-          subdomain: subdomain,
-        }}
-        userRole={admin.role}
-      />
-      <SidebarInset>
+  // Always show with sidebar if admin exists, otherwise show standalone
+  const showWithSidebar = admin && admin.email;
+
+  if (showWithSidebar) {
+    return (
+      <SidebarProvider>
+        <ClientSidebar
+          user={{
+            name: admin.name || admin.email.split("@")[0],
+            email: admin.email,
+            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${admin.email}`,
+          }}
+          organization={{
+            name: organization.name,
+            subdomain: subdomain,
+          }}
+          userRole={admin.role || 'viewer'}
+        />
+        <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
@@ -543,5 +555,108 @@ export default function DocumentationPage() {
         </div>
       </SidebarInset>
     </SidebarProvider>
+    );
+  }
+
+  // Standalone documentation (no sidebar) for non-logged-in users
+  return (
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold tracking-tight">
+              {organization?.name} Documentation
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Everything you need to know about using the compliance platform
+            </p>
+          </div>
+
+          {/* Search */}
+          <div className="relative max-w-md mb-8">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search documentation..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+
+          {/* Documentation Sections */}
+          <div className="space-y-8">
+            {filteredSections.map((section, index) => {
+              const Icon = section.icon;
+              return (
+                <Card key={section.id} id={section.id} className="scroll-mt-24">
+                  <CardHeader>
+                    <div className="flex items-start gap-4">
+                      <div className={`p-3 rounded-lg bg-muted ${section.color}`}>
+                        <Icon className="h-6 w-6" />
+                      </div>
+                      <div className="flex-1">
+                        <CardTitle className="text-2xl">{section.title}</CardTitle>
+                        <CardDescription className="text-base mt-1">
+                          {section.description}
+                        </CardDescription>
+                      </div>
+                      <Badge variant="outline" className="ml-auto">
+                        {String(index + 1).padStart(2, "0")}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-6">
+                    {section.content.map((contentBlock, idx) => (
+                      <div key={idx}>
+                        {idx > 0 && <Separator className="my-6" />}
+                        <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                          <CheckCircle className={`h-4 w-4 ${section.color}`} />
+                          {contentBlock.subtitle}
+                        </h3>
+                        <ul className="space-y-2.5">
+                          {contentBlock.items.map((item, itemIdx) => (
+                            <li key={itemIdx} className="flex gap-3 text-muted-foreground">
+                              <span className="text-primary mt-1.5 text-xs">●</span>
+                              <span className="flex-1 leading-relaxed">{item}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+
+          {filteredSections.length === 0 && (
+            <Alert>
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                No documentation found matching &quot;{searchQuery}&quot;. Try a different search term.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Footer */}
+          <Card className="mt-12 border-muted">
+            <CardContent className="pt-6">
+              <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                <div className="text-center md:text-left">
+                  <p className="font-medium">Need More Help?</p>
+                  <p className="text-sm text-muted-foreground">
+                    Contact your organization administrator for additional support
+                  </p>
+                </div>
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Shield className="h-4 w-4" />
+                  <span>Powered by WhisTrust</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
   );
 }
