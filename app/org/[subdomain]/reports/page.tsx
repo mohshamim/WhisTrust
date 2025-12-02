@@ -1437,7 +1437,7 @@ export default function ClientReportsPage() {
 
               {/* Bottom Status Update Bar */}
               <div className="border-t p-6 sticky bottom-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-[0_-4px_12px_hsl(0_0%_0%_/0.06)]">
-                <div className="flex items-center gap-3 justify-end">
+                <div className="flex items-center gap-3">
                   {permissions?.canEditStatus && (
                     <>
                       <Select
