@@ -11,6 +11,7 @@ import {
   type DocumentationPage,
 } from "@/lib/services/documentation";
 import { ClientSidebar } from "@/components/client-sidebar";
+import { getAvatarUrl } from "@/lib/services/avatar";
 import {
   SidebarInset,
   SidebarProvider,
