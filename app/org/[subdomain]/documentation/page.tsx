@@ -328,7 +328,7 @@ export default function DocumentationPage() {
 
   if (showWithSidebar) {
     return (
-      <SidebarProvider className="h-screen overflow-hidden">
+      <SidebarProvider>
         <ClientSidebar
           user={{
             name: admin.full_name || admin.name || admin.email.split("@")[0],
@@ -341,7 +341,7 @@ export default function DocumentationPage() {
           }}
           userRole={admin.role || 'viewer'}
         />
-        <SidebarInset className="flex flex-col overflow-hidden">
+        <SidebarInset className="flex flex-col h-screen overflow-hidden">
         <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
@@ -393,7 +393,7 @@ export default function DocumentationPage() {
           </div>
 
           {/* Scrollable Content Area with Fixed Sidebar */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto scroll-smooth">
             <div className="max-w-[1400px] mx-auto px-4 py-6">
               {/* Two-column Layout */}
               <div className="flex gap-8">
@@ -414,6 +414,18 @@ export default function DocumentationPage() {
                     <a
                       key={section.id}
                       href={`#${section.id}`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        const element = document.getElementById(section.id);
+                        const scrollContainer = document.querySelector('.flex-1.overflow-y-auto');
+                        if (element && scrollContainer) {
+                          const offsetTop = element.offsetTop - 100; // Offset for fixed header
+                          scrollContainer.scrollTo({
+                            top: offsetTop,
+                            behavior: 'smooth'
+                          });
+                        }
+                      }}
                       className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-muted ${section.color}`}
                     >
                       <Icon className="h-4 w-4 flex-shrink-0" />
