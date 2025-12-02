@@ -5,10 +5,11 @@
 ALTER TABLE admin_profiles 
 ADD COLUMN IF NOT EXISTS avatar_style TEXT;
 
--- Add a check constraint for valid avatar styles (updated for local avatars)
+-- Drop old constraint first
 ALTER TABLE admin_profiles
 DROP CONSTRAINT IF EXISTS valid_avatar_style;
 
+-- Add a check constraint for valid avatar styles (updated for local avatars)
 ALTER TABLE admin_profiles
 ADD CONSTRAINT valid_avatar_style 
 CHECK (avatar_style IS NULL OR avatar_style IN (
