@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { ClientSidebar } from "@/components/client-sidebar";
 import { getCurrentClientAdmin } from "@/lib/services/client-auth";
+import { getAvatarUrl } from "@/lib/services/avatar";
 import {
   SidebarInset,
   SidebarProvider,
