@@ -496,7 +496,7 @@ export default function ManageDocumentationPage() {
                   <div className="space-y-2">
                     <label className="flex items-center gap-1 text-xs font-medium">
                       Content (Markdown)
-                      <HelpTooltip text="Supports headings, lists, bold/italic, and links. This content powers both the Documentation Center and Assistant search." />
+                      <HelpTooltip text="Supports headings, lists, bold/italic, and links. This content powers the Documentation Center." />
                     </label>
                     <Textarea
                       value={form.content_md}

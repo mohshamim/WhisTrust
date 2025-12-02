@@ -190,6 +190,16 @@ export default function DocumentationPage() {
             "Track investigator performance and case resolution",
           ],
         },
+        {
+          subtitle: "Settings & Customization",
+          items: [
+            "Customize your profile with 12 professional avatar styles",
+            "Update organization settings and preferences",
+            "Configure notification preferences and alerts",
+            "Manage team member profiles and permissions",
+            "Set up custom categories and workflows",
+          ],
+        },
       ],
     },
     {
@@ -223,6 +233,17 @@ export default function DocumentationPage() {
             "Advanced analytics and compliance reporting",
             "Role-based access control (Admin, Manager, Investigator)",
             "Complete audit trail of all actions",
+          ],
+        },
+        {
+          subtitle: "User Interface Enhancements",
+          items: [
+            "Fixed headers for easy navigation across all pages",
+            "Smooth scrolling documentation with interactive table of contents",
+            "Professional avatar system with multiple style options",
+            "Responsive design optimized for all devices and screen sizes",
+            "Real-time updates and notifications",
+            "Intuitive case status tracking with visual indicators",
           ],
         },
       ],
@@ -262,6 +283,17 @@ export default function DocumentationPage() {
             "Configurable data retention policies",
             "Right to access and data portability",
             "Regular compliance training and documentation",
+          ],
+        },
+        {
+          subtitle: "Technical Security Measures",
+          items: [
+            "Built on Supabase with Row-Level Security (RLS)",
+            "PostgreSQL database with encrypted storage",
+            "Secure file uploads to private storage buckets",
+            "Session management with automatic timeout",
+            "Real-time data synchronization with encryption",
+            "Multi-tenant architecture with complete data isolation",
           ],
         },
       ],

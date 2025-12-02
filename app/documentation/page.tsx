@@ -22,9 +22,11 @@ import {
   Upload,
   Search,
   Filter,
-  GitBranch,
   Menu,
   X,
+  HelpCircle,
+  AlertTriangle,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -32,22 +34,14 @@ import { cn } from "@/lib/utils";
 
 // Table of Contents data
 const tocSections = [
-  { id: "introduction", label: "Introduction" },
-  { id: "getting-started", label: "Getting Started" },
-  { id: "workflow-1", label: "Anonymous Report Submission" },
-  { id: "workflow-2", label: "Case Tracking & Messaging" },
-  { id: "workflow-3", label: "Admin Dashboard" },
-  { id: "workflow-4", label: "File Upload Security" },
-  { id: "workflow-5", label: "Offline Case Entry" },
-  { id: "workflow-6", label: "Audit Logs & Notifications" },
-  { id: "workflow-7", label: "Encryption & Security" },
-  { id: "workflow-8", label: "Priority & Label Management" },
-  { id: "workflow-9", label: "Role-Based Access Control" },
-  { id: "workflow-10", label: "Reports & Analytics" },
-  { id: "workflow-11", label: "User Management" },
-  { id: "testing", label: "Testing Instructions" },
-  { id: "security", label: "Security & Data Handling" },
-  { id: "faq", label: "FAQ & Troubleshooting" },
+  { id: "introduction", label: "Getting Started", icon: FileText },
+  { id: "anonymous-reporting", label: "Anonymous Reporting", icon: Shield },
+  { id: "tracking", label: "Tracking Your Case", icon: Search },
+  { id: "for-admins", label: "For Administrators", icon: Users },
+  { id: "features", label: "Platform Features", icon: BarChart3 },
+  { id: "security", label: "Security & Privacy", icon: Lock },
+  { id: "workflows", label: "Testing Workflows", icon: CheckCircle },
+  { id: "faqs", label: "FAQs", icon: HelpCircle },
 ];
 
 export default function DocumentationPage() {
@@ -62,24 +56,26 @@ export default function DocumentationPage() {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        // Skip updates during programmatic scrolling
         if (isScrollingRef.current) return;
 
-        // Debounce the state update to prevent flickering
         clearTimeout(debounceTimeout);
         debounceTimeout = setTimeout(() => {
-          const visibleEntries = entries.filter(entry => entry.isIntersecting);
+          const visibleEntries = entries.filter(
+            (entry) => entry.isIntersecting
+          );
           if (visibleEntries.length > 0) {
             const mostVisible = visibleEntries.reduce((prev, current) => {
-              return current.intersectionRatio > prev.intersectionRatio ? current : prev;
+              return current.intersectionRatio > prev.intersectionRatio
+                ? current
+                : prev;
             });
             setActiveSection(mostVisible.target.id);
           }
         }, 100);
       },
-      { 
+      {
         rootMargin: "-20% 0px -35% 0px",
-        threshold: [0, 0.25, 0.5, 0.75, 1]
+        threshold: [0, 0.25, 0.5, 0.75, 1],
       }
     );
 
@@ -97,12 +93,9 @@ export default function DocumentationPage() {
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      // Set active immediately for instant feedback
       setActiveSection(id);
-      
-      // Disable observer during scroll
       isScrollingRef.current = true;
-      
+
       const offset = 100;
       const elementPosition = element.getBoundingClientRect().top;
       const offsetPosition = elementPosition + window.scrollY - offset;
@@ -112,7 +105,6 @@ export default function DocumentationPage() {
         behavior: "smooth",
       });
 
-      // Re-enable observer after scroll completes
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
@@ -139,16 +131,13 @@ export default function DocumentationPage() {
               className="lg:hidden"
               onClick={() => setTocOpen(!tocOpen)}
             >
-              {tocOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+              {tocOpen ? (
+                <X className="h-4 w-4" />
+              ) : (
+                <Menu className="h-4 w-4" />
+              )}
               <span className="ml-2">Contents</span>
             </Button>
-            {/* <Link
-              href="/docs/workflow"
-              className="text-sm text-muted-foreground hover:text-primary transition-colors flex items-center gap-1"
-            >
-              <GitBranch className="h-4 w-4" />
-              Workflow
-            </Link> */}
             <Link
               href="/demo"
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
@@ -177,17 +166,18 @@ export default function DocumentationPage() {
               </Button>
             </div>
             <div className="p-4 space-y-1">
-              {tocSections.map(({ id, label }) => (
+              {tocSections.map(({ id, label, icon: Icon }) => (
                 <button
                   key={id}
                   onClick={() => scrollToSection(id)}
                   className={cn(
-                    "w-full text-left text-sm px-3 py-2 rounded-md transition-colors",
+                    "w-full text-left text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-2",
                     activeSection === id
                       ? "bg-primary text-primary-foreground font-medium"
                       : "text-muted-foreground hover:bg-muted hover:text-foreground"
                   )}
                 >
+                  <Icon className="h-4 w-4" />
                   {label}
                 </button>
               ))}
@@ -202,1353 +192,1481 @@ export default function DocumentationPage() {
           <aside className="hidden lg:block sticky top-24 w-64 shrink-0 h-[calc(100vh-120px)] overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/20 scrollbar-track-transparent hover:scrollbar-thumb-muted-foreground/40">
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <CardTitle className="text-sm font-semibold flex items-center gap-2 uppercase tracking-wider">
                   <FileText className="h-4 w-4" />
                   Contents
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-1">
-                {tocSections.map(({ id, label }) => (
+                {tocSections.map(({ id, label, icon: Icon }) => (
                   <button
                     key={id}
                     onClick={() => scrollToSection(id)}
                     className={cn(
-                      "w-full text-left text-sm px-3 py-2 rounded-md transition-colors",
+                      "w-full text-left text-sm px-3 py-2 rounded-md transition-colors flex items-center gap-2",
                       activeSection === id
                         ? "bg-primary text-primary-foreground font-medium"
                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
                     )}
                   >
+                    <Icon className="h-4 w-4" />
                     {label}
                   </button>
                 ))}
               </CardContent>
             </Card>
+
+            {/* Quick Actions */}
+            <Card className="mt-4 border-primary/20">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm flex items-center gap-2">
+                  <Shield className="h-4 w-4 text-primary" />
+                  Quick Actions
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2 p-3 pt-0">
+                <Link
+                  href="/demo"
+                  className="flex items-center gap-2 p-2 rounded text-sm hover:bg-muted transition-colors"
+                >
+                  <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span>Try Demo</span>
+                  <ArrowRight className="h-3 w-3 ml-auto" />
+                </Link>
+              </CardContent>
+            </Card>
           </aside>
 
           {/* Main Content */}
-          <div className="flex-1 min-w-0 max-w-4xl">
-        {/* Hero Section */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 mb-4">
-            <Shield className="h-8 w-8 text-primary" />
-            <h1 className="text-4xl font-bold">WhisTrust Documentation</h1>
+          <div className="flex-1 min-w-0 max-w-4xl space-y-8">
+            {/* Hero Section */}
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 mb-4">
+                <Shield className="h-10 w-10 text-primary" />
+                <h1 className="text-4xl font-bold">WhisTrust Documentation</h1>
+              </div>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                Enterprise Multi-Tenant Whistleblowing Platform - Complete User
+                Guide
+              </p>
+            </div>
+
+            {/* Getting Started */}
+            <section id="introduction" className="scroll-mt-24">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-blue-600">
+                    <FileText className="h-5 w-5" />
+                    Getting Started
+                  </CardTitle>
+                  <CardDescription>
+                    Learn the basics of using the platform
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <h3 className="font-semibold mb-3">For New Users</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Navigate to the reporting page to submit a concern
+                          anonymously
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Provide as much detail as possible to help
+                          investigators
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Save your unique tracking code to monitor progress
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Use the tracking page anytime to check your case
+                          status
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="font-semibold mb-3">What Happens Next</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <Badge variant="outline" className="mt-0.5">
+                          1
+                        </Badge>
+                        <span>
+                          Your report is immediately submitted to the compliance
+                          team
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Badge variant="outline" className="mt-0.5">
+                          2
+                        </Badge>
+                        <span>Cases are reviewed within 24-48 hours</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Badge variant="outline" className="mt-0.5">
+                          3
+                        </Badge>
+                        <span>
+                          Investigators may request additional information via
+                          secure messaging
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Badge variant="outline" className="mt-0.5">
+                          4
+                        </Badge>
+                        <span>
+                          You'll receive updates as your case progresses through
+                          review stages
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+
+            {/* Anonymous Reporting */}
+            <section id="anonymous-reporting" className="scroll-mt-24">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-green-600">
+                    <Shield className="h-5 w-5" />
+                    Anonymous Reporting
+                  </CardTitle>
+                  <CardDescription>
+                    How to submit secure, confidential reports
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <h3 className="font-semibold mb-3">Submitting a Report</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Choose the appropriate category for your concern
+                          (ethics, fraud, harassment, etc.)
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Provide a clear, detailed description of the issue
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Include dates, locations, and names if relevant
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Upload any supporting documents or evidence (optional)
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Submit and save your unique tracking code</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="font-semibold mb-3">Your Privacy</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <Lock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          No personal information is required to submit a report
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Lock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>Your IP address is not logged or tracked</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Lock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>All data is encrypted end-to-end</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Lock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          Only authorized investigators can access reports
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Lock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          Use your tracking code to maintain anonymity while
+                          following up
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+
+            {/* Tracking */}
+            <section id="tracking" className="scroll-mt-24">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-purple-600">
+                    <Search className="h-5 w-5" />
+                    Tracking Your Case
+                  </CardTitle>
+                  <CardDescription>
+                    Monitor the progress of your report
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <h3 className="font-semibold mb-3">
+                      Using Your Tracking Code
+                    </h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Enter your unique tracking code on the tracking page
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          View the current status of your case (Submitted, Under
+                          Review, Investigating, Resolved, Closed)
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          See timeline of all updates and actions taken
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Check for any messages from investigators</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Respond to follow-up questions securely</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="font-semibold mb-3">
+                      Report Statuses Explained
+                    </h3>
+                    <div className="space-y-3">
+                      <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                        <Badge variant="outline">Submitted</Badge>
+                        <span className="text-sm text-muted-foreground">
+                          Your report has been received and is awaiting review
+                        </span>
+                      </div>
+                      <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                        <Badge variant="outline">Under Review</Badge>
+                        <span className="text-sm text-muted-foreground">
+                          A compliance officer is evaluating your concern
+                        </span>
+                      </div>
+                      <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                        <Badge variant="outline">Investigating</Badge>
+                        <span className="text-sm text-muted-foreground">
+                          An investigator is actively working on your case
+                        </span>
+                      </div>
+                      <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                        <Badge variant="outline">Resolved</Badge>
+                        <span className="text-sm text-muted-foreground">
+                          The issue has been addressed and resolved
+                        </span>
+                      </div>
+                      <div className="flex items-start gap-3 p-3 bg-muted/50 rounded-lg">
+                        <Badge variant="outline">Closed</Badge>
+                        <span className="text-sm text-muted-foreground">
+                          The case is complete with documented outcomes
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+
+            {/* For Administrators */}
+            <section id="for-admins" className="scroll-mt-24">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-orange-600">
+                    <Users className="h-5 w-5" />
+                    For Administrators
+                  </CardTitle>
+                  <CardDescription>
+                    Managing reports and your compliance team
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <h3 className="font-semibold mb-3">Dashboard Overview</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          View key metrics: total reports, pending cases,
+                          resolution times
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Monitor report volume by category and priority
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Track SLA compliance and at-risk cases</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Access quick actions for common workflows</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Review recent activity and submissions</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="font-semibold mb-3">Case Management</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Assign reports to appropriate investigators</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Set priority levels (Low, Medium, High, Critical)
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Add internal notes and update case status</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Communicate with reporters via secure messaging
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Export reports and generate compliance documentation
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="font-semibold mb-3">Team Collaboration</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Invite team members with role-based access (Admin,
+                          Manager, Investigator)
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Assign cases based on expertise and workload
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Leave internal comments for team coordination
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>View audit logs of all user actions</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Track investigator performance and case resolution
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="font-semibold mb-3">
+                      Settings & Customization
+                    </h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Customize your profile with 12 professional avatar
+                          styles
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Update organization settings and preferences
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Configure notification preferences and alerts
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Manage team member profiles and permissions</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Set up custom categories and workflows</span>
+                      </li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+
+            {/* Platform Features */}
+            <section id="features" className="scroll-mt-24">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-indigo-600">
+                    <BarChart3 className="h-5 w-5" />
+                    Platform Features
+                  </CardTitle>
+                  <CardDescription>
+                    Explore all available capabilities
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <h3 className="font-semibold mb-3">Report Categories</h3>
+                    <div className="grid grid-cols-2 gap-2">
+                      <Badge variant="secondary">
+                        Ethics & Code of Conduct
+                      </Badge>
+                      <Badge variant="secondary">
+                        Fraud & Financial Misconduct
+                      </Badge>
+                      <Badge variant="secondary">
+                        Harassment & Discrimination
+                      </Badge>
+                      <Badge variant="secondary">
+                        Safety & Health Violations
+                      </Badge>
+                      <Badge variant="secondary">Data Privacy & Security</Badge>
+                      <Badge variant="secondary">Environmental Issues</Badge>
+                      <Badge variant="secondary">Conflicts of Interest</Badge>
+                      <Badge variant="secondary">
+                        Other Compliance Matters
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="font-semibold mb-3">Key Capabilities</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Anonymous & confidential reporting</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Secure file uploads (documents, images, audio)
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Real-time status tracking with unique codes</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Two-way secure messaging between reporters and
+                          investigators
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Customizable workflows and case assignment</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Advanced analytics and compliance reporting</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Role-based access control (Admin, Manager,
+                          Investigator)
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Complete audit trail of all actions</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="font-semibold mb-3">
+                      User Interface Enhancements
+                    </h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Fixed headers for easy navigation across all pages
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Smooth scrolling documentation with interactive table
+                          of contents
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Professional avatar system with multiple style options
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Responsive design optimized for all devices and screen
+                          sizes
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Real-time updates and notifications</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Intuitive case status tracking with visual indicators
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+
+            {/* Security & Privacy */}
+            <section id="security" className="scroll-mt-24">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-red-600">
+                    <Lock className="h-5 w-5" />
+                    Security & Privacy
+                  </CardTitle>
+                  <CardDescription>
+                    How we protect your information
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div>
+                    <h3 className="font-semibold mb-3">Data Protection</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <Lock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          End-to-end encryption for all data in transit and at
+                          rest
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Lock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>No IP address logging or tracking</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Lock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>Secure file storage with access controls</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Lock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          Regular security audits and penetration testing
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Lock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          SOC 2 and ISO 27001 compliant infrastructure
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="font-semibold mb-3">Access Controls</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <Lock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          Role-based permissions ensure least-privilege access
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Lock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          Multi-factor authentication available for
+                          administrators
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Lock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          Session timeouts and automatic logout for security
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Lock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          Comprehensive audit logging of all user actions
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Lock className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>Data retention policies and secure deletion</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="font-semibold mb-3">Compliance</h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>GDPR, CCPA, and SOX compliance ready</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Whistleblower protection act alignment</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Configurable data retention policies</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>Right to access and data portability</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <CheckCircle className="h-4 w-4 text-green-500 mt-0.5 flex-shrink-0" />
+                        <span>
+                          Regular compliance training and documentation
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <Separator />
+
+                  <div>
+                    <h3 className="font-semibold mb-3">
+                      Technical Security Measures
+                    </h3>
+                    <ul className="space-y-2 text-sm text-muted-foreground">
+                      <li className="flex items-start gap-2">
+                        <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          Built on Supabase with Row-Level Security (RLS)
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>PostgreSQL database with encrypted storage</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          Secure file uploads to private storage buckets
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>Session management with automatic timeout</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          Real-time data synchronization with encryption
+                        </span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                        <span>
+                          Multi-tenant architecture with complete data isolation
+                        </span>
+                      </li>
+                    </ul>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+
+            {/* Testing Workflows */}
+            <section id="workflows" className="scroll-mt-24">
+              <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-background">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-primary text-2xl">
+                    <CheckCircle className="h-6 w-6" />
+                    Testing Workflows - Try It Yourself!
+                  </CardTitle>
+                  <CardDescription>
+                    Step-by-step guides to test the platform by role
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-8">
+                  {/* Anonymous Reporter Workflow */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-blue-500/10 rounded-lg">
+                        <Shield className="h-6 w-6 text-blue-500" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg">
+                          Workflow 1: Anonymous Reporter
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Test the complete anonymous reporting flow
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="ml-12 space-y-3">
+                      <div className="flex items-start gap-3 p-4 bg-card border rounded-lg">
+                        <Badge className="bg-blue-500">Step 1</Badge>
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-1">
+                            Submit Anonymous Report
+                          </h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Navigate to the report submission page and create a
+                            test report.
+                          </p>
+                          <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                            <li>
+                              • Visit{" "}
+                              <Link
+                                href="/demo"
+                                className="text-primary hover:underline"
+                              >
+                                /demo
+                              </Link>{" "}
+                              or your organization's report page
+                            </li>
+                            <li>
+                              • Select category (e.g., "Ethics Violation")
+                            </li>
+                            <li>
+                              • Write a description (minimum 50 characters)
+                            </li>
+                            <li>• Optional: Upload a test file</li>
+                            <li>• Optional: Provide contact information</li>
+                            <li>• Click "Submit Report"</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-4 bg-card border rounded-lg">
+                        <Badge className="bg-blue-500">Step 2</Badge>
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-1">
+                            Save Tracking Code
+                          </h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            After submission, you'll receive a unique tracking
+                            code.
+                          </p>
+                          <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                            <li>
+                              • Copy the tracking code (e.g., "TR-ABC123")
+                            </li>
+                            <li>• Save it securely for testing</li>
+                            <li>
+                              • You'll need this code to track your report
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-4 bg-card border rounded-lg">
+                        <Badge className="bg-blue-500">Step 3</Badge>
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-1">
+                            Track Your Report
+                          </h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Use the tracking code to monitor case status.
+                          </p>
+                          <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                            <li>• Go to the tracking page</li>
+                            <li>• Enter your tracking code</li>
+                            <li>• View case status, timeline, and messages</li>
+                            <li>• Send a message to the compliance team</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-sm">
+                        <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                        <span className="text-green-700 dark:text-green-400 font-medium">
+                          ✓ Workflow Complete! You've tested anonymous reporting
+                          and tracking.
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Admin Workflow */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-purple-500/10 rounded-lg">
+                        <Users className="h-6 w-6 text-purple-500" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg">
+                          Workflow 2: Organization Admin
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Test the admin dashboard and case management
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="ml-12 space-y-3">
+                      <div className="flex items-start gap-3 p-4 bg-card border rounded-lg">
+                        <Badge className="bg-purple-500">Step 1</Badge>
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-1">Login as Admin</h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Access the admin portal with test credentials.
+                          </p>
+                          <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                            <li>
+                              • Navigate to{" "}
+                              <code className="bg-muted px-1 py-0.5 rounded">
+                                /org/codesquare/login
+                              </code>
+                            </li>
+                            <li>
+                              • Email:{" "}
+                              <code className="bg-muted px-1 py-0.5 rounded">
+                                admin@codesquare.com
+                              </code>
+                            </li>
+                            <li>
+                              • Password:{" "}
+                              <code className="bg-muted px-1 py-0.5 rounded">
+                                CodeSquare@2024
+                              </code>
+                            </li>
+                            <li>• Click "Sign In"</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-4 bg-card border rounded-lg">
+                        <Badge className="bg-purple-500">Step 2</Badge>
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-1">View Dashboard</h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Explore the admin dashboard and metrics.
+                          </p>
+                          <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                            <li>
+                              • Review total reports, pending cases, resolution
+                              times
+                            </li>
+                            <li>
+                              • Check recent submissions and activity feed
+                            </li>
+                            <li>• View charts and analytics</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-4 bg-card border rounded-lg">
+                        <Badge className="bg-purple-500">Step 3</Badge>
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-1">Manage Reports</h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Find and manage the report you created.
+                          </p>
+                          <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                            <li>• Go to "Reports" in the sidebar</li>
+                            <li>
+                              • Find your test report (filter by status:
+                              Submitted)
+                            </li>
+                            <li>• Click to open case details</li>
+                            <li>• Update status to "Under Review"</li>
+                            <li>• Set priority (e.g., "Medium")</li>
+                            <li>• Add an internal note</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-4 bg-card border rounded-lg">
+                        <Badge className="bg-purple-500">Step 4</Badge>
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-1">
+                            Assign to Investigator
+                          </h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Assign the case to a team member.
+                          </p>
+                          <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                            <li>• Click "Assign" button</li>
+                            <li>• Select investigator from dropdown</li>
+                            <li>• Add assignment notes (optional)</li>
+                            <li>• Confirm assignment</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-4 bg-card border rounded-lg">
+                        <Badge className="bg-purple-500">Step 5</Badge>
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-1">
+                            Message Reporter
+                          </h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Communicate with the anonymous reporter.
+                          </p>
+                          <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                            <li>• Scroll to "Messages" section</li>
+                            <li>
+                              • Type a message (e.g., "Thank you for your
+                              report. We're reviewing your concern.")
+                            </li>
+                            <li>• Click "Send Message"</li>
+                            <li>• Message appears in case timeline</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-4 bg-card border rounded-lg">
+                        <Badge className="bg-purple-500">Step 6</Badge>
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-1">
+                            Explore Other Features
+                          </h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Test additional admin capabilities.
+                          </p>
+                          <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                            <li>
+                              • <strong>Analytics:</strong> View charts and
+                              trends
+                            </li>
+                            <li>
+                              • <strong>Users:</strong> See team members and
+                              their roles
+                            </li>
+                            <li>
+                              • <strong>Audit Logs:</strong> Review all system
+                              activity
+                            </li>
+                            <li>
+                              • <strong>Settings:</strong> Customize avatar and
+                              preferences
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-sm">
+                        <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                        <span className="text-green-700 dark:text-green-400 font-medium">
+                          ✓ Workflow Complete! You've tested the full admin
+                          experience.
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Manager Workflow */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-orange-500/10 rounded-lg">
+                        <BarChart3 className="h-6 w-6 text-orange-500" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg">
+                          Workflow 3: Manager Role
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Test manager-level oversight and review
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="ml-12 space-y-3">
+                      <div className="flex items-start gap-3 p-4 bg-card border rounded-lg">
+                        <Badge className="bg-orange-500">Step 1</Badge>
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-1">
+                            Login as Manager
+                          </h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Access with manager credentials.
+                          </p>
+                          <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                            <li>
+                              • Navigate to{" "}
+                              <code className="bg-muted px-1 py-0.5 rounded">
+                                /org/codesquare/login
+                              </code>
+                            </li>
+                            <li>
+                              • Email:{" "}
+                              <code className="bg-muted px-1 py-0.5 rounded">
+                                manager@codesquare.com
+                              </code>
+                            </li>
+                            <li>
+                              • Password:{" "}
+                              <code className="bg-muted px-1 py-0.5 rounded">
+                                Manager@2024
+                              </code>
+                            </li>
+                            <li>• Click "Sign In"</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-4 bg-card border rounded-lg">
+                        <Badge className="bg-orange-500">Step 2</Badge>
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-1">
+                            Review Dashboard & Analytics
+                          </h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Managers have full visibility into cases and trends.
+                          </p>
+                          <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                            <li>• View departmental dashboard</li>
+                            <li>• Check analytics for trends and patterns</li>
+                            <li>• Review audit logs for compliance</li>
+                            <li>
+                              • Can view all reports (not just assigned ones)
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-4 bg-card border rounded-lg">
+                        <Badge className="bg-orange-500">Step 3</Badge>
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-1">
+                            Oversee Case Progress
+                          </h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Review cases and provide oversight.
+                          </p>
+                          <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                            <li>• Open any case to review details</li>
+                            <li>• Read internal notes from investigators</li>
+                            <li>• Adjust priority if needed</li>
+                            <li>• Add manager comments for guidance</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-sm">
+                        <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                        <span className="text-green-700 dark:text-green-400 font-medium">
+                          ✓ Workflow Complete! You've tested manager oversight
+                          capabilities.
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Investigator Workflow */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-green-500/10 rounded-lg">
+                        <Search className="h-6 w-6 text-green-500" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-lg">
+                          Workflow 4: Investigator Role
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Test case investigation and resolution
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="ml-12 space-y-3">
+                      <div className="flex items-start gap-3 p-4 bg-card border rounded-lg">
+                        <Badge className="bg-green-500">Step 1</Badge>
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-1">
+                            Login as Investigator
+                          </h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Access with investigator credentials.
+                          </p>
+                          <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                            <li>
+                              • Navigate to{" "}
+                              <code className="bg-muted px-1 py-0.5 rounded">
+                                /org/codesquare/login
+                              </code>
+                            </li>
+                            <li>
+                              • Email:{" "}
+                              <code className="bg-muted px-1 py-0.5 rounded">
+                                investigator@codesquare.com
+                              </code>
+                            </li>
+                            <li>
+                              • Password:{" "}
+                              <code className="bg-muted px-1 py-0.5 rounded">
+                                Investigator@2024
+                              </code>
+                            </li>
+                            <li>• Click "Sign In"</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-4 bg-card border rounded-lg">
+                        <Badge className="bg-green-500">Step 2</Badge>
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-1">
+                            View Assigned Cases
+                          </h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Investigators only see cases assigned to them.
+                          </p>
+                          <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                            <li>• Dashboard shows only your assigned cases</li>
+                            <li>• Go to "Reports" to see full list</li>
+                            <li>• Open the case assigned to you earlier</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-4 bg-card border rounded-lg">
+                        <Badge className="bg-green-500">Step 3</Badge>
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-1">
+                            Investigate & Document
+                          </h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Update case status and add investigation notes.
+                          </p>
+                          <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                            <li>• Update status to "Investigating"</li>
+                            <li>
+                              • Add internal notes about your investigation
+                            </li>
+                            <li>• Review any uploaded attachments</li>
+                            <li>
+                              • Request more information via messaging if needed
+                            </li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="flex items-start gap-3 p-4 bg-card border rounded-lg">
+                        <Badge className="bg-green-500">Step 4</Badge>
+                        <div className="flex-1">
+                          <h4 className="font-semibold mb-1">Resolve Case</h4>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            Complete investigation and mark as resolved.
+                          </p>
+                          <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                            <li>• Update status to "Resolved"</li>
+                            <li>• Add resolution notes summarizing findings</li>
+                            <li>• Send final message to reporter (optional)</li>
+                            <li>• Case moves to closed state</li>
+                          </ul>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-sm">
+                        <CheckCircle className="h-4 w-4 text-green-500 flex-shrink-0" />
+                        <span className="text-green-700 dark:text-green-400 font-medium">
+                          ✓ Workflow Complete! You've tested the investigator
+                          role end-to-end.
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Complete End-to-End */}
+                  <div className="p-6 bg-gradient-to-r from-primary/10 via-purple-500/10 to-blue-500/10 border-2 border-primary/20 rounded-lg">
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-primary/20 rounded-xl">
+                        <CheckCircle className="h-8 w-8 text-primary" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-xl mb-2">
+                          Complete End-to-End Testing
+                        </h3>
+                        <p className="text-muted-foreground mb-4">
+                          Follow all 4 workflows in sequence to experience the
+                          complete platform lifecycle:
+                        </p>
+                        <ol className="space-y-2 text-sm">
+                          <li className="flex items-start gap-2">
+                            <Badge variant="outline" className="mt-0.5">
+                              1
+                            </Badge>
+                            <span>
+                              <strong>Anonymous Reporter:</strong> Submit a
+                              report and save tracking code
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <Badge variant="outline" className="mt-0.5">
+                              2
+                            </Badge>
+                            <span>
+                              <strong>Admin:</strong> Review, prioritize, and
+                              assign the report
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <Badge variant="outline" className="mt-0.5">
+                              3
+                            </Badge>
+                            <span>
+                              <strong>Manager:</strong> Oversee progress and
+                              provide guidance
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <Badge variant="outline" className="mt-0.5">
+                              4
+                            </Badge>
+                            <span>
+                              <strong>Investigator:</strong> Investigate,
+                              document, and resolve
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-2">
+                            <Badge variant="outline" className="mt-0.5">
+                              5
+                            </Badge>
+                            <span>
+                              <strong>Back to Reporter:</strong> Check tracking
+                              page to see final status
+                            </span>
+                          </li>
+                        </ol>
+                        <div className="mt-4 p-3 bg-background rounded-lg border">
+                          <p className="text-sm font-medium text-primary mb-1">
+                            💡 Pro Tip
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            Use browser incognito/private windows to test
+                            multiple roles simultaneously, or log out between
+                            role changes.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+
+            {/* FAQs */}
+            <section id="faqs" className="scroll-mt-24">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-teal-600">
+                    <HelpCircle className="h-5 w-5" />
+                    Frequently Asked Questions
+                  </CardTitle>
+                  <CardDescription>
+                    Common questions about using WhisTrust
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-4">
+                    <div className="p-4 bg-muted/50 rounded-lg">
+                      <h4 className="font-semibold mb-2">
+                        Q: Is my report truly anonymous?
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        A: Yes, we do not collect any identifying information
+                        unless you choose to provide it. Your IP address is not
+                        logged or tracked.
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-muted/50 rounded-lg">
+                      <h4 className="font-semibold mb-2">
+                        Q: How long does an investigation take?
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        A: Most cases are resolved within 2-4 weeks, depending
+                        on complexity and the nature of the concern.
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-muted/50 rounded-lg">
+                      <h4 className="font-semibold mb-2">
+                        Q: Can I update my report after submission?
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        A: Yes, use your tracking code to add information via
+                        secure messaging. You can provide additional details
+                        anytime.
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-muted/50 rounded-lg">
+                      <h4 className="font-semibold mb-2">
+                        Q: Who can see my report?
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        A: Only authorized compliance team members assigned to
+                        your case can view your report. Access is strictly
+                        controlled.
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-muted/50 rounded-lg">
+                      <h4 className="font-semibold mb-2">
+                        Q: What if I need to report urgent safety concerns?
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        A: Mark your report as 'Critical' priority during
+                        submission for immediate attention from the compliance
+                        team.
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-muted/50 rounded-lg">
+                      <h4 className="font-semibold mb-2">
+                        Q: Can I attach files to my report?
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        A: Yes, you can upload documents, images, and audio
+                        files securely. All files are encrypted and stored
+                        privately.
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-muted/50 rounded-lg">
+                      <h4 className="font-semibold mb-2">
+                        Q: How do I know my case is being worked on?
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        A: Check your tracking page regularly for status updates
+                        and messages from investigators. You'll see a complete
+                        timeline of actions.
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-muted/50 rounded-lg">
+                      <h4 className="font-semibold mb-2">
+                        Q: What happens if I lose my tracking code?
+                      </h4>
+                      <p className="text-sm text-muted-foreground">
+                        A: Unfortunately, tracking codes cannot be recovered to
+                        protect anonymity. Please save your tracking code
+                        securely when you submit a report.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </section>
+
+            {/* Footer */}
+            <div className="mt-16 pt-8 border-t text-center text-sm text-muted-foreground">
+              <p>Built with ❤️ for secure and ethical reporting</p>
+              <p className="mt-2">
+                <Link href="/demo" className="text-primary hover:underline">
+                  Try the Demo
+                </Link>
+                {" • "}
+                <Link href="/" className="text-primary hover:underline">
+                  Back to Home
+                </Link>
+              </p>
+            </div>
           </div>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
-            Complete guide to using WhisTrust - your secure digital
-            whistleblowing system
-          </p>
-          {/* <div className="flex items-center justify-center gap-3">
-            <Button asChild size="lg" className="gap-2">
-              <Link href="/docs/workflow">
-                <GitBranch className="h-5 w-5" />
-                View Interactive Workflow Diagram
-              </Link>
-            </Button>
-          </div> */}
         </div>
-
-        {/* Introduction */}
-        <Card id="introduction" className="mb-8 scroll-mt-24">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Introduction to WhisTrust
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground">
-              <strong>WhisTrust</strong> is a secure, confidential digital
-              whistleblowing system designed for organizations to receive and
-              manage anonymous reports of misconduct, fraud, safety concerns,
-              and policy violations.
-            </p>
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg">
-                <Shield className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <h4 className="font-semibold mb-1">Purpose</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Enable confidential reporting, secure communication, and
-                    transparent case resolution
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-4 bg-muted/50 rounded-lg">
-                <Lock className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <h4 className="font-semibold mb-1">Security First</h4>
-                  <p className="text-sm text-muted-foreground">
-                    End-to-end encryption, metadata cleaning, and
-                    compliance-ready data handling
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Getting Started */}
-        <Card id="getting-started" className="mb-8 scroll-mt-24">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5" />
-              Getting Started
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <h3 className="font-semibold mb-2">
-                For Reporters (Anonymous Users)
-              </h3>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline">1</Badge>
-                  <span>
-                    Visit the{" "}
-                    <Link
-                      href="/report"
-                      className="text-primary hover:underline"
-                    >
-                      Report Portal
-                    </Link>
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline">2</Badge>
-                  <span>
-                    Fill in report details (category, description, optional
-                    contact info)
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline">3</Badge>
-                  <span>Upload any supporting files securely</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline">4</Badge>
-                  <span>
-                    Receive a unique tracking code to monitor your case
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div>
-              <h3 className="font-semibold mb-2">For Admin Users</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                WhisTrust uses Role-Based Access Control (RBAC). Your access
-                depends on your assigned role:
-              </p>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline">1</Badge>
-                  <span>
-                    Visit the{" "}
-                    <Link
-                      href="/admin/login"
-                      className="text-primary hover:underline"
-                    >
-                      Admin Portal
-                    </Link>
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline">2</Badge>
-                  <span>
-                    Login with your credentials (e.g., admin@whistrust.com)
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline">3</Badge>
-                  <span>
-                    Access features based on your role (see Role Permissions
-                    section below)
-                  </span>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* System Workflows */}
-        <div className="space-y-8 mb-8">
-          <h2 className="text-3xl font-bold text-center mb-8">
-            System Workflows
-          </h2>
-
-          {/* Workflow 1 */}
-          <Card id="workflow-1" className="scroll-mt-24">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-blue-500" />
-                Workflow 1: Anonymous Report Submission
-              </CardTitle>
-              <CardDescription>
-                Submit a confidential report without revealing your identity
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">What This Does</h4>
-                <p className="text-sm text-muted-foreground">
-                  Allows users to submit reports of misconduct, fraud, or policy
-                  violations securely and anonymously. Each submission receives
-                  a unique tracking code for follow-up.
-                </p>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">
-                  Step-by-Step Instructions
-                </h4>
-                <ol className="list-decimal list-inside space-y-2 text-sm">
-                  <li>Navigate to the Report Portal</li>
-                  <li>
-                    Select report category (fraud, harassment, safety, etc.)
-                  </li>
-                  <li>Enter detailed description of the incident</li>
-                  <li>
-                    Optionally provide name and email (not required for
-                    anonymity)
-                  </li>
-                  <li>Attach supporting documents or evidence (optional)</li>
-                  <li>Click "Submit Report"</li>
-                  <li>Save your unique tracking code for case monitoring</li>
-                </ol>
-              </div>
-
-              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 p-4 rounded-lg">
-                <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  Testing Checklist
-                </h4>
-                <ul className="list-disc list-inside space-y-1 text-sm text-green-900 dark:text-green-100">
-                  <li>Submit a test report with all fields filled</li>
-                  <li>Verify tracking code is generated (e.g., "ABC1234")</li>
-                  <li>Check report appears in admin dashboard</li>
-                  <li>Confirm file uploads are successful</li>
-                  <li>Test with anonymous submission (no name/email)</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Workflow 2 */}
-          <Card id="workflow-2" className="scroll-mt-24">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-green-500" />
-                Workflow 2: Case Tracking & Two-Way Messaging
-              </CardTitle>
-              <CardDescription>
-                Communicate securely with administrators about your case
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">What This Does</h4>
-                <p className="text-sm text-muted-foreground">
-                  Enables encrypted two-way communication between reporters and
-                  administrators. Messages are encrypted before storage and
-                  decrypted on display to ensure maximum privacy.
-                </p>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">
-                  Step-by-Step Instructions
-                </h4>
-                <ol className="list-decimal list-inside space-y-2 text-sm">
-                  <li>Enter your tracking code on the Track Your Case page</li>
-                  <li>View case status and timeline</li>
-                  <li>Review previous messages from administrators</li>
-                  <li>Type your response in the message box</li>
-                  <li>Send message (encrypted automatically)</li>
-                  <li>Receive real-time notifications of new messages</li>
-                </ol>
-              </div>
-
-              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 p-4 rounded-lg">
-                <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  Testing Checklist
-                </h4>
-                <ul className="list-disc list-inside space-y-1 text-sm text-green-900 dark:text-green-100">
-                  <li>Track a case using valid tracking code</li>
-                  <li>Send a test message from reporter view</li>
-                  <li>Verify message appears in admin panel</li>
-                  <li>
-                    Send reply from admin and confirm it appears to reporter
-                  </li>
-                  <li>Check encryption/decryption works correctly</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Workflow 3 */}
-          <Card id="workflow-3" className="scroll-mt-24">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-purple-500" />
-                Workflow 3: Admin Dashboard & Case Management
-              </CardTitle>
-              <CardDescription>
-                Manage and resolve cases with comprehensive admin tools
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">What This Does</h4>
-                <p className="text-sm text-muted-foreground">
-                  Provides administrators with a complete case management
-                  interface including case assignment, status updates, priority
-                  management, custom labels, and file access.
-                </p>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Key Features</h4>
-                <ul className="list-disc list-inside space-y-2 text-sm">
-                  <li>
-                    <strong>Case Overview:</strong> View reports with role-based
-                    filtering:
-                    <ul className="list-disc list-inside ml-4 mt-1">
-                      <li>Admin: All cases</li>
-                      <li>
-                        Manager: Cases assigned to users in their department
-                      </li>
-                      <li>Investigator: Only cases assigned to them</li>
-                      <li>HR: Only HR-related categories</li>
-                    </ul>
-                  </li>
-                  <li>
-                    <strong>Case Details:</strong> Side drawer with full case
-                    information, messages, and attachments
-                  </li>
-                  <li>
-                    <strong>Assignment:</strong> Assign cases to specific
-                    administrators or investigators (Admin & Manager only -
-                    Investigator/HR cannot assign)
-                  </li>
-                  <li>
-                    <strong>Status Management:</strong> Update case status
-                    (Pending → In Review → In Progress → Resolved) - Admin,
-                    Manager, and Investigator can update; HR is read-only
-                  </li>
-                  <li>
-                    <strong>Priority & Labels:</strong> Set priority levels
-                    (Low/Medium/High) and add custom labels - HR role cannot
-                    edit priority
-                  </li>
-                  <li>
-                    <strong>Two-Way Messaging:</strong> Communicate with
-                    reporters securely (all roles can send messages)
-                  </li>
-                </ul>
-              </div>
-
-              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 p-4 rounded-lg">
-                <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  Testing Checklist
-                </h4>
-                <ul className="list-disc list-inside space-y-1 text-sm text-green-900 dark:text-green-100">
-                  <li>Open a case and review all details</li>
-                  <li>
-                    Verify case filtering works per role (Admin sees all,
-                    Manager sees department, etc.)
-                  </li>
-                  <li>As Admin/Manager: Assign case to another user</li>
-                  <li>
-                    As Investigator/HR: Verify assignment controls are hidden
-                  </li>
-                  <li>
-                    Update case status and priority (Admin, Manager,
-                    Investigator)
-                  </li>
-                  <li>
-                    As HR: Verify status/priority controls are disabled with
-                    tooltips
-                  </li>
-                  <li>Add custom labels to case</li>
-                  <li>Filter cases by status, priority, or label</li>
-                  <li>
-                    Send message to reporter from case details (all roles)
-                  </li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Workflow 4 */}
-          <Card id="workflow-4" className="scroll-mt-24">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Upload className="h-5 w-5 text-orange-500" />
-                Workflow 4: File Upload Security & Privacy
-              </CardTitle>
-              <CardDescription>
-                Secure file handling with metadata cleaning and encryption
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">What This Does</h4>
-                <p className="text-sm text-muted-foreground">
-                  Ensures all uploaded files are stored securely with metadata
-                  stripped to prevent identity exposure. Files are accessible
-                  only to authorized administrators via signed URLs.
-                </p>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Security Features</h4>
-                <ul className="list-disc list-inside space-y-2 text-sm">
-                  <li>
-                    Automatic metadata cleaning (removes EXIF, author info,
-                    timestamps)
-                  </li>
-                  <li>Secure storage in Supabase with access control</li>
-                  <li>Signed URLs for temporary file access</li>
-                  <li>File type validation and size limits</li>
-                  <li>Admin-only download permissions</li>
-                </ul>
-              </div>
-
-              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 p-4 rounded-lg">
-                <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  Testing Checklist
-                </h4>
-                <ul className="list-disc list-inside space-y-1 text-sm text-green-900 dark:text-green-100">
-                  <li>Upload file during report submission</li>
-                  <li>Verify file appears in admin case details</li>
-                  <li>Download file from admin panel</li>
-                  <li>Check file metadata is cleaned</li>
-                  <li>Test with different file types (PDF, images, docs)</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Workflow 5 - Offline Entry */}
-          <Card id="workflow-5" className="scroll-mt-24">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-cyan-500" />
-                Workflow 5: Offline / Proxy Case Entry
-              </CardTitle>
-              <CardDescription>
-                Allow administrators to submit cases on behalf of reporters
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">What This Does</h4>
-                <p className="text-sm text-muted-foreground">
-                  Enables authorized administrators to submit reports on behalf
-                  of individuals who cannot access the system directly. Source
-                  marked as "proxy" or "offline".
-                </p>
-              </div>
-
-              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 p-4 rounded-lg">
-                <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  Testing Checklist
-                </h4>
-                <ul className="list-disc list-inside space-y-1 text-sm text-green-900 dark:text-green-100">
-                  <li>Admin creates case via offline entry form</li>
-                  <li>Verify source is marked as "proxy" or "offline"</li>
-                  <li>Confirm case appears in system with special badge</li>
-                  <li>Test case management flows work normally</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Workflow 6 */}
-          <Card id="workflow-6" className="scroll-mt-24">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bell className="h-5 w-5 text-yellow-500" />
-                Workflow 6: Audit Logs & Notifications
-              </CardTitle>
-              <CardDescription>
-                Track all system activities and receive real-time updates
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">What This Does</h4>
-                <p className="text-sm text-muted-foreground">
-                  Comprehensive audit trail of all system actions (report
-                  creation, status changes, assignments, messages) and real-time
-                  notification system for admins.
-                </p>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Audit Log Features</h4>
-                <ul className="list-disc list-inside space-y-2 text-sm">
-                  <li>
-                    Track all user actions with timestamps and user role
-                    information
-                  </li>
-                  <li>
-                    Automatic role capture: Every audit entry automatically
-                    includes the{" "}
-                    <code className="bg-muted px-1 rounded">user_role</code>{" "}
-                    field
-                  </li>
-                  <li>
-                    Track user management actions: Role changes, user
-                    activation/deactivation are logged with full details
-                  </li>
-                  <li>
-                    Filter by action type, resource, user, role, and date range
-                  </li>
-                  <li>
-                    View detailed metadata for each action (old/new values,
-                    target user info)
-                  </li>
-                  <li>Export logs for compliance reporting</li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Notification Features</h4>
-                <ul className="list-disc list-inside space-y-2 text-sm">
-                  <li>Real-time bell notifications for new reports</li>
-                  <li>
-                    Notifications for case assignments and message replies
-                  </li>
-                  <li>Badge showing unread count</li>
-                  <li>Mark notifications as read</li>
-                </ul>
-              </div>
-
-              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 p-4 rounded-lg">
-                <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  Testing Checklist
-                </h4>
-                <ul className="list-disc list-inside space-y-1 text-sm text-green-900 dark:text-green-100">
-                  <li>Submit a new report and check audit log entry</li>
-                  <li>Assign a case and verify notification appears</li>
-                  <li>Check notification bell updates in real-time</li>
-                  <li>Filter audit logs by date and action type</li>
-                  <li>Mark notifications as read and verify badge count</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Workflow 7 */}
-          <Card id="workflow-7" className="scroll-mt-24">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Lock className="h-5 w-5 text-red-500" />
-                Workflow 7: Encryption & Security Layers
-              </CardTitle>
-              <CardDescription>
-                Multi-layer security to protect sensitive data
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">What This Does</h4>
-                <p className="text-sm text-muted-foreground">
-                  Implements multiple security layers including client-side
-                  message encryption, metadata cleaning, role-based access
-                  control, and secure authentication.
-                </p>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Security Layers</h4>
-                <ul className="list-disc list-inside space-y-2 text-sm">
-                  <li>
-                    <strong>Message Encryption:</strong> AES encryption for all
-                    messages
-                  </li>
-                  <li>
-                    <strong>File Metadata Cleaning:</strong> Automatic removal
-                    of identifying information
-                  </li>
-                  <li>
-                    <strong>Row-Level Security (RLS):</strong> Database-level
-                    access control
-                  </li>
-                  <li>
-                    <strong>Role-Based Access Control (RBAC):</strong> Four
-                    distinct roles (Admin, Manager, Investigator, HR) with
-                    granular permissions. Each role sees only authorized
-                    features and data.
-                  </li>
-                  <li>
-                    <strong>Secure Authentication:</strong> Supabase Auth with
-                    session management
-                  </li>
-                  <li>
-                    <strong>HTTPS Only:</strong> All connections encrypted in
-                    transit
-                  </li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Workflow 8 */}
-          <Card id="workflow-8" className="scroll-mt-24">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Filter className="h-5 w-5 text-indigo-500" />
-                Workflow 8: Priority & Label Management
-              </CardTitle>
-              <CardDescription>
-                Organize and filter cases with custom labels and priorities
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">What This Does</h4>
-                <p className="text-sm text-muted-foreground">
-                  Allows administrators to set case priorities (Low/Medium/High)
-                  and add custom labels for better organization and filtering.
-                </p>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Features</h4>
-                <ul className="list-disc list-inside space-y-2 text-sm">
-                  <li>Set priority levels with color-coded badges</li>
-                  <li>Add multiple custom labels per case</li>
-                  <li>Filter cases by priority in the table</li>
-                  <li>Visual indicators for quick case assessment</li>
-                </ul>
-              </div>
-
-              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 p-4 rounded-lg">
-                <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  Testing Checklist
-                </h4>
-                <ul className="list-disc list-inside space-y-1 text-sm text-green-900 dark:text-green-100">
-                  <li>Add labels to a case (e.g., "Finance", "Urgent")</li>
-                  <li>Change case priority from dropdown</li>
-                  <li>Verify priority badge displays correctly</li>
-                  <li>Filter cases by priority level</li>
-                  <li>Confirm filters work together (status + priority)</li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Workflow 9 - RBAC */}
-          <Card id="workflow-9" className="scroll-mt-24">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-blue-500" />
-                Workflow 9: Role-Based Access Control (RBAC)
-              </CardTitle>
-              <CardDescription>
-                Granular permissions and access control for different user roles
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">What This Does</h4>
-                <p className="text-sm text-muted-foreground">
-                  WhisTrust implements comprehensive role-based access control
-                  with four distinct roles. Each role has specific permissions,
-                  sees only relevant data, and has access to appropriate
-                  features. Unauthorized routes are automatically blocked with
-                  clear access-denied messaging.
-                </p>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-3">Role Permissions</h4>
-                <div className="space-y-4">
-                  <div className="border rounded-lg p-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="default">Admin</Badge>
-                      <span className="text-xs text-muted-foreground">
-                        Full System Access
-                      </span>
-                    </div>
-                    <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                      <li>View all cases across all departments</li>
-                      <li>Assign cases to any user</li>
-                      <li>Update case status and priority</li>
-                      <li>View Analytics dashboard</li>
-                      <li>Access Audit Logs</li>
-                      <li>
-                        Manage user accounts - change roles, activate/deactivate
-                        users (see User Management section)
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="border rounded-lg p-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="secondary">Manager</Badge>
-                      <span className="text-xs text-muted-foreground">
-                        Department Oversight
-                      </span>
-                    </div>
-                    <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                      <li>
-                        View cases assigned to users in their department
-                        (department-based filtering)
-                      </li>
-                      <li>
-                        Assign cases to investigators within their department
-                      </li>
-                      <li>Update case status and priority</li>
-                      <li>View Analytics dashboard</li>
-                      <li>Access Audit Logs</li>
-                      <li>
-                        <span className="text-destructive">Cannot</span> manage
-                        users or access user management page
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="border rounded-lg p-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline">Investigator</Badge>
-                      <span className="text-xs text-muted-foreground">
-                        Case Investigation
-                      </span>
-                    </div>
-                    <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                      <li>View only cases assigned to them</li>
-                      <li>Update status and priority of assigned cases</li>
-                      <li>Send messages and manage assigned cases</li>
-                      <li>
-                        <span className="text-destructive">Cannot</span> assign
-                        cases
-                      </li>
-                      <li>
-                        <span className="text-destructive">Cannot</span> view
-                        Analytics or Audit Logs
-                      </li>
-                    </ul>
-                  </div>
-
-                  <div className="border rounded-lg p-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline">HR</Badge>
-                      <span className="text-xs text-muted-foreground">
-                        Human Resources Focus
-                      </span>
-                    </div>
-                    <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                      <li>
-                        View only HR-related categories (Workplace Conduct,
-                        Harassment, Discrimination, Bullying)
-                      </li>
-                      <li>Send messages to reporters</li>
-                      <li>
-                        <span className="text-destructive">Read-only:</span>{" "}
-                        Cannot edit status or priority
-                      </li>
-                      <li>
-                        <span className="text-destructive">Cannot</span> assign
-                        cases
-                      </li>
-                      <li>
-                        <span className="text-destructive">Cannot</span> view
-                        Analytics or Audit Logs
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">UI Features</h4>
-                <ul className="list-disc list-inside space-y-2 text-sm">
-                  <li>
-                    <strong>Role Badge:</strong> Your role is displayed next to
-                    your name in the sidebar with color-coding (Admin: primary,
-                    Manager: secondary, Investigator/HR: outline)
-                  </li>
-                  <li>
-                    <strong>Conditional Navigation:</strong> Only authorized
-                    menu items appear in the sidebar. Unauthorized routes (e.g.,
-                    Users page for non-admin) are hidden
-                  </li>
-                  <li>
-                    <strong>Disabled Controls:</strong> Unauthorized actions
-                    (like status updates for HR) show helpful tooltips when
-                    hovered, explaining permission restrictions
-                  </li>
-                  <li>
-                    <strong>Access Denied Page:</strong> Attempting to access
-                    unauthorized routes (e.g., /admin/users as Manager)
-                    redirects to a clear access-denied page with navigation
-                    options
-                  </li>
-                  <li>
-                    <strong>Case Filtering:</strong> Cases are automatically
-                    filtered based on your role's permissions:
-                    <ul className="list-disc list-inside ml-4 mt-1 space-y-1">
-                      <li>
-                        <strong>Admin:</strong> All cases
-                      </li>
-                      <li>
-                        <strong>Manager:</strong> Cases assigned to users in the
-                        same department
-                      </li>
-                      <li>
-                        <strong>Investigator:</strong> Only cases assigned to
-                        them
-                      </li>
-                      <li>
-                        <strong>HR:</strong> Only HR-related categories
-                        (Workplace Conduct, Harassment, Discrimination,
-                        Bullying)
-                      </li>
-                    </ul>
-                  </li>
-                  <li>
-                    <strong>User Management (Admin Only):</strong> Admin users
-                    can manage other admin accounts - change roles,
-                    activate/deactivate users. All actions are logged in audit
-                    trail with user role information
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Tooltip Examples</h4>
-                <div className="bg-muted/50 p-3 rounded-lg text-sm space-y-1">
-                  <p>
-                    <strong>HR trying to update status:</strong> "You don't have
-                    permission to edit reports. Only Admin, Manager, and
-                    Investigator can update case status."
-                  </p>
-                  <p>
-                    <strong>Non-admin trying to manage users:</strong> "Only
-                    Admin can change user roles." or "Only Admin can
-                    activate/deactivate users."
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 p-4 rounded-lg">
-                <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  Testing Checklist
-                </h4>
-                <ul className="list-disc list-inside space-y-1 text-sm text-green-900 dark:text-green-100">
-                  <li>
-                    Login as each role and verify sidebar shows correct menu
-                    items
-                  </li>
-                  <li>
-                    Check role badge displays correctly next to your name with
-                    appropriate color
-                  </li>
-                  <li>
-                    Verify case filtering works:
-                    <ul className="list-disc list-inside ml-4 mt-1">
-                      <li>Admin sees all cases</li>
-                      <li>
-                        Manager sees only cases assigned to users in their
-                        department
-                      </li>
-                      <li>Investigator sees only assigned cases</li>
-                      <li>HR sees only HR-related categories</li>
-                    </ul>
-                  </li>
-                  <li>
-                    Attempt to access restricted routes (e.g., /admin/users as
-                    Manager) - should redirect to access-denied page
-                  </li>
-                  <li>
-                    Hover over disabled controls (status/priority for HR, user
-                    management for non-admin) and verify tooltips appear
-                  </li>
-                  <li>
-                    As Admin: Change a user's role and verify audit log entry
-                    shows{" "}
-                    <code className="bg-white/20 px-1 rounded">
-                      user_role_updated
-                    </code>{" "}
-                    with old/new values
-                  </li>
-                  <li>
-                    Check audit logs show correct{" "}
-                    <code className="bg-white/20 px-1 rounded">user_role</code>{" "}
-                    column for each action
-                  </li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Workflow 10 */}
-          <Card id="workflow-10" className="scroll-mt-24">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <BarChart3 className="h-5 w-5 text-teal-500" />
-                Workflow 10: Reports & Analytics Dashboard
-              </CardTitle>
-              <CardDescription>
-                Comprehensive insights into case volumes and trends (Admin &
-                Manager only)
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">What This Does</h4>
-                <p className="text-sm text-muted-foreground">
-                  Provides administrators with key metrics, category breakdowns,
-                  trend analysis, and exportable reports for compliance and
-                  management purposes.
-                </p>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Analytics Features</h4>
-                <ul className="list-disc list-inside space-y-2 text-sm">
-                  <li>Total reports count and status breakdown</li>
-                  <li>Average resolution time tracking</li>
-                  <li>Category distribution with percentages</li>
-                  <li>Trend analysis over time</li>
-                  <li>CSV export functionality</li>
-                  <li>
-                    <strong>Access:</strong> Admin and Manager roles only
-                    (Investigator and HR cannot access Analytics)
-                  </li>
-                </ul>
-              </div>
-
-              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 p-4 rounded-lg">
-                <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  Testing Checklist
-                </h4>
-                <ul className="list-disc list-inside space-y-1 text-sm text-green-900 dark:text-green-100">
-                  <li>
-                    As Admin/Manager: View analytics dashboard with real data
-                  </li>
-                  <li>Verify metrics match actual report counts</li>
-                  <li>Check category breakdown is accurate</li>
-                  <li>Export analytics data to CSV</li>
-                  <li>Verify CSV contains all expected data</li>
-                  <li>
-                    As Investigator/HR: Attempt to access /admin/analytics -
-                    should redirect to access-denied page
-                  </li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Workflow 11 - User Management */}
-          <Card id="workflow-11" className="scroll-mt-24">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-pink-500" />
-                Workflow 11: User Management (Admin Only)
-              </CardTitle>
-              <CardDescription>
-                Manage admin user accounts, roles, and activation status
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-muted/50 p-4 rounded-lg">
-                <h4 className="font-semibold mb-2">What This Does</h4>
-                <p className="text-sm text-muted-foreground">
-                  Allows Admin users to manage other admin accounts in the
-                  system. This includes changing user roles (Admin, Manager,
-                  Investigator, HR), activating or deactivating accounts, and
-                  viewing user information. All user management actions are
-                  automatically logged in the audit trail with full details
-                  including who performed the action and what changed.
-                </p>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">Key Features</h4>
-                <ul className="list-disc list-inside space-y-2 text-sm">
-                  <li>
-                    <strong>User List:</strong> View all admin users with their
-                    roles, departments, and activation status
-                  </li>
-                  <li>
-                    <strong>Role Management:</strong> Change user roles between
-                    Admin, Manager, Investigator, and HR
-                  </li>
-                  <li>
-                    <strong>Account Activation:</strong> Activate or deactivate
-                    user accounts (inactive users cannot log in)
-                  </li>
-                  <li>
-                    <strong>Audit Logging:</strong> All changes are logged with:
-                    <ul className="list-disc list-inside ml-4 mt-1">
-                      <li>Who made the change (user and role)</li>
-                      <li>What changed (old/new role, activation status)</li>
-                      <li>When the change occurred</li>
-                      <li>Target user details</li>
-                    </ul>
-                  </li>
-                  <li>
-                    <strong>Access Control:</strong> Only Admin role can access
-                    this page. Other roles attempting to access will be
-                    redirected to the access-denied page.
-                  </li>
-                  <li>
-                    <strong>UI Restrictions:</strong> Non-admin users see
-                    disabled controls with helpful tooltips explaining
-                    permission requirements.
-                  </li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="font-semibold mb-2">User Management Actions</h4>
-                <div className="space-y-3">
-                  <div className="border rounded-lg p-3">
-                    <h5 className="font-semibold text-sm mb-1">
-                      Change User Role
-                    </h5>
-                    <p className="text-xs text-muted-foreground">
-                      Update a user's role. This immediately affects their
-                      permissions and access. Logged as{" "}
-                      <code className="bg-muted px-1 rounded">
-                        user_role_updated
-                      </code>{" "}
-                      with old and new role values.
-                    </p>
-                  </div>
-                  <div className="border rounded-lg p-3">
-                    <h5 className="font-semibold text-sm mb-1">
-                      Activate/Deactivate Account
-                    </h5>
-                    <p className="text-xs text-muted-foreground">
-                      Control user access. Deactivated users cannot log in.
-                      Logged as{" "}
-                      <code className="bg-muted px-1 rounded">
-                        user_activated
-                      </code>{" "}
-                      or{" "}
-                      <code className="bg-muted px-1 rounded">
-                        user_deactivated
-                      </code>{" "}
-                      with user details.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-green-50 dark:bg-green-950/20 border border-green-200 dark:border-green-900 p-4 rounded-lg">
-                <h4 className="font-semibold text-green-900 dark:text-green-100 mb-2 flex items-center gap-2">
-                  <CheckCircle className="h-4 w-4" />
-                  Testing Checklist
-                </h4>
-                <ul className="list-disc list-inside space-y-1 text-sm text-green-900 dark:text-green-100">
-                  <li>As Admin: Access /admin/users page</li>
-                  <li>View list of all admin users with their roles</li>
-                  <li>Change a user's role (e.g., Manager → Investigator)</li>
-                  <li>
-                    Verify audit log shows{" "}
-                    <code className="bg-white/20 px-1 rounded">
-                      user_role_updated
-                    </code>{" "}
-                    entry
-                  </li>
-                  <li>Deactivate a user account</li>
-                  <li>
-                    Verify audit log shows{" "}
-                    <code className="bg-white/20 px-1 rounded">
-                      user_deactivated
-                    </code>{" "}
-                    entry
-                  </li>
-                  <li>Activate the user account again</li>
-                  <li>
-                    Verify audit log shows{" "}
-                    <code className="bg-white/20 px-1 rounded">
-                      user_activated
-                    </code>{" "}
-                    entry
-                  </li>
-                  <li>
-                    As Manager/Investigator/HR: Attempt to access /admin/users -
-                    should redirect to access-denied
-                  </li>
-                  <li>
-                    Check audit logs verify{" "}
-                    <code className="bg-white/20 px-1 rounded">user_role</code>{" "}
-                    is captured for all actions
-                  </li>
-                </ul>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Testing Instructions */}
-        <Card id="testing" className="mb-8 scroll-mt-24">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5" />
-              Testing Instructions
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <h3 className="font-semibold mb-3">Test User Roles</h3>
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-semibold text-sm mb-2">
-                    Reporter (Anonymous)
-                  </h4>
-                  <p className="text-xs text-muted-foreground">
-                    No login required. Use tracking codes to access cases. Can
-                    submit reports and communicate via messages.
-                  </p>
-                </div>
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                    Admin
-                    <Badge variant="default" className="text-xs">
-                      Full Access
-                    </Badge>
-                  </h4>
-                  <p className="text-xs text-muted-foreground mb-2">
-                    Full system access including user management.
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Login: admin@whistrust.com
-                  </p>
-                </div>
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                    Manager
-                    <Badge variant="secondary" className="text-xs">
-                      Department
-                    </Badge>
-                  </h4>
-                  <p className="text-xs text-muted-foreground mb-2">
-                    Department-based case oversight. Sees cases assigned to
-                    users in their department. Can view analytics and audit
-                    logs.
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Cannot manage users or access user management page.
-                  </p>
-                </div>
-                <div className="p-4 border rounded-lg">
-                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                    Investigator
-                    <Badge variant="outline" className="text-xs">
-                      Assigned Cases
-                    </Badge>
-                  </h4>
-                  <p className="text-xs text-muted-foreground mb-2">
-                    View and manage only assigned cases.
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Cannot assign cases or view analytics.
-                  </p>
-                </div>
-                <div className="p-4 border rounded-lg md:col-span-2">
-                  <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                    HR
-                    <Badge variant="outline" className="text-xs">
-                      HR Categories
-                    </Badge>
-                  </h4>
-                  <p className="text-xs text-muted-foreground mb-2">
-                    View HR-related cases only (Workplace Conduct, Harassment,
-                    Discrimination, Bullying).
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    Read-only access. Cannot edit case status or priority.
-                    Cannot view analytics.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <Separator />
-
-            <div>
-              <h3 className="font-semibold mb-2">Sample Test Data</h3>
-              <div className="bg-muted/50 p-4 rounded-lg text-sm">
-                <p className="mb-2">
-                  <strong>Sample Tracking Code:</strong> ABC1234
-                </p>
-                <p className="mb-2">
-                  <strong>Test Categories:</strong> Fraud, Harassment, Safety,
-                  Ethical Violations
-                </p>
-                <p className="mb-2">
-                  <strong>Test File Types:</strong> PDF, JPG, PNG, DOCX (max
-                  10MB each)
-                </p>
-                <p>
-                  <strong>Admin Login:</strong> admin@whistrust.com / Admin@123
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Security & Data Handling */}
-        <Card id="security" className="mb-8 scroll-mt-24">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5" />
-              Security & Data Handling
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <h4 className="font-semibold">Encryption</h4>
-                <p className="text-sm text-muted-foreground">
-                  All messages are encrypted using AES encryption before
-                  storage. Files are encrypted in transit and at rest.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <h4 className="font-semibold">Metadata Cleaning</h4>
-                <p className="text-sm text-muted-foreground">
-                  Automatic removal of EXIF data, author information, and
-                  timestamps from uploaded files to prevent identity exposure.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <h4 className="font-semibold">Access Control</h4>
-                <p className="text-sm text-muted-foreground">
-                  Role-based permissions with database-level security. Only
-                  authorized admins can access specific cases.
-                </p>
-              </div>
-              <div className="space-y-2">
-                <h4 className="font-semibold">Data Storage</h4>
-                <p className="text-sm text-muted-foreground">
-                  Secure cloud storage with signed URLs for temporary file
-                  access. Full audit trail maintained for compliance.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 p-4 rounded-lg">
-              <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-2 flex items-center gap-2">
-                <Shield className="h-4 w-4" />
-                Compliance Ready
-              </h4>
-              <p className="text-sm text-blue-900 dark:text-blue-100">
-                WhisTrust is designed to meet data localization requirements and
-                compliance standards. All data handling follows security best
-                practices and can be hosted in compliant jurisdictions.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* FAQ */}
-        <Card id="faq" className="scroll-mt-24">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              FAQ & Troubleshooting
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-4">
-              <div>
-                <h4 className="font-semibold mb-1">
-                  Why can't I see my messages?
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Make sure you're using the correct tracking code. Messages may
-                  take a moment to sync. Try refreshing the page or checking
-                  your tracking code.
-                </p>
-              </div>
-
-              <Separator />
-
-              <div>
-                <h4 className="font-semibold mb-1">
-                  File upload failed. What should I do?
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  Check file size (max 10MB per file), file type is supported
-                  (PDF, images, docs), and your internet connection is stable.
-                  Try uploading one file at a time.
-                </p>
-              </div>
-
-              <Separator />
-
-              <div>
-                <h4 className="font-semibold mb-1">
-                  I forgot my tracking code. Can I get it back?
-                </h4>
-                <p className="text-sm text-muted-foreground">
-                  If you provided an email during submission, you should have
-                  received the tracking code. For security, we cannot retrieve
-                  tracking codes without authentication.
-                </p>
-              </div>
-
-              <Separator />
-
-              <div>
-                <h4 className="font-semibold mb-1">How secure is my data?</h4>
-                <p className="text-sm text-muted-foreground">
-                  All data is encrypted in transit (HTTPS) and at rest. Messages
-                  use client-side encryption, and files have metadata removed.
-                  Only authorized admins can access case data.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-muted/50 p-4 rounded-lg">
-              <h4 className="font-semibold mb-2">Need More Help?</h4>
-              <p className="text-sm text-muted-foreground">
-                For additional support, please contact your organization's
-                compliance team or system administrator. Technical issues can be
-                reported through your organization's IT support channels.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Footer */}
-        <div className="text-center text-sm text-muted-foreground mt-12 pb-8">
-          <p>
-            WhisTrust Documentation v1.0 | Last Updated:{" "}
-            {new Date().toLocaleDateString()}
-          </p>
-          <div className="flex items-center justify-center gap-4 mt-4">
-            <Link href="/demo" className="text-primary hover:underline">
-              Try Demo
-            </Link>
-            <span>•</span>
-            <Link href="/" className="text-primary hover:underline">
-              Home
-            </Link>
-          </div>
-        </div>
-          </div> {/* End Main Content */}
-        </div> {/* End Flex Container */}
-      </div> {/* End Container */}
+      </div>
     </div>
   );
 }
