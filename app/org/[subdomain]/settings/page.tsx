@@ -383,6 +383,7 @@ export default function ClientSettingsPage() {
         userRole={user.role}
       />
       <SidebarInset>
+        <div className="flex flex-col h-screen overflow-hidden">
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
@@ -396,6 +397,7 @@ export default function ClientSettingsPage() {
           </div>
         </header>
 
+        <div className="flex-1 overflow-y-auto">
         <div className="flex flex-1 flex-col gap-4 p-4">
           <div className="max-w-4xl space-y-6">
             <UsageBanner organization={organization} />
@@ -1445,6 +1447,8 @@ export default function ClientSettingsPage() {
               </Card>
             )}
           </div>
+        </div>
+        </div>
         </div>
       </SidebarInset>
     </SidebarProvider>

@@ -798,8 +798,9 @@ export default function ClientReportsPage() {
         userRole={user.role}
       />
       <SidebarInset>
-        <div className="flex flex-col h-full">
-          <header className="flex items-center justify-between border-b px-6 py-4">
+        <div className="flex flex-col h-screen overflow-hidden">
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <header className="flex items-center justify-between border-b px-6 py-4 flex-shrink-0">
             <div className="flex items-center gap-4">
               <SidebarTrigger />
               <div>
@@ -814,6 +815,7 @@ export default function ClientReportsPage() {
             </div>
           </header>
 
+          <div className="flex-1 overflow-y-auto">
           <div className="flex flex-1 flex-col gap-4 md:gap-6 p-4 md:p-6 lg:p-8">
           {/* Demo Mode Banner */}
           {subdomain === 'demo' && (
@@ -1060,6 +1062,8 @@ export default function ClientReportsPage() {
               )}
             </CardContent>
           </Card>
+        </div>
+        </div>
         </div>
         </div>
         {organization?.id && (

@@ -379,8 +379,9 @@ export default function ClientDashboardPage() {
         userRole={user.role}
       />
       <SidebarInset>
-        <div className="flex flex-col">
-          <div className="flex items-center justify-between border-b px-6 py-4">
+        <div className="flex flex-col h-screen overflow-hidden">
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <div className="flex items-center justify-between border-b px-6 py-4 flex-shrink-0">
             <div className="flex items-center gap-4">
               <SidebarTrigger />
               <div>
@@ -409,6 +410,7 @@ export default function ClientDashboardPage() {
             </div>
           </div>
 
+          <div className="flex-1 overflow-y-auto">
           <div className="space-y-6 p-6">
             {/* Demo Mode Banner */}
             {subdomain === 'demo' && (
@@ -960,6 +962,8 @@ export default function ClientDashboardPage() {
               </Card>
             </div>
           </div>
+        </div>
+        </div>
         </div>
         {organization?.id && (
           <OrgAssistantButton

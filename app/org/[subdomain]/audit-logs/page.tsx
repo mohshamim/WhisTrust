@@ -271,9 +271,10 @@ export default function AuditLogsPage() {
         userRole={user.role || "admin"}
       />
       <SidebarInset>
-        <div className="flex flex-col">
+        <div className="flex flex-col h-screen overflow-hidden">
+        <div className="flex flex-col flex-1 overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between border-b px-6 py-4">
+          <div className="flex items-center justify-between border-b px-6 py-4 flex-shrink-0">
             <div className="flex items-center gap-4">
               <SidebarTrigger />
               <div>
@@ -296,6 +297,7 @@ export default function AuditLogsPage() {
           </div>
 
           {/* Content */}
+          <div className="flex-1 overflow-y-auto">
           <div className="p-6 space-y-6">
             {/* Info Alert */}
             <Alert className="bg-blue-500/10 text-blue-600 border-blue-500/20">
@@ -497,6 +499,8 @@ export default function AuditLogsPage() {
               </CardContent>
             </Card>
           </div>
+          </div>
+        </div>
         </div>
       </SidebarInset>
 
