@@ -360,10 +360,10 @@ export default function DocumentationPage() {
           </Breadcrumb>
         </header>
 
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 flex flex-col overflow-hidden">
           {/* Fixed Header Section */}
-          <div className="sticky top-0 z-10 bg-background border-b">
-            <div className="container mx-auto px-4 py-6">
+          <div className="flex-shrink-0 bg-background border-b px-4 py-6">
+            <div className="max-w-[1400px] mx-auto">
               <div className="flex items-start justify-between gap-4 mb-4">
                 <div>
                   <h1 className="text-3xl font-bold tracking-tight">
@@ -373,7 +373,7 @@ export default function DocumentationPage() {
                     Everything you need to know about using the compliance platform
                   </p>
                 </div>
-                <Badge variant="outline" className="mt-1">
+                <Badge variant="outline" className="mt-1 flex-shrink-0">
                   <FileText className="h-3 w-3 mr-1" />
                   {sections.length} Sections
                 </Badge>
@@ -392,13 +392,14 @@ export default function DocumentationPage() {
             </div>
           </div>
 
-          {/* Scrollable Content Area */}
-          <div className="container mx-auto px-4 py-6">
-            {/* Two-column Layout with Fixed Sidebar */}
-            <div className="relative flex gap-8">
-          {/* Sidebar Navigation - Fixed Position */}
-          <aside className="hidden lg:block w-[280px] flex-shrink-0">
-            <div className="sticky top-[280px] space-y-4 max-h-[calc(100vh-300px)] overflow-y-auto">
+          {/* Scrollable Content Area with Fixed Sidebar */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="max-w-[1400px] mx-auto px-4 py-6">
+              {/* Two-column Layout */}
+              <div className="flex gap-8">
+                {/* Sidebar Navigation - Sticky Position */}
+                <aside className="hidden lg:block w-[280px] flex-shrink-0">
+                  <div className="sticky top-4 space-y-4 max-h-[calc(100vh-180px)] overflow-y-auto">
               <Card className="border-muted">
                 <CardHeader className="pb-3">
                   <CardTitle className="text-sm uppercase tracking-wider">
@@ -459,8 +460,8 @@ export default function DocumentationPage() {
             </div>
           </aside>
 
-          {/* Main Content - Takes remaining space with left margin to avoid overlap */}
-          <div className="flex-1 min-w-0 space-y-8 lg:ml-[296px]">
+                {/* Main Content - Takes remaining space */}
+                <div className="flex-1 min-w-0 space-y-8">
             {/* Mobile Navigation (visible on small screens) */}
             <Card className="mb-8 lg:hidden border-primary/20 bg-primary/5">
               <CardHeader>
@@ -560,7 +561,8 @@ export default function DocumentationPage() {
                   </div>
                 </CardContent>
               </Card>
-            </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
