@@ -1,489 +1,547 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { getCurrentClientAdmin } from "@/lib/services/client-auth";
-import { ClientSidebar } from "@/components/client-sidebar";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
+import { Shield, FileText, Users, Bell, Lock, HelpCircle, CheckCircle, AlertTriangle, MessageSquare, BarChart3, Search, ArrowRight } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-  FileText,
-  Loader2,
-  Shield,
-  Users,
-  Lock,
-  MessageSquare,
-  AlertCircle,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { getOrganizationBySubdomain, getCurrentClientAdmin } from "@/lib/services/client-auth";
+import { ClientSidebar } from "@/components/client-sidebar";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 
-const ORG_DOC_SECTIONS = [
-  { id: "introduction", label: "Introduction" },
-  { id: "getting-started", label: "Getting Started" },
-  { id: "reporting", label: "Reporting" },
-  { id: "case-management", label: "Case Management" },
-  { id: "user-management", label: "User Management" },
-  { id: "security", label: "Security & Compliance" },
-  { id: "faqs", label: "FAQs" },
-  { id: "troubleshooting", label: "Troubleshooting" },
-  { id: "downloads", label: "Downloads & Templates" },
-  { id: "policies", label: "Organization Policies" },
-] as const;
+interface DocSection {
+  id: string;
+  icon: any;
+  title: string;
+  description: string;
+  color: string;
+  content: {
+    subtitle: string;
+    items: string[];
+  }[];
+}
 
-export default function OrganizationDocumentationPage() {
+export default function DocumentationPage() {
   const params = useParams();
-  const router = useRouter();
   const subdomain = params.subdomain as string;
-
-  const [user, setUser] = useState<any>(null);
   const [organization, setOrganization] = useState<any>(null);
+  const [admin, setAdmin] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    checkAuthAndLoad();
-  }, []);
+    loadData();
+  }, [subdomain]);
 
-  const checkAuthAndLoad = async () => {
+  const loadData = async () => {
     try {
-      const { user: clientUser, organization: org } =
-        await getCurrentClientAdmin();
+      const [orgResult, adminResult] = await Promise.all([
+        getOrganizationBySubdomain(subdomain),
+        getCurrentClientAdmin(subdomain),
+      ]);
 
-      if (!clientUser || !org || org.subdomain !== subdomain) {
-        router.push(`/org/${subdomain}/login`);
-        return;
+      if (orgResult.success && orgResult.organization) {
+        setOrganization(orgResult.organization);
       }
-
-      setUser(clientUser);
-      setOrganization(org);
+      
+      if (adminResult.success && adminResult.admin) {
+        setAdmin(adminResult.admin);
+      }
     } catch (error) {
-      console.error("Documentation auth/load error:", error);
-      router.push(`/org/${subdomain}/login`);
+      console.error("Error loading documentation:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const scrollToSection = useCallback((id: string) => {
-    if (typeof window === "undefined") return;
-    const el = document.getElementById(id);
-    if (!el) return;
-    const offset = 80;
-    const rect = el.getBoundingClientRect();
-    const target = rect.top + window.scrollY - offset;
-    window.scrollTo({ top: target, behavior: "smooth" });
-  }, []);
+  const sections: DocSection[] = [
+    {
+      id: "getting-started",
+      icon: FileText,
+      title: "Getting Started",
+      description: "Learn the basics of using the platform",
+      color: "text-blue-600",
+      content: [
+        {
+          subtitle: "For New Users",
+          items: [
+            "Navigate to the reporting page to submit a concern anonymously",
+            "Provide as much detail as possible to help investigators",
+            "Save your unique tracking code to monitor progress",
+            "Use the tracking page anytime to check your case status",
+          ],
+        },
+        {
+          subtitle: "What Happens Next",
+          items: [
+            "Your report is immediately submitted to the compliance team",
+            "Cases are reviewed within 24-48 hours",
+            "Investigators may request additional information via secure messaging",
+            "You'll receive updates as your case progresses through review stages",
+          ],
+        },
+      ],
+    },
+    {
+      id: "anonymous-reporting",
+      icon: Shield,
+      title: "Anonymous Reporting",
+      description: "How to submit secure, confidential reports",
+      color: "text-green-600",
+      content: [
+        {
+          subtitle: "Submitting a Report",
+          items: [
+            "Choose the appropriate category for your concern (ethics, fraud, harassment, etc.)",
+            "Provide a clear, detailed description of the issue",
+            "Include dates, locations, and names if relevant",
+            "Upload any supporting documents or evidence (optional)",
+            "Submit and save your unique tracking code",
+          ],
+        },
+        {
+          subtitle: "Your Privacy",
+          items: [
+            "No personal information is required to submit a report",
+            "Your IP address is not logged or tracked",
+            "All data is encrypted end-to-end",
+            "Only authorized investigators can access reports",
+            "Use your tracking code to maintain anonymity while following up",
+          ],
+        },
+      ],
+    },
+    {
+      id: "tracking",
+      icon: Search,
+      title: "Tracking Your Case",
+      description: "Monitor the progress of your report",
+      color: "text-purple-600",
+      content: [
+        {
+          subtitle: "Using Your Tracking Code",
+          items: [
+            "Enter your unique tracking code on the tracking page",
+            "View the current status of your case (Submitted, Under Review, Investigating, Resolved, Closed)",
+            "See timeline of all updates and actions taken",
+            "Check for any messages from investigators",
+            "Respond to follow-up questions securely",
+          ],
+        },
+        {
+          subtitle: "Report Statuses Explained",
+          items: [
+            "Submitted - Your report has been received and is awaiting review",
+            "Under Review - A compliance officer is evaluating your concern",
+            "Investigating - An investigator is actively working on your case",
+            "Resolved - The issue has been addressed and resolved",
+            "Closed - The case is complete with documented outcomes",
+          ],
+        },
+      ],
+    },
+    {
+      id: "for-admins",
+      icon: Users,
+      title: "For Administrators",
+      description: "Managing reports and your compliance team",
+      color: "text-orange-600",
+      content: [
+        {
+          subtitle: "Dashboard Overview",
+          items: [
+            "View key metrics: total reports, pending cases, resolution times",
+            "Monitor report volume by category and priority",
+            "Track SLA compliance and at-risk cases",
+            "Access quick actions for common workflows",
+            "Review recent activity and submissions",
+          ],
+        },
+        {
+          subtitle: "Case Management",
+          items: [
+            "Assign reports to appropriate investigators",
+            "Set priority levels (Low, Medium, High, Critical)",
+            "Add internal notes and update case status",
+            "Communicate with reporters via secure messaging",
+            "Export reports and generate compliance documentation",
+          ],
+        },
+        {
+          subtitle: "Team Collaboration",
+          items: [
+            "Invite team members with role-based access (Admin, Manager, Investigator)",
+            "Assign cases based on expertise and workload",
+            "Leave internal comments for team coordination",
+            "View audit logs of all user actions",
+            "Track investigator performance and case resolution",
+          ],
+        },
+      ],
+    },
+    {
+      id: "features",
+      icon: BarChart3,
+      title: "Platform Features",
+      description: "Explore all available capabilities",
+      color: "text-indigo-600",
+      content: [
+        {
+          subtitle: "Report Categories",
+          items: [
+            "Ethics & Code of Conduct Violations",
+            "Fraud & Financial Misconduct",
+            "Harassment & Discrimination",
+            "Safety & Health Violations",
+            "Data Privacy & Security Concerns",
+            "Environmental Issues",
+            "Conflicts of Interest",
+            "Other Compliance Matters",
+          ],
+        },
+        {
+          subtitle: "Key Capabilities",
+          items: [
+            "Anonymous & confidential reporting",
+            "Secure file uploads (documents, images, audio)",
+            "Real-time status tracking with unique codes",
+            "Two-way secure messaging between reporters and investigators",
+            "Customizable workflows and case assignment",
+            "Advanced analytics and compliance reporting",
+            "Role-based access control (Admin, Manager, Investigator)",
+            "Complete audit trail of all actions",
+          ],
+        },
+      ],
+    },
+    {
+      id: "security",
+      icon: Lock,
+      title: "Security & Privacy",
+      description: "How we protect your information",
+      color: "text-red-600",
+      content: [
+        {
+          subtitle: "Data Protection",
+          items: [
+            "End-to-end encryption for all data in transit and at rest",
+            "No IP address logging or tracking",
+            "Secure file storage with access controls",
+            "Regular security audits and penetration testing",
+            "SOC 2 and ISO 27001 compliant infrastructure",
+          ],
+        },
+        {
+          subtitle: "Access Controls",
+          items: [
+            "Role-based permissions ensure least-privilege access",
+            "Multi-factor authentication available for administrators",
+            "Session timeouts and automatic logout for security",
+            "Comprehensive audit logging of all user actions",
+            "Data retention policies and secure deletion",
+          ],
+        },
+        {
+          subtitle: "Compliance",
+          items: [
+            "GDPR, CCPA, and SOX compliance ready",
+            "Whistleblower protection act alignment",
+            "Configurable data retention policies",
+            "Right to access and data portability",
+            "Regular compliance training and documentation",
+          ],
+        },
+      ],
+    },
+    {
+      id: "faqs",
+      icon: HelpCircle,
+      title: "FAQs",
+      description: "Frequently asked questions",
+      color: "text-teal-600",
+      content: [
+        {
+          subtitle: "Common Questions",
+          items: [
+            "Q: Is my report truly anonymous? A: Yes, we do not collect any identifying information unless you choose to provide it.",
+            "Q: How long does an investigation take? A: Most cases are resolved within 2-4 weeks, depending on complexity.",
+            "Q: Can I update my report after submission? A: Yes, use your tracking code to add information via secure messaging.",
+            "Q: Who can see my report? A: Only authorized compliance team members assigned to your case.",
+            "Q: What if I need to report urgent safety concerns? A: Mark your report as 'Critical' priority for immediate attention.",
+            "Q: Can I attach files to my report? A: Yes, you can upload documents, images, and audio files securely.",
+            "Q: How do I know my case is being worked on? A: Check your tracking page regularly for status updates and messages.",
+            "Q: What happens if I lose my tracking code? A: Unfortunately, tracking codes cannot be recovered to protect anonymity. Save it securely.",
+          ],
+        },
+      ],
+    },
+  ];
+
+  const filteredSections = sections.filter((section) => {
+    if (!searchQuery) return true;
+    const query = searchQuery.toLowerCase();
+    return (
+      section.title.toLowerCase().includes(query) ||
+      section.description.toLowerCase().includes(query) ||
+      section.content.some((c) =>
+        c.items.some((item) => item.toLowerCase().includes(query))
+      )
+    );
+  });
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-muted/50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <Loader2 className="h-6 w-6 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">
-            Loading Documentation Center...
-          </p>
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-sm text-muted-foreground">Loading documentation...</p>
         </div>
       </div>
     );
   }
 
-  if (!organization || !user) {
-    return null;
+  if (!organization || !admin) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground">Unable to load documentation</p>
+        </div>
+      </div>
+    );
   }
-
-  const orgName = organization.name as string;
 
   return (
     <SidebarProvider>
       <ClientSidebar
         user={{
-          name: user.full_name || "User",
-          email: user.email,
-          avatar: user.avatar_url || "/avatars/default.jpg",
+          name: admin.name || admin.email.split("@")[0],
+          email: admin.email,
+          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${admin.email}`,
         }}
         organization={{
           name: organization.name,
-          subdomain,
+          subdomain: subdomain,
         }}
-        userRole={user.role}
+        userRole={admin.role}
       />
       <SidebarInset>
-        {/* Header inside org layout - keep visible while scrolling */}
-        <header className="sticky top-0 z-20 flex h-14 items-center gap-2 border-b px-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
           <SidebarTrigger className="-ml-1" />
-          <div className="flex flex-1 items-center justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="font-semibold text-base sm:text-lg">
-                  Documentation Center
-                </h1>
-                <Badge variant="outline" className="text-[10px]">
-                  Org-scoped
-                </Badge>
-              </div>
-              <p className="text-xs text-muted-foreground">
-                How reporting, case management, and security work in {orgName}.
-              </p>
-            </div>
-          </div>
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem className="hidden md:block">
+                <BreadcrumbLink href={`/org/${subdomain}/dashboard`}>
+                  Dashboard
+                </BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Documentation</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
         </header>
 
-        <main className="flex-1 bg-muted/30">
-          <div className="mx-auto max-w-6xl p-4 md:p-6 lg:p-8">
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-              {/* TOC sidebar */}
-              <aside className="w-full lg:w-64 lg:sticky lg:top-24 lg:h-[calc(100vh-112px)] lg:overflow-y-auto">
-                <Card>
-                  <CardHeader className="pb-3">
-                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                      <FileText className="h-4 w-4" />
-                      Contents
-                    </CardTitle>
-                    <CardDescription className="text-xs">
-                      Key guidance for the {orgName} workspace.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-1">
-                    {ORG_DOC_SECTIONS.map(({ id, label }) => (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => scrollToSection(id)}
-                        className={cn(
-                          "w-full text-left text-sm px-3 py-2 rounded-md transition-colors",
-                          "text-muted-foreground hover:bg-muted hover:text-foreground"
-                        )}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </CardContent>
-                </Card>
-              </aside>
-
-              {/* Main content */}
-              <div className="flex-1 min-w-0 space-y-8">
-                {/* Hero / overview */}
-                <div className="text-left">
-                  <div className="inline-flex items-center gap-2 mb-3">
-                    <Shield className="h-6 w-6 text-primary" />
-                    <h2 className="text-2xl md:text-3xl font-bold">
-                      {orgName} Compliance Documentation
-                    </h2>
-                  </div>
-                  <p className="text-sm md:text-base text-muted-foreground max-w-2xl">
-                    This guide explains how your team uses WhisTrust to capture
-                    reports, manage cases, and stay compliant inside the{" "}
-                    <span className="font-semibold">{orgName}</span> tenant.
-                  </p>
-                </div>
-
-                {/* Introduction */}
-                <Card id="introduction" className="scroll-mt-24">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="h-5 w-5" />
-                      Introduction
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3 text-sm text-muted-foreground">
-                    <p>
-                      The <span className="font-semibold">{orgName}</span>{" "}
-                      workspace is an isolated tenant on the WhisTrust platform.
-                      All reports, users, and configurations you see here are
-                      scoped only to your organization.
-                    </p>
-                    <p>
-                      Use this Documentation Center as your internal reference
-                      for how staff should submit, triage, and close cases, and
-                      how administrators configure the system.
-                    </p>
-                  </CardContent>
-                </Card>
-
-                {/* Getting Started */}
-                <Card id="getting-started" className="scroll-mt-24">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Users className="h-5 w-5 text-primary" />
-                      Getting Started
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4 text-sm text-muted-foreground">
-                    <p className="font-medium">
-                      Access your tenant at{" "}
-                      <code className="px-1.5 py-0.5 rounded bg-muted text-xs">
-                        /org/{subdomain}
-                      </code>
-                      .
-                    </p>
-                    <ul className="list-disc list-inside space-y-1">
-                      <li>
-                        Admins and reviewers log in from the staff portal using
-                        the credentials provisioned for them.
-                      </li>
-                      <li>
-                        Only users created in the <strong>Users</strong> section
-                        of this org can access cases for {orgName}.
-                      </li>
-                      <li>
-                        Invite new admins, managers, or investigators from{" "}
-                        <span className="font-semibold">Users &gt; Invite</span>.
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                {/* Reporting */}
-                <Card id="reporting" className="scroll-mt-24">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MessageSquare className="h-5 w-5 text-primary" />
-                      Reporting
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4 text-sm text-muted-foreground">
-                    <p>
-                      Reporters submit new cases using the anonymous
-                      whistleblowing form configured for {orgName}. Submitted
-                      reports immediately appear in the{" "}
-                      <strong>Reports</strong> section for authorized staff.
-                    </p>
-                    <ul className="list-disc list-inside space-y-1">
-                      <li>
-                        Status lifecycle:{" "}
-                        <span className="font-mono text-xs">
-                          submitted → under_review → investigating → resolved →
-                          closed
-                        </span>
-                      </li>
-                      <li>
-                        Each submission generates a tracking code that reporters
-                        can use on the <strong>Track Case</strong> page.
-                      </li>
-                      <li>
-                        Attachments are stored securely and only visible to
-                        permitted roles within this organization.
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                {/* Case Management */}
-                <Card id="case-management" className="scroll-mt-24">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Lock className="h-5 w-5 text-primary" />
-                      Case Management
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4 text-sm text-muted-foreground">
-                    <p>
-                      Admins and managers assign cases to investigators, set
-                      priority, and coordinate internal notes from the{" "}
-                      <strong>Reports</strong> workspace.
-                    </p>
-                    <ul className="list-disc list-inside space-y-1">
-                      <li>
-                        Use <strong>priority</strong> to highlight critical and
-                        high-risk issues first.
-                      </li>
-                      <li>
-                        Internal notes are only visible to your internal team
-                        and are captured in the audit log.
-                      </li>
-                      <li>
-                        Messaging on the case timeline keeps communication
-                        between reporter and staff in a single secure channel.
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                {/* User Management */}
-                <Card id="user-management" className="scroll-mt-24">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Users className="h-5 w-5 text-primary" />
-                      User Management
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3 text-sm text-muted-foreground">
-                    <p>
-                      Roles in {orgName} control who can see which data and
-                      perform which actions.
-                    </p>
-                    <ul className="list-disc list-inside space-y-1">
-                      <li>
-                        <strong>Admin</strong> – full configuration access,
-                        user management, reports.
-                      </li>
-                      <li>
-                        <strong>Manager</strong> – manages cases and teams,
-                        limited settings.
-                      </li>
-                      <li>
-                        <strong>Investigator</strong> – works only on assigned
-                        cases.
-                      </li>
-                      <li>
-                        Other read‑only roles (e.g. HR, Viewer) can be added as
-                        needed with restricted visibility.
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                {/* Security & Compliance */}
-                <Card id="security" className="scroll-mt-24">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Lock className="h-5 w-5 text-primary" />
-                      Security & Compliance
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3 text-sm text-muted-foreground">
-                    <p>
-                      WhisTrust is built on Supabase Postgres with strict Row
-                      Level Security (RLS). The{" "}
-                      <span className="font-semibold">{orgName}</span> tenant
-                      is fully isolated from other organizations.
-                    </p>
-                    <ul className="list-disc list-inside space-y-1">
-                      <li>
-                        Every report row is stamped with{" "}
-                        <code className="px-1 rounded bg-muted text-xs">
-                          organization_id
-                        </code>{" "}
-                        and constrained by RLS.
-                      </li>
-                      <li>
-                        Audit logs record sensitive actions like status changes,
-                        assignments, and login events.
-                      </li>
-                      <li>
-                        Only authenticated users with the correct role can
-                        access internal data for this tenant.
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                {/* FAQs */}
-                <Card id="faqs" className="scroll-mt-24">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <MessageSquare className="h-5 w-5 text-primary" />
-                      FAQs
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3 text-sm text-muted-foreground">
-                    <p className="font-medium">
-                      Common questions from {orgName} admins and reviewers.
-                    </p>
-                    <ul className="space-y-2">
-                      <li>
-                        <span className="font-semibold">
-                          How do reporters track their case?
-                        </span>
-                        <br />
-                        Use the tracking code on the{" "}
-                        <strong>/org/{subdomain}/track</strong> page.
-                      </li>
-                      <li>
-                        <span className="font-semibold">
-                          Who can see anonymous reports?
-                        </span>
-                        <br />
-                        Only Admins, Managers, and Investigators in this
-                        organization.
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                {/* Troubleshooting */}
-                <Card id="troubleshooting" className="scroll-mt-24">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <AlertCircle className="h-5 w-5 text-primary" />
-                      Troubleshooting
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3 text-sm text-muted-foreground">
-                    <ul className="list-disc list-inside space-y-1">
-                      <li>
-                        If staff cannot log in, confirm their account is active
-                        in <strong>Users</strong> and that they are using the{" "}
-                        <strong>{subdomain}</strong> tenant URL.
-                      </li>
-                      <li>
-                        If reports or analytics look incorrect, verify that
-                        filters (date range, status) are set as expected.
-                      </li>
-                    </ul>
-                  </CardContent>
-                </Card>
-
-                {/* Downloads & Templates / Policies */}
-                <Card id="downloads" className="scroll-mt-24">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <FileText className="h-5 w-5 text-primary" />
-                      Downloads & Templates
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3 text-sm text-muted-foreground">
-                    <p>
-                      Store your internal policies, investigation checklists, or
-                      training PDFs in a shared location for your team. For
-                      now, this section documents which resources should be
-                      available; uploads can be handled via your preferred file
-                      system.
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Card id="policies" className="scroll-mt-24">
-                  <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                      <Lock className="h-5 w-5 text-primary" />
-                      Organization Policies
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-3 text-sm text-muted-foreground">
-                    <p>
-                      Link your internal Code of Conduct, Anti‑fraud policy,
-                      and Investigation SOP here so investigators and managers
-                      always know which standard to follow when handling cases.
-                    </p>
-                  </CardContent>
-                </Card>
-
-                <Separator className="my-4" />
-                <p className="text-[11px] text-muted-foreground">
-                  Need a change in this documentation? Contact your WhisTrust
-                  implementation partner to update org-level guidance for{" "}
-                  {orgName}.
+        <div className="flex-1 overflow-auto">
+          <div className="container mx-auto px-4 py-6">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div>
+                <h1 className="text-3xl font-bold tracking-tight">
+                  {organization?.name} Documentation
+                </h1>
+                <p className="text-muted-foreground mt-1">
+                  Everything you need to know about using the compliance platform
                 </p>
               </div>
+              <Badge variant="outline" className="mt-1">
+                <FileText className="h-3 w-3 mr-1" />
+                {sections.length} Sections
+              </Badge>
+            </div>
+
+            {/* Search */}
+            <div className="relative max-w-md mb-8">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search documentation..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+
+            {/* Two-column Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
+          {/* Sidebar Navigation */}
+          <aside className="hidden lg:block">
+            <div className="sticky top-24 space-y-1">
+              <div className="px-3 py-2 mb-4">
+                <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                  Contents
+                </h2>
+              </div>
+              <nav className="space-y-1">
+                {filteredSections.map((section) => {
+                  const Icon = section.icon;
+                  return (
+                    <a
+                      key={section.id}
+                      href={`#${section.id}`}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-colors hover:bg-muted ${section.color}`}
+                    >
+                      <Icon className="h-4 w-4 flex-shrink-0" />
+                      <span className="flex-1 font-medium">{section.title}</span>
+                    </a>
+                  );
+                })}
+              </nav>
+
+              {/* Quick Links Card */}
+              <Card className="mt-8 border-primary/20">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <Shield className="h-4 w-4 text-primary" />
+                    Quick Actions
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <a
+                    href="/org/demo/report"
+                    className="flex items-center gap-2 p-2 rounded text-sm hover:bg-muted transition-colors"
+                  >
+                    <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span>Submit Report</span>
+                  </a>
+                  <a
+                    href="/org/demo/track"
+                    className="flex items-center gap-2 p-2 rounded text-sm hover:bg-muted transition-colors"
+                  >
+                    <Search className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span>Track Case</span>
+                  </a>
+                  <a
+                    href="/org/demo/dashboard"
+                    className="flex items-center gap-2 p-2 rounded text-sm hover:bg-muted transition-colors"
+                  >
+                    <Users className="h-3.5 w-3.5 text-muted-foreground" />
+                    <span>Dashboard</span>
+                  </a>
+                </CardContent>
+              </Card>
+            </div>
+          </aside>
+
+          {/* Main Content */}
+          <div className="space-y-8">
+            {/* Mobile Navigation (visible on small screens) */}
+            <Card className="mb-8 lg:hidden border-primary/20 bg-primary/5">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Shield className="h-5 w-5 text-primary" />
+                  Quick Navigation
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-3">
+                  {filteredSections.slice(0, 4).map((section) => {
+                    const Icon = section.icon;
+                    return (
+                      <a
+                        key={section.id}
+                        href={`#${section.id}`}
+                        className="flex items-center gap-2 p-3 rounded-lg border bg-background hover:bg-muted transition-colors"
+                      >
+                        <Icon className={`h-4 w-4 ${section.color}`} />
+                        <span className="text-sm font-medium truncate">{section.title}</span>
+                      </a>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Documentation Sections */}
+            <div className="space-y-8">
+              {filteredSections.map((section, index) => {
+                const Icon = section.icon;
+                return (
+                  <Card key={section.id} id={section.id} className="scroll-mt-24">
+                    <CardHeader>
+                      <div className="flex items-start gap-4">
+                        <div className={`p-3 rounded-lg bg-muted ${section.color}`}>
+                          <Icon className="h-6 w-6" />
+                        </div>
+                        <div className="flex-1">
+                          <CardTitle className="text-2xl">{section.title}</CardTitle>
+                          <CardDescription className="text-base mt-1">
+                            {section.description}
+                          </CardDescription>
+                        </div>
+                        <Badge variant="outline" className="ml-auto">
+                          {String(index + 1).padStart(2, "0")}
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      {section.content.map((contentBlock, idx) => (
+                        <div key={idx}>
+                          {idx > 0 && <Separator className="my-6" />}
+                          <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                            <CheckCircle className={`h-4 w-4 ${section.color}`} />
+                            {contentBlock.subtitle}
+                          </h3>
+                          <ul className="space-y-2.5">
+                            {contentBlock.items.map((item, itemIdx) => (
+                              <li key={itemIdx} className="flex gap-3 text-muted-foreground">
+                                <span className="text-primary mt-1.5 text-xs">●</span>
+                                <span className="flex-1 leading-relaxed">{item}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+
+            {filteredSections.length === 0 && (
+              <Alert>
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription>
+                  No documentation found matching &quot;{searchQuery}&quot;. Try a different search term.
+                </AlertDescription>
+              </Alert>
+            )}
+
+              {/* Footer */}
+              <Card className="mt-12 border-muted">
+                <CardContent className="pt-6">
+                  <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div className="text-center md:text-left">
+                      <p className="font-medium">Need More Help?</p>
+                      <p className="text-sm text-muted-foreground">
+                        Contact your organization administrator for additional support
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Shield className="h-4 w-4" />
+                      <span>Powered by WhisTrust</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
-        </main>
+        </div>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );
 }
-
-
