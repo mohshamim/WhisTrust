@@ -328,7 +328,7 @@ export default function DocumentationPage() {
 
   if (showWithSidebar) {
     return (
-      <SidebarProvider>
+      <SidebarProvider className="h-screen overflow-hidden">
         <ClientSidebar
           user={{
             name: admin.full_name || admin.name || admin.email.split("@")[0],
