@@ -211,7 +211,7 @@ export default function AnalyticsPage() {
         user={{
           name: user.full_name || user.email,
           email: user.email,
-          avatar: user.avatar_url || "",
+          avatar: getAvatarUrl({ avatar_url: user.avatar_url, email: user.email }),
         }}
         organization={{
           name: organization.name,

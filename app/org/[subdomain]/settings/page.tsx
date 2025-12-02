@@ -30,6 +30,9 @@ import {
   CheckCircle2,
   Key,
   Globe,
+  Upload,
+  Trash2,
+  User as UserIcon,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -47,6 +50,8 @@ import {
   ColorPickerSelection,
 } from "@/components/ui/shadcn-io/color-picker";
 import { UsageBanner } from "@/components/usage-banner";
+import { uploadAvatar, deleteAvatar, getAvatarUrl } from "@/lib/services/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 export default function ClientSettingsPage() {
   const params = useParams();
@@ -99,6 +104,9 @@ export default function ClientSettingsPage() {
   const [logoDarkFile, setLogoDarkFile] = useState<File | null>(null);
   const [emailLogoFile, setEmailLogoFile] = useState<File | null>(null);
   const [faviconFile, setFaviconFile] = useState<File | null>(null);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
 
   // Validation state
   const [validationErrors, setValidationErrors] = useState<{
@@ -140,6 +148,72 @@ export default function ClientSettingsPage() {
       checkAuth();
     }
   }, [subdomain]);
+
+  const handleAvatarUpload = async () => {
+    if (!avatarFile || !user?.id) return;
+
+    setUploadingAvatar(true);
+    try {
+      const result = await uploadAvatar(avatarFile, user.id);
+      
+      if (result.success) {
+        toast.success("Avatar uploaded successfully");
+        setAvatarFile(null);
+        setAvatarPreview(null);
+        
+        // Refresh user data
+        const { user: updatedUser } = await getCurrentClientAdmin();
+        if (updatedUser) {
+          setUser(updatedUser);
+        }
+      } else {
+        toast.error(result.error || "Failed to upload avatar");
+      }
+    } catch (error) {
+      toast.error("An error occurred while uploading avatar");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleAvatarDelete = async () => {
+    if (!user?.id) return;
+
+    setUploadingAvatar(true);
+    try {
+      const result = await deleteAvatar(user.id);
+      
+      if (result.success) {
+        toast.success("Avatar removed successfully");
+        
+        // Refresh user data
+        const { user: updatedUser } = await getCurrentClientAdmin();
+        if (updatedUser) {
+          setUser(updatedUser);
+        }
+      } else {
+        toast.error(result.error || "Failed to remove avatar");
+      }
+    } catch (error) {
+      toast.error("An error occurred while removing avatar");
+    } finally {
+      setUploadingAvatar(false);
+    }
+  };
+
+  const handleAvatarFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setAvatarFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const checkAuth = async () => {
     try {
@@ -267,7 +341,7 @@ export default function ClientSettingsPage() {
         user={{
           name: user.full_name || 'User',
           email: user.email,
-          avatar: user.avatar_url || '/avatars/default.jpg',
+          avatar: getAvatarUrl({ avatar_url: user.avatar_url, email: user.email }),
         }}
         organization={{
           name: organization.name,
@@ -292,6 +366,115 @@ export default function ClientSettingsPage() {
         <div className="flex flex-1 flex-col gap-4 p-4">
           <div className="max-w-4xl space-y-6">
             <UsageBanner organization={organization} />
+            
+            {/* Profile Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserIcon className="h-5 w-5" />
+                  Your Profile
+                </CardTitle>
+                <CardDescription>Manage your profile picture and personal information</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Avatar Upload */}
+                <div className="flex items-start gap-6">
+                  <div className="flex flex-col items-center gap-3">
+                    <Avatar className="h-24 w-24 border-2 border-primary/20">
+                      <AvatarImage 
+                        src={avatarPreview || (user?.avatar_url) || getAvatarUrl({ avatar_url: user?.avatar_url, email: user?.email || '' })} 
+                        alt={user?.full_name || user?.email || 'User'} 
+                      />
+                      <AvatarFallback className="text-2xl">
+                        {(user?.full_name || user?.email || 'U')[0].toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <p className="text-xs text-muted-foreground text-center max-w-[120px]">
+                      JPG, PNG, WebP, GIF<br/>Max 5MB
+                    </p>
+                  </div>
+                  
+                  <div className="flex-1 space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="avatar-upload">Profile Picture</Label>
+                      <div className="flex gap-2">
+                        <Input
+                          id="avatar-upload"
+                          type="file"
+                          accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                          onChange={handleAvatarFileChange}
+                          disabled={uploadingAvatar}
+                          className="flex-1"
+                        />
+                        {avatarFile && (
+                          <Button
+                            onClick={handleAvatarUpload}
+                            disabled={uploadingAvatar}
+                            className="gap-2"
+                          >
+                            {uploadingAvatar ? (
+                              <>
+                                <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                Uploading...
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="h-4 w-4" />
+                                Upload
+                              </>
+                            )}
+                          </Button>
+                        )}
+                      </div>
+                      {avatarPreview && (
+                        <p className="text-sm text-muted-foreground">
+                          Preview ready - click Upload to save
+                        </p>
+                      )}
+                    </div>
+
+                    {user?.avatar_url && (
+                      <Button
+                        variant="outline"
+                        onClick={handleAvatarDelete}
+                        disabled={uploadingAvatar}
+                        className="gap-2"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Remove Avatar
+                      </Button>
+                    )}
+
+                    <div className="space-y-2">
+                      <Label htmlFor="full_name">Full Name</Label>
+                      <Input
+                        id="full_name"
+                        value={user?.full_name || ''}
+                        disabled
+                        className="bg-muted"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Contact your administrator to update your name
+                      </p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        value={user?.email || ''}
+                        disabled
+                        className="bg-muted"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Email cannot be changed after account creation
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Branding */}
             <Card>
               <CardHeader>

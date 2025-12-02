@@ -39,6 +39,7 @@ import { OrgAssistantButton } from "@/components/org-assistant-button";
 import { DemoModeBanner } from "@/components/demo-mode-banner";
 import type { LucideIcon } from "lucide-react";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
+import { getAvatarUrl } from "@/lib/services/avatar";
 
 type TimeRange = "7d" | "30d" | "90d" | "all";
 
@@ -369,7 +370,7 @@ export default function ClientDashboardPage() {
         user={{
           name: user.full_name || "User",
           email: user.email,
-          avatar: user.avatar_url || "/avatars/default.jpg",
+          avatar: getAvatarUrl({ avatar_url: user.avatar_url, email: user.email }),
         }}
         organization={{
           name: organization.name,

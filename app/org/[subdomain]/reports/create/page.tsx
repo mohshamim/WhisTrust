@@ -9,6 +9,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
+import { getAvatarUrl } from "@/lib/services/avatar";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -186,7 +187,7 @@ export default function CreateCasePage() {
           user={{
             name: user.full_name || user.email,
             email: user.email,
-            avatar: user.avatar_url || "",
+            avatar: getAvatarUrl({ avatar_url: user.avatar_url, email: user.email }),
           }}
           organization={{
             name: organization.name,
@@ -259,7 +260,7 @@ export default function CreateCasePage() {
         user={{
           name: user.full_name || user.email,
           email: user.email,
-          avatar: user.avatar_url || "",
+          avatar: getAvatarUrl({ avatar_url: user.avatar_url, email: user.email }),
         }}
         organization={{
           name: organization.name,

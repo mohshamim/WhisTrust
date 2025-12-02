@@ -57,6 +57,7 @@ import {
 import { OrgAssistantButton } from "@/components/org-assistant-button";
 import { HelpTooltip } from "@/components/help-tooltip";
 import { DemoModeBanner } from "@/components/demo-mode-banner";
+import { getAvatarUrl } from "@/lib/services/avatar";
 import {
   exportReportsPDF,
   exportReportsExcelProtected,
@@ -788,7 +789,7 @@ export default function ClientReportsPage() {
         user={{
           name: user.full_name || 'User',
           email: user.email,
-          avatar: user.avatar_url || '/avatars/default.jpg',
+          avatar: getAvatarUrl({ avatar_url: user.avatar_url, email: user.email }),
         }}
         organization={{
           name: organization.name,

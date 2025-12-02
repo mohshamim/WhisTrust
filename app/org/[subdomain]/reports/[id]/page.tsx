@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getCurrentClientAdmin } from "@/lib/services/client-auth";
 import { ClientSidebar } from "@/components/client-sidebar";
+import { getAvatarUrl } from "@/lib/services/avatar";
 import {
   SidebarInset,
   SidebarProvider,
@@ -217,7 +218,7 @@ export default function ReportDetailsPage() {
         user={{
           name: user.full_name || 'User',
           email: user.email,
-          avatar: user.avatar_url || '/avatars/default.jpg',
+          avatar: getAvatarUrl({ avatar_url: user.avatar_url, email: user.email }),
         }}
         organization={{
           name: organization.name,

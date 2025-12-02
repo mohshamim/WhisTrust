@@ -12,6 +12,7 @@ import { getOrganizationBySubdomain, getCurrentClientAdmin } from "@/lib/service
 import { ClientSidebar } from "@/components/client-sidebar";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { getAvatarUrl } from "@/lib/services/avatar";
 
 interface DocSection {
   id: string;
@@ -330,9 +331,9 @@ export default function DocumentationPage() {
       <SidebarProvider>
         <ClientSidebar
           user={{
-            name: admin.name || admin.email.split("@")[0],
+            name: admin.full_name || admin.name || admin.email.split("@")[0],
             email: admin.email,
-            avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${admin.email}`,
+            avatar: getAvatarUrl({ avatar_url: admin.avatar_url, email: admin.email }),
           }}
           organization={{
             name: organization.name,
