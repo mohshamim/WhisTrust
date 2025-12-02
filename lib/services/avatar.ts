@@ -19,6 +19,8 @@ export const AVATAR_STYLES = [
   { id: 'man-2', name: 'Manager', description: 'Management style', image: '/avatar/man (2).png' },
   { id: 'man-3', name: 'Analyst', description: 'Technical style', image: '/avatar/man (3).png' },
   { id: 'boy', name: 'Young Professional', description: 'Modern professional', image: '/avatar/boy.png' },
+  { id: 'arab-man', name: 'Arab Professional', description: 'Middle Eastern professional', image: '/avatar/arab-man.png' },
+  { id: 'arab-man-1', name: 'Arab Executive', description: 'Traditional Arab style', image: '/avatar/arab-man (1).png' },
   { id: 'woman', name: 'Professional Woman', description: 'Business professional', image: '/avatar/woman.png' },
   { id: 'woman-1', name: 'Executive Woman', description: 'Leadership style', image: '/avatar/woman (1).png' },
   { id: 'moslem-woman', name: 'Modest Professional', description: 'Professional with headscarf', image: '/avatar/moslem-woman.png' },
