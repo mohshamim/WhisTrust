@@ -21,6 +21,8 @@ export interface AuditLog {
   // Joined from admin_profiles
   user_name?: string;
   user_email?: string;
+  user_avatar_url?: string | null;
+  user_avatar_style?: string | null;
 }
 
 export interface AuditLogFilters {
@@ -49,7 +51,9 @@ export async function getAuditLogs(
         *,
         admin_profiles!audit_logs_user_id_fkey (
           full_name,
-          email
+          email,
+          avatar_url,
+          avatar_style
         )
       `
       )
@@ -86,6 +90,8 @@ export async function getAuditLogs(
         ...log,
         user_name: log.admin_profiles?.full_name || "System",
         user_email: log.admin_profiles?.email || null,
+        user_avatar_url: log.admin_profiles?.avatar_url || null,
+        user_avatar_style: log.admin_profiles?.avatar_style || null,
       })) || [];
 
     // Filter by search term if provided

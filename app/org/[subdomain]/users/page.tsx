@@ -37,7 +37,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Dialog,
@@ -508,6 +508,10 @@ export default function UsersPage() {
                             <TableCell>
                               <div className="flex items-center gap-3">
                                 <Avatar className="h-10 w-10">
+                                  <AvatarImage 
+                                    src={getAvatarUrl({ avatar_url: u.avatar_url, email: u.email, avatar_style: u.avatar_style })} 
+                                    alt={u.full_name} 
+                                  />
                                   <AvatarFallback>
                                     {u.full_name.substring(0, 2).toUpperCase()}
                                   </AvatarFallback>

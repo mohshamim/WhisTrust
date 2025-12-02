@@ -36,7 +36,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Sheet,
@@ -451,6 +451,10 @@ export default function AuditLogsPage() {
                               <TableCell>
                                 <div className="flex items-center gap-2">
                                   <Avatar className="h-8 w-8">
+                                    <AvatarImage 
+                                      src={getAvatarUrl({ avatar_url: log.user_avatar_url, email: log.user_email || '', avatar_style: log.user_avatar_style })} 
+                                      alt={log.user_name || 'User'} 
+                                    />
                                     <AvatarFallback className="text-xs">
                                       {log.user_name?.substring(0, 2).toUpperCase() || "SY"}
                                     </AvatarFallback>
