@@ -1,48 +1,38 @@
 -- Migration: Add avatar_style column to admin_profiles
--- Allow users to save their preferred Dicebear avatar style
+-- Allow users to save their preferred avatar style from local professional images
 
--- Add avatar_style column (nullable, defaults to 'avataaars')
+-- Add avatar_style column (nullable, defaults to 'profile')
 ALTER TABLE admin_profiles 
 ADD COLUMN IF NOT EXISTS avatar_style TEXT;
 
--- Add a check constraint for valid avatar styles
+-- Add a check constraint for valid avatar styles (updated for local avatars)
+ALTER TABLE admin_profiles
+DROP CONSTRAINT IF EXISTS valid_avatar_style;
+
 ALTER TABLE admin_profiles
 ADD CONSTRAINT valid_avatar_style 
 CHECK (avatar_style IS NULL OR avatar_style IN (
-  'notionists',
-  'avataaars',
-  'lorelei',
-  'big-smile',
-  'personas',
-  'adventurer',
-  'initials',
-  'shapes'
+  'profile',
+  'man',
+  'man-1',
+  'man-2',
+  'man-3',
+  'boy',
+  'arab-man',
+  'arab-man-1',
+  'woman',
+  'woman-1',
+  'moslem-woman',
+  'arab'
 ));
 
 -- Set default avatar style for existing users without one
 UPDATE admin_profiles 
-SET avatar_style = 'notionists'
+SET avatar_style = 'profile'
 WHERE avatar_style IS NULL 
-  AND (avatar_url IS NULL OR avatar_url LIKE '%dicebear.com%');
+  OR avatar_style NOT IN ('profile', 'man', 'man-1', 'man-2', 'man-3', 'boy', 'arab-man', 'arab-man-1', 'woman', 'woman-1', 'moslem-woman', 'arab');
 
--- Create a function to set default avatar on user creation
-CREATE OR REPLACE FUNCTION set_default_avatar()
-RETURNS TRIGGER AS $$
-BEGIN
-  -- If no avatar_url provided, generate default Dicebear avatar (Professional style)
-  IF NEW.avatar_url IS NULL THEN
-    NEW.avatar_style := COALESCE(NEW.avatar_style, 'notionists');
-    NEW.avatar_url := 'https://api.dicebear.com/7.x/' || NEW.avatar_style || '/svg?seed=' || encode(NEW.email::bytea, 'escape');
-  END IF;
-  
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
--- Create trigger to auto-assign default avatar on insert
+-- Remove old trigger and function (no longer needed as we use local images)
 DROP TRIGGER IF EXISTS set_default_avatar_trigger ON admin_profiles;
-CREATE TRIGGER set_default_avatar_trigger
-  BEFORE INSERT ON admin_profiles
-  FOR EACH ROW
-  EXECUTE FUNCTION set_default_avatar();
+DROP FUNCTION IF EXISTS set_default_avatar();
 
