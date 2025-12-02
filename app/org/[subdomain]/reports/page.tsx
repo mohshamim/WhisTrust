@@ -1437,7 +1437,7 @@ export default function ClientReportsPage() {
 
               {/* Bottom Status Update Bar */}
               <div className="border-t p-6 sticky bottom-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-[0_-4px_12px_hsl(0_0%_0%_/0.06)]">
-                <div className="flex items-center gap-3 justify-center">
+                <div className="flex items-center gap-3">
                   {permissions?.canEditStatus && (
                     <>
                       <Select
@@ -1446,7 +1446,7 @@ export default function ClientReportsPage() {
                           setEditData({ ...editData, status: value })
                         }
                       >
-                        <SelectTrigger className="w-[220px] h-12 rounded-lg bg-card border-2 border-border px-4 text-sm shadow-sm hover:border-primary/60 focus-visible:ring-4 focus-visible:ring-ring/30 transition-all">
+                        <SelectTrigger className="flex-1 h-12 rounded-lg bg-card border-2 border-border px-4 text-sm shadow-sm hover:border-primary/60 focus-visible:ring-4 focus-visible:ring-ring/30 transition-all">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
