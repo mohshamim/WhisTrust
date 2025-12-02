@@ -35,7 +35,6 @@ import {
   ArrowUpRight,
   Loader2,
 } from "lucide-react";
-import { OrgAssistantButton } from "@/components/org-assistant-button";
 import { DemoModeBanner } from "@/components/demo-mode-banner";
 import type { LucideIcon } from "lucide-react";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
@@ -965,12 +964,6 @@ export default function ClientDashboardPage() {
         </div>
         </div>
         </div>
-        {organization?.id && (
-          <OrgAssistantButton
-            organizationId={organization.id}
-            subdomain={subdomain}
-          />
-        )}
       </SidebarInset>
     </SidebarProvider>
   );

@@ -54,7 +54,6 @@ import {
   Calendar,
   User,
 } from "lucide-react";
-import { OrgAssistantButton } from "@/components/org-assistant-button";
 import { HelpTooltip } from "@/components/help-tooltip";
 import { DemoModeBanner } from "@/components/demo-mode-banner";
 import { getAvatarUrl } from "@/lib/services/avatar";
@@ -1066,12 +1065,6 @@ export default function ClientReportsPage() {
         </div>
         </div>
         </div>
-        {organization?.id && (
-          <OrgAssistantButton
-            organizationId={organization.id}
-            subdomain={subdomain}
-          />
-        )}
       </SidebarInset>
 
       {/* Case Details Drawer */}
