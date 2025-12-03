@@ -66,6 +66,7 @@ interface AttachmentWithCase {
     suggested_category: string;
     status: string;
     created_at: string;
+    extracted_text?: string;
   } | null;
 }
 
