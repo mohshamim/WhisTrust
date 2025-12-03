@@ -320,7 +320,7 @@ export default function AIPoweredSectionPage() {
                       <div className="p-2 bg-muted rounded-lg">
                         <Icon className="h-5 w-5 text-muted-foreground" />
                       </div>
-                      <Badge variant="outline" className="text-xs">
+                      <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 text-xs">
                         {feature.estimatedRelease}
                       </Badge>
                     </div>
@@ -334,12 +334,6 @@ export default function AIPoweredSectionPage() {
                       Coming Soon
                     </Button>
                   </CardContent>
-                  {/* Coming Soon Overlay */}
-                  <div className="absolute top-2 right-2">
-                    <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
-                      Planned
-                    </Badge>
-                  </div>
                 </Card>
               );
             })}
