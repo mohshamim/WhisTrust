@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
-import { createClient } from "@/lib/supabase/client";
+import { createClient } from "@supabase/supabase-js";
 
 // Initialize Resend only if API key is available
 const resend = process.env.RESEND_API_KEY 
@@ -30,7 +30,10 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Save to Supabase database
-    const supabase = createClient();
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
     const { data: submission, error: dbError } = await supabase
       .from("contact_submissions")
       .insert({
