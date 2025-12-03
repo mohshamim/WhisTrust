@@ -78,7 +78,7 @@ export default function AIPoweredSectionPage() {
       icon: FileText,
       status: "active",
       usageCount: stats.todayAnalyses,
-      href: `/org/${subdomain}/reports`,
+      href: `/org/${subdomain}/ai-powered-section/attachment-analyzer`,
       features: [
         "Extract text from PDFs and images",
         "Detect risk levels (Low to Critical)",
