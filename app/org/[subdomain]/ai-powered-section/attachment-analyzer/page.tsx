@@ -48,7 +48,6 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { AIAttachmentAnalysis } from "@/components/ai-attachment-analysis";
 
 interface AttachmentWithCase {
   id: string;
@@ -618,17 +617,138 @@ export default function AttachmentAnalyzerPage() {
               {selectedAttachment?.file_name} • {selectedAttachment?.case_number}
             </DialogDescription>
           </DialogHeader>
+          
           {selectedAttachment && selectedAttachment.ai_summary && (
-            <AIAttachmentAnalysis
-              attachmentId={selectedAttachment.id}
-              organizationId={organization.id}
-              userId={user.id}
-              fileName={selectedAttachment.file_name}
-              existingAnalysis={selectedAttachment.ai_summary as any}
-              onAnalysisComplete={async () => {
-                await loadAttachments(organization.id);
-              }}
-            />
+            <div className="space-y-6 mt-4">
+              {/* File Info */}
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Case Number</p>
+                    <p className="font-semibold">{selectedAttachment.case_number}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">File Name</p>
+                    <p className="font-semibold truncate">{selectedAttachment.file_name}</p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Analyzed</p>
+                    <p className="font-semibold">
+                      {new Date(selectedAttachment.ai_summary.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Powered by</p>
+                    <p className="font-semibold">Gemini AI</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Risk Level and Category */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">RISK LEVEL</p>
+                  <Badge
+                    className={`
+                      ${selectedAttachment.ai_summary.risk_level === "critical" ? "bg-red-100 text-red-800 border-red-300" : ""}
+                      ${selectedAttachment.ai_summary.risk_level === "high" ? "bg-orange-100 text-orange-800 border-orange-300" : ""}
+                      ${selectedAttachment.ai_summary.risk_level === "medium" ? "bg-yellow-100 text-yellow-800 border-yellow-300" : ""}
+                      ${selectedAttachment.ai_summary.risk_level === "low" ? "bg-green-100 text-green-800 border-green-300" : ""}
+                      border flex items-center gap-1 w-fit text-base px-3 py-1
+                    `}
+                  >
+                    <AlertTriangle className="h-4 w-4" />
+                    <span className="capitalize">{selectedAttachment.ai_summary.risk_level}</span>
+                  </Badge>
+                </div>
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-muted-foreground">SUGGESTED CATEGORY</p>
+                  <Badge variant="outline" className="capitalize w-fit text-base px-3 py-1">
+                    {selectedAttachment.ai_summary.suggested_category?.replace('_', ' ')}
+                  </Badge>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Summary */}
+              <div className="space-y-2">
+                <h3 className="text-lg font-semibold">Summary</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">
+                  {selectedAttachment.ai_summary.summary}
+                </p>
+              </div>
+
+              {/* Key Findings */}
+              {(selectedAttachment.ai_summary as any).findings && (selectedAttachment.ai_summary as any).findings.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold">Key Findings</h3>
+                  <ul className="space-y-2">
+                    {(selectedAttachment.ai_summary as any).findings.map((finding: string, index: number) => (
+                      <li key={index} className="flex items-start gap-2 text-sm">
+                        <span className="text-primary mt-1">•</span>
+                        <span className="text-muted-foreground">{finding}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Detected Entities */}
+              {(selectedAttachment.ai_summary as any).entities && (selectedAttachment.ai_summary as any).entities.length > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold">Detected Entities</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {(selectedAttachment.ai_summary as any).entities.map((entity: any, index: number) => (
+                      <Badge 
+                        key={index} 
+                        variant="secondary"
+                        className="flex items-center gap-1"
+                      >
+                        <span className="capitalize">{entity.type}:</span>
+                        <span className="font-semibold">{entity.value}</span>
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Extracted Text */}
+              {selectedAttachment.ai_summary.extracted_text && (
+                <div className="space-y-2">
+                  <h3 className="text-lg font-semibold">Extracted Text</h3>
+                  <div className="p-4 bg-muted/50 rounded-lg border max-h-64 overflow-y-auto">
+                    <pre className="text-xs font-mono whitespace-pre-wrap break-words">
+                      {selectedAttachment.ai_summary.extracted_text}
+                    </pre>
+                  </div>
+                </div>
+              )}
+
+              {/* Metadata */}
+              <div className="pt-4 border-t">
+                <div className="grid grid-cols-3 gap-4 text-sm">
+                  <div>
+                    <p className="text-muted-foreground">Confidence Score</p>
+                    <p className="font-semibold text-lg">
+                      {((selectedAttachment.ai_summary as any).confidence_score * 100).toFixed(0)}%
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Processing Time</p>
+                    <p className="font-semibold text-lg">
+                      {(selectedAttachment.ai_summary as any).processing_time_ms}ms
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-muted-foreground">Status</p>
+                    <p className="font-semibold text-lg capitalize">
+                      {selectedAttachment.ai_summary.status}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
           )}
         </DialogContent>
       </Dialog>
