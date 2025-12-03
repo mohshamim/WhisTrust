@@ -566,6 +566,7 @@ export default function AttachmentAnalyzerPage() {
                                   variant="ghost"
                                   onClick={() => handleAnalyze(attachment)}
                                   disabled={analyzingIds.has(attachment.id)}
+                                  title="Re-analyze this attachment with AI"
                                 >
                                   <RefreshCw
                                     className={`h-3 w-3 ${
