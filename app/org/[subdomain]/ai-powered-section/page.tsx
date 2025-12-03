@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,24 +19,56 @@ import {
   CheckCircle2,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { ClientSidebar } from "@/components/client-sidebar";
+import { NotificationsDropdown } from "@/components/notifications-dropdown";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
+import { getCurrentClientAdmin } from "@/lib/services/client-auth";
+import { getAvatarUrl } from "@/lib/services/avatar";
 
 export default function AIPoweredSectionPage() {
   const params = useParams();
+  const router = useRouter();
   const subdomain = params.subdomain as string;
   const [stats, setStats] = useState({
     totalAnalyses: 0,
     todayAnalyses: 0,
     avgProcessingTime: 0,
   });
+  const [user, setUser] = useState<any>(null);
+  const [organization, setOrganization] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Load AI usage stats (placeholder for now)
-    setStats({
-      totalAnalyses: 15,
-      todayAnalyses: 8,
-      avgProcessingTime: 4.5,
-    });
-  }, []);
+    const loadData = async () => {
+      try {
+        const { user: currentUser, organization: currentOrg } = await getCurrentClientAdmin(subdomain);
+        if (!currentUser || !currentOrg) {
+          router.push(`/org/${subdomain}/login`);
+          return;
+        }
+        setUser(currentUser);
+        setOrganization(currentOrg);
+
+        // Load AI usage stats (placeholder for now)
+        setStats({
+          totalAnalyses: 15,
+          todayAnalyses: 8,
+          avgProcessingTime: 4.5,
+        });
+      } catch (error) {
+        console.error("Failed to load data:", error);
+        router.push(`/org/${subdomain}/login`);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [subdomain, router]);
 
   const activeFeatures = [
     {
@@ -107,9 +139,48 @@ export default function AIPoweredSectionPage() {
     },
   ];
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-muted-foreground">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!user || !organization) {
+    return null;
+  }
+
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto py-8 px-4 max-w-7xl">
+    <SidebarProvider>
+      <ClientSidebar
+        user={{
+          name: user.full_name || user.email,
+          email: user.email,
+          avatar: getAvatarUrl({ avatar_url: user.avatar_url, email: user.email }),
+        }}
+        organization={{
+          name: organization.name,
+          subdomain: organization.subdomain,
+        }}
+        userRole={user.role || "admin"}
+      />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear border-b">
+          <div className="flex items-center gap-2 px-4 w-full justify-between">
+            <div className="flex items-center gap-2">
+              <SidebarTrigger className="-ml-1" />
+              <Separator orientation="vertical" className="mr-2 h-4" />
+            </div>
+            <NotificationsDropdown 
+              userId={user?.id || ""} 
+              organizationId={organization?.id || ""} 
+            />
+          </div>
+        </header>
+
+        <div className="flex flex-1 flex-col gap-4 p-4 md:p-8">
+          <div className="container mx-auto max-w-7xl">
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -295,8 +366,10 @@ export default function AIPoweredSectionPage() {
             </Button>
           </CardContent>
         </Card>
-      </div>
-    </div>
+          </div>
+        </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }
 
