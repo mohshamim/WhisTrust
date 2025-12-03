@@ -10,6 +10,7 @@ import {
   BarChart3,
   Users,
   History,
+  Sparkles,
 } from "lucide-react";
 
 import { NavMain } from "@/components/nav-main";
@@ -72,6 +73,13 @@ function buildNav(subdomain: string, role: string) {
       icon: BarChart3 
     });
   }
+
+  // AI Powered Section - available to all roles
+  nav.push({ 
+    title: "AI Powered Section", 
+    url: `${baseUrl}/ai-powered-section`, 
+    icon: Sparkles 
+  });
 
   if (role === 'admin') {
     nav.push({ 
