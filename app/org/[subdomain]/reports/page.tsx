@@ -53,9 +53,13 @@ import {
   Trash2,
   Calendar,
   User,
+  Copy,
+  Check,
 } from "lucide-react";
 import { HelpTooltip } from "@/components/help-tooltip";
 import { DemoModeBanner } from "@/components/demo-mode-banner";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { toast } from "sonner";
 import { getAvatarUrl } from "@/lib/services/avatar";
 import {
   exportReportsPDF,
@@ -108,6 +112,7 @@ export default function ClientReportsPage() {
   // Drawer state
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
   const [editData, setEditData] = useState({
     status: "",
     priority: "",
@@ -601,6 +606,19 @@ export default function ClientReportsPage() {
     }
   };
 
+  const copyTrackingCode = async () => {
+    if (selectedReport?.tracking_code) {
+      try {
+        await navigator.clipboard.writeText(selectedReport.tracking_code);
+        setIsCopied(true);
+        toast.success("Tracking code copied to clipboard!");
+        setTimeout(() => setIsCopied(false), 2000);
+      } catch (error) {
+        toast.error("Failed to copy tracking code");
+      }
+    }
+  };
+
   const handleDownload = async (attachment: any) => {
     try {
       const result = await downloadFile(attachment.file_path);
@@ -783,8 +801,9 @@ export default function ClientReportsPage() {
   }
 
   return (
-    <SidebarProvider>
-      <ClientSidebar
+    <TooltipProvider>
+      <SidebarProvider>
+        <ClientSidebar
         user={{
           name: user.full_name || 'User',
           email: user.email,
@@ -1065,7 +1084,6 @@ export default function ClientReportsPage() {
         </div>
         </div>
         </div>
-      </SidebarInset>
 
       {/* Case Details Drawer */}
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
@@ -1082,12 +1100,34 @@ export default function ClientReportsPage() {
                       <div className="p-2 bg-primary/10 rounded-lg ring-1 ring-primary/20">
                         <FileSearch className="h-6 w-6 text-primary" />
                       </div>
-                      Case Details
-                    </SheetTitle>
-                    <SheetDescription className="mt-2 text-base font-mono font-semibold">
+                    Case Details
+                  </SheetTitle>
+                  <SheetDescription className="mt-2 flex items-center gap-2">
+                    <span className="text-base font-mono font-semibold">
                       {selectedReport.tracking_code}
-                    </SheetDescription>
-                  </div>
+                    </span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0 hover:bg-muted"
+                          onClick={copyTrackingCode}
+                          aria-label="Copy tracking code"
+                        >
+                          {isCopied ? (
+                            <Check className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{isCopied ? "Copied!" : "Copy tracking code"}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </SheetDescription>
+                </div>
                   <div className="flex items-center gap-3">
                     {getStatusBadge(selectedReport.status)}
                     {selectedReport.is_anonymous && (
@@ -1475,7 +1515,9 @@ export default function ClientReportsPage() {
           )}
         </SheetContent>
       </Sheet>
-    </SidebarProvider>
+      </SidebarInset>
+      </SidebarProvider>
+    </TooltipProvider>
   );
 }
 

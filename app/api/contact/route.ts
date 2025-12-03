@@ -51,7 +51,24 @@ export async function POST(request: NextRequest) {
 
     if (dbError) {
       console.error("Database error:", dbError);
-      throw new Error("Failed to save submission to database");
+      console.error("Error code:", dbError.code);
+      console.error("Error details:", dbError.details);
+      console.error("Error hint:", dbError.hint);
+      
+      // Check if table doesn't exist
+      if (dbError.code === '42P01' || dbError.message?.includes('relation') || dbError.message?.includes('does not exist')) {
+        return NextResponse.json(
+          {
+            error: "Database not set up. Please run the contact_submissions migration.",
+            setup_required: true,
+            migration_file: "supabase/RUN_CONTACT_MIGRATION.sql",
+            details: dbError.message,
+          },
+          { status: 500 }
+        );
+      }
+      
+      throw new Error(`Failed to save submission: ${dbError.message}`);
     }
 
     // 2. Send email notification via Resend
@@ -204,10 +221,20 @@ Received: ${new Date().toLocaleString()}
     );
   } catch (error) {
     console.error("Contact form error:", error);
+    
+    // Provide more helpful error messages
+    let errorMessage = "Failed to process contact form";
+    let errorDetails = error instanceof Error ? error.message : "Unknown error";
+    
+    if (errorDetails.includes("migration")) {
+      errorMessage = "Database table not found. Please run the migration script.";
+    }
+    
     return NextResponse.json(
       {
-        error: "Failed to process contact form",
-        details: error instanceof Error ? error.message : "Unknown error",
+        error: errorMessage,
+        details: errorDetails,
+        hint: "Check if the contact_submissions table exists in Supabase",
       },
       { status: 500 }
     );

@@ -57,6 +57,8 @@ import {
   File,
   Download,
   X,
+  Copy,
+  Check,
 } from "lucide-react";
 import { PriorityBadge } from "@/components/ui/priority-badge";
 import { toast } from "sonner";
@@ -66,6 +68,7 @@ import { AdminNotifications } from "@/components/admin-notifications";
 import {
   Tooltip,
   TooltipContent,
+  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { AdminUser, ReportLabel } from "@/lib/types/database";
@@ -96,6 +99,8 @@ function CasesPageContent() {
   const [newMessage, setNewMessage] = useState("");
   const [attachments, setAttachments] = useState<any[]>([]);
   const [isSending, setIsSending] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+  const [isCaseNumberCopied, setIsCaseNumberCopied] = useState(false);
 
   useEffect(() => {
     loadCases();
@@ -220,6 +225,32 @@ function CasesPageContent() {
       console.error("Error loading cases:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const copyTrackingCode = async () => {
+    if (selectedCase?.tracking_code) {
+      try {
+        await navigator.clipboard.writeText(selectedCase.tracking_code);
+        setIsCopied(true);
+        toast.success("Tracking code copied to clipboard!");
+        setTimeout(() => setIsCopied(false), 2000);
+      } catch (error) {
+        toast.error("Failed to copy tracking code");
+      }
+    }
+  };
+
+  const copyCaseNumber = async () => {
+    if (selectedCase?.case_number) {
+      try {
+        await navigator.clipboard.writeText(selectedCase.case_number);
+        setIsCaseNumberCopied(true);
+        toast.success("Case number copied to clipboard!");
+        setTimeout(() => setIsCaseNumberCopied(false), 2000);
+      } catch (error) {
+        toast.error("Failed to copy case number");
+      }
     }
   };
 
@@ -534,9 +565,10 @@ function CasesPageContent() {
   };
 
   return (
-    <SidebarProvider>
-      <AdminSidebar />
-      <SidebarInset>
+    <TooltipProvider>
+      <SidebarProvider>
+        <AdminSidebar />
+        <SidebarInset>
         <header className="flex h-14 shrink-0 items-center gap-2 transition-[width,height] ease-linear border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex items-center gap-2 px-4 w-full">
             <SidebarTrigger className="-ml-1" />
@@ -727,8 +759,30 @@ function CasesPageContent() {
                     </div>
                     Case Details
                   </SheetTitle>
-                  <SheetDescription className="mt-2 text-base font-mono font-semibold">
-                    {selectedCase?.tracking_code}
+                  <SheetDescription className="mt-2 flex items-center gap-2">
+                    <span className="text-base font-mono font-semibold">
+                      {selectedCase?.tracking_code}
+                    </span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-7 w-7 p-0 hover:bg-muted"
+                          onClick={copyTrackingCode}
+                          aria-label="Copy tracking code"
+                        >
+                          {isCopied ? (
+                            <Check className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <Copy className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{isCopied ? "Copied!" : "Copy tracking code"}</p>
+                      </TooltipContent>
+                    </Tooltip>
                   </SheetDescription>
                 </div>
                 <div className="flex items-center gap-3">
@@ -1121,7 +1175,8 @@ function CasesPageContent() {
           </SheetContent>
         </Sheet>
       </SidebarInset>
-    </SidebarProvider>
+      </SidebarProvider>
+    </TooltipProvider>
   );
 }
 

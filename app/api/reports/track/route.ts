@@ -19,6 +19,8 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { subdomain, trackingCode } = body;
 
+    console.log("🔍 Track API called:", { subdomain, trackingCode });
+
     if (!subdomain || !trackingCode) {
       return NextResponse.json(
         { error: "Missing tracking code" },
@@ -35,9 +37,12 @@ export async function POST(request: NextRequest) {
       .eq("subdomain", subdomain)
       .single();
 
+    console.log("Organization query result:", { org, orgError });
+
     if (orgError || !org) {
+      console.error("Organization not found:", { subdomain, orgError });
       return NextResponse.json(
-        { error: "Organization not found" },
+        { error: "Organization not found", details: orgError?.message },
         { status: 404 }
       );
     }
