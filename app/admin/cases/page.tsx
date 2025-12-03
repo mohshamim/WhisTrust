@@ -566,9 +566,9 @@ function CasesPageContent() {
 
   return (
     <TooltipProvider>
-      <SidebarProvider>
-        <AdminSidebar />
-        <SidebarInset>
+    <SidebarProvider>
+      <AdminSidebar />
+      <SidebarInset>
         <header className="flex h-14 shrink-0 items-center gap-2 transition-[width,height] ease-linear border-b bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
           <div className="flex items-center gap-2 px-4 w-full">
             <SidebarTrigger className="-ml-1" />
@@ -761,7 +761,7 @@ function CasesPageContent() {
                   </SheetTitle>
                   <SheetDescription className="mt-2 flex items-center gap-2">
                     <span className="text-base font-mono font-semibold">
-                      {selectedCase?.tracking_code}
+                    {selectedCase?.tracking_code}
                     </span>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -841,25 +841,48 @@ function CasesPageContent() {
                       </p>
                     </div>
 
-                    {(selectedCase.reporter_name ||
-                      selectedCase.reporter_email) && (
-                      <div>
-                        <p className="text-sm font-medium text-muted-foreground mb-2">
-                          Reporter Information
-                        </p>
+                    {/* Reporter Information - Show if any contact info provided */}
+                    {(selectedCase.reporter_name || selectedCase.reporter_email || selectedCase.reporter_phone) && (
+                      <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+                        <div className="flex items-center gap-2 mb-3">
+                          <User className="h-4 w-4 text-blue-600" />
+                          <p className="text-sm font-semibold text-blue-900">
+                            Reporter Contact Information
+                          </p>
+                        </div>
                         <div className="space-y-2">
                           {selectedCase.reporter_name && (
-                            <p className="text-sm flex items-center gap-2">
-                              <User className="h-4 w-4" />
-                              {selectedCase.reporter_name}
-                            </p>
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-muted-foreground min-w-[60px]">Name:</span>
+                              <span className="font-medium">{selectedCase.reporter_name}</span>
+                            </div>
                           )}
                           {selectedCase.reporter_email && (
-                            <p className="text-sm">
-                              {selectedCase.reporter_email}
-                            </p>
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-muted-foreground min-w-[60px]">Email:</span>
+                              <a 
+                                href={`mailto:${selectedCase.reporter_email}`}
+                                className="font-medium text-primary hover:underline"
+                              >
+                                {selectedCase.reporter_email}
+                              </a>
+                            </div>
+                          )}
+                          {selectedCase.reporter_phone && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-muted-foreground min-w-[60px]">Phone:</span>
+                              <a 
+                                href={`tel:${selectedCase.reporter_phone}`}
+                                className="font-medium text-primary hover:underline"
+                              >
+                                {selectedCase.reporter_phone}
+                              </a>
+                            </div>
                           )}
                         </div>
+                        <p className="text-xs text-blue-700 italic mt-2">
+                          Reporter voluntarily provided this information
+                        </p>
                       </div>
                     )}
                   </CardContent>
@@ -1175,7 +1198,7 @@ function CasesPageContent() {
           </SheetContent>
         </Sheet>
       </SidebarInset>
-      </SidebarProvider>
+    </SidebarProvider>
     </TooltipProvider>
   );
 }

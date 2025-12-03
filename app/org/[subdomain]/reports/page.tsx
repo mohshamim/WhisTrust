@@ -77,7 +77,9 @@ interface Report {
   status: string;
   priority: string;
   is_anonymous: boolean;
+  reporter_name: string | null;
   reporter_email: string | null;
+  reporter_phone: string | null;
   created_at: string;
   updated_at: string;
   assigned_to: string | null;
@@ -802,8 +804,8 @@ export default function ClientReportsPage() {
 
   return (
     <TooltipProvider>
-      <SidebarProvider>
-        <ClientSidebar
+    <SidebarProvider>
+      <ClientSidebar
         user={{
           name: user.full_name || 'User',
           email: user.email,
@@ -1100,8 +1102,8 @@ export default function ClientReportsPage() {
                       <div className="p-2 bg-primary/10 rounded-lg ring-1 ring-primary/20">
                         <FileSearch className="h-6 w-6 text-primary" />
                       </div>
-                    Case Details
-                  </SheetTitle>
+                      Case Details
+                    </SheetTitle>
                   <SheetDescription className="mt-2 flex items-center gap-2">
                     <span className="text-base font-mono font-semibold">
                       {selectedReport.tracking_code}
@@ -1126,8 +1128,8 @@ export default function ClientReportsPage() {
                         <p>{isCopied ? "Copied!" : "Copy tracking code"}</p>
                       </TooltipContent>
                     </Tooltip>
-                  </SheetDescription>
-                </div>
+                    </SheetDescription>
+                  </div>
                   <div className="flex items-center gap-3">
                     {getStatusBadge(selectedReport.status)}
                     {selectedReport.is_anonymous && (
@@ -1193,10 +1195,48 @@ export default function ClientReportsPage() {
                       </p>
                     </div>
 
-                    {!selectedReport.is_anonymous && selectedReport.reporter_email && (
-                      <div className="p-3 rounded-lg bg-muted/50">
-                        <p className="text-sm font-medium text-muted-foreground mb-1">Reporter Email</p>
-                        <p className="font-semibold">{selectedReport.reporter_email}</p>
+                    {/* Reporter Information - Show if any contact info provided */}
+                    {(selectedReport.reporter_name || selectedReport.reporter_email || selectedReport.reporter_phone) && (
+                      <div className="space-y-3 p-4 rounded-lg bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800">
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-blue-600" />
+                          <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">
+                            Reporter Contact Information (Optional)
+                          </p>
+                        </div>
+                        <div className="grid gap-2">
+                          {selectedReport.reporter_name && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-muted-foreground min-w-[60px]">Name:</span>
+                              <span className="font-medium">{selectedReport.reporter_name}</span>
+                            </div>
+                          )}
+                          {selectedReport.reporter_email && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-muted-foreground min-w-[60px]">Email:</span>
+                              <a 
+                                href={`mailto:${selectedReport.reporter_email}`}
+                                className="font-medium text-primary hover:underline"
+                              >
+                                {selectedReport.reporter_email}
+                              </a>
+                            </div>
+                          )}
+                          {selectedReport.reporter_phone && (
+                            <div className="flex items-center gap-2 text-sm">
+                              <span className="text-muted-foreground min-w-[60px]">Phone:</span>
+                              <a 
+                                href={`tel:${selectedReport.reporter_phone}`}
+                                className="font-medium text-primary hover:underline"
+                              >
+                                {selectedReport.reporter_phone}
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-xs text-blue-700 dark:text-blue-300 italic">
+                          Reporter voluntarily provided this information for follow-up
+                        </p>
                       </div>
                     )}
                   </CardContent>
@@ -1516,7 +1556,7 @@ export default function ClientReportsPage() {
         </SheetContent>
       </Sheet>
       </SidebarInset>
-      </SidebarProvider>
+    </SidebarProvider>
     </TooltipProvider>
   );
 }

@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Shield, ArrowRight, Lock, Check, Copy, AlertCircle, FileUp, Mail, User } from "lucide-react";
+import { Shield, ArrowRight, Lock, Check, Copy, AlertCircle, FileUp, Mail, User, Sparkles } from "lucide-react";
 import { getOrganizationBySubdomain } from "@/lib/services/client-auth";
 import type { ClientOrganization } from "@/lib/services/client-auth";
 import { toast } from "sonner";
@@ -85,6 +85,82 @@ export default function AnonymousReportPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const fillSampleData = () => {
+    const scenarios = [
+      {
+        category: "fraud",
+        title: "Suspicious Invoice Approval Process",
+        description: "I have observed irregular patterns in the invoice approval process within the procurement department. Multiple invoices from the same vendor are being approved without proper review or competitive bidding. The amounts are consistently just below the threshold that would require additional oversight. This has been happening over the past 3 months, with total amounts exceeding $150,000. I believe this warrants investigation as it may indicate fraudulent activity or conflict of interest.",
+      },
+      {
+        category: "harassment",
+        title: "Repeated Workplace Harassment",
+        description: "Over the past two months, I have witnessed repeated instances of inappropriate behavior and verbal harassment directed at junior team members by a senior manager. The comments are often demeaning and create a hostile work environment. Multiple colleagues have expressed discomfort but fear retaliation. This behavior violates our company's code of conduct and creates a toxic atmosphere that affects team morale and productivity. The situation has escalated recently and needs immediate attention.",
+      },
+      {
+        category: "safety",
+        title: "Unsafe Working Conditions in Warehouse",
+        description: "Critical safety protocols are being ignored in the warehouse facility. Forklift operators are not wearing required safety gear, emergency exits are blocked by inventory, and fire extinguishers have expired inspection dates. Management has been notified multiple times but no corrective action has been taken. I'm concerned that these violations could lead to serious injuries or worse. OSHA regulations are clearly being violated and this needs urgent attention before an accident occurs.",
+      },
+      {
+        category: "ethical",
+        title: "Conflict of Interest - Vendor Relationship",
+        description: "A senior procurement officer has a personal relationship with the owner of a major supplier. This vendor consistently wins contracts despite higher prices and there is no competitive bidding process. The officer failed to disclose this relationship as required by company policy. Contract values total over $500,000 annually. This represents a clear conflict of interest and potential breach of fiduciary duty. The relationship should have been disclosed and the officer should have recused themselves from vendor selection.",
+      },
+      {
+        category: "data_breach",
+        title: "Customer Data Being Shared Inappropriately",
+        description: "I discovered that customer personal information, including email addresses and phone numbers, is being shared with third-party marketing companies without proper consent or data processing agreements. This appears to violate our privacy policy and potentially GDPR regulations. The data sharing has been ongoing for at least six months. Customers were not informed, and there's no opt-out mechanism. This could expose the company to significant legal and regulatory risks, as well as damage customer trust.",
+      },
+      {
+        category: "corruption",
+        title: "Expense Report Irregularities and Potential Bribery",
+        description: "Several executives are submitting expense reports with questionable charges that don't align with business purposes. These include luxury dinners with no business justification, personal travel expenses coded as business trips, and duplicate reimbursement claims. The pattern is consistent across multiple individuals over the past quarter. Total questionable expenses exceed $75,000. The approval process appears to be bypassed for senior staff, creating a double standard that undermines our expense policy.",
+      },
+      {
+        category: "theft",
+        title: "Inventory Discrepancies and Missing Assets",
+        description: "Significant inventory discrepancies have been noticed in the warehouse over the past two months. High-value items are going missing without proper documentation or approval. Security camera footage shows after-hours access by unauthorized personnel. The total value of missing inventory exceeds $50,000. Standard check-out procedures are not being followed, and inventory records are being altered to cover the losses. This appears to be systematic theft rather than simple accounting errors.",
+      },
+      {
+        category: "conflict",
+        title: "Manager Hiring Family Members",
+        description: "A department manager has hired three family members to the team over the past year without following proper recruitment procedures or disclosing the relationships. These hires did not go through the standard interview process and were not posted publicly. The family members receive preferential treatment including flexible schedules and higher pay grades compared to similarly qualified staff. This creates morale issues and represents a clear conflict of interest that violates our hiring policies.",
+      },
+    ];
+    
+    // Pick a random scenario
+    const randomScenario = scenarios[Math.floor(Math.random() * scenarios.length)];
+    
+    // 40% chance to include optional contact info (for testing)
+    const includeContact = Math.random() < 0.4;
+    
+    const sampleData = {
+      ...randomScenario,
+      file: null,
+      provideIdentity: includeContact,
+      name: includeContact ? "John Smith" : "",
+      email: includeContact ? "j.smith@example.com" : "",
+    };
+    
+    setFormData(sampleData);
+    setShowIdentity(includeContact);
+    
+    // Show which scenario was loaded
+    const categoryNames: Record<string, string> = {
+      fraud: "Fraud",
+      harassment: "Harassment",
+      safety: "Safety",
+      ethical: "Ethical Violations",
+      data_breach: "Data Privacy",
+      corruption: "Corruption",
+      theft: "Theft",
+      conflict: "Conflict of Interest",
+    };
+    
+    toast.success(`Filled with ${categoryNames[randomScenario.category]} scenario`);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -378,6 +454,22 @@ export default function AnonymousReportPage() {
                   )}
                 </AlertDescription>
               </Alert>
+            )}
+
+            {/* Demo: Fill Sample Data Button - Only show for demo org */}
+            {subdomain === 'demo' && (
+              <div className="mb-6">
+                <Button
+                  type="button"
+                  onClick={fillSampleData}
+                  variant="outline"
+                  className="w-full h-12 border-2 border-dashed border-primary/50 hover:border-primary hover:bg-primary/5 transition-all"
+                >
+                  <Sparkles className="h-4 w-4 mr-2 text-primary" />
+                  <span className="font-semibold">Fill with Sample Data</span>
+                  <span className="ml-2 text-xs text-muted-foreground">(Demo Only)</span>
+                </Button>
+              </div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-6">

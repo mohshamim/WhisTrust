@@ -188,7 +188,7 @@ Received: ${new Date().toLocaleString()}
 
     const { data: emailData, error: emailError } = await resend.emails.send({
       from: "WhisTrust Contact <onboarding@resend.dev>", // Change this to your verified domain
-      to: ["info@aisar.sa"],
+      to: ["info@aisar.sa", "codesquare01@gmail.com"],
       subject: emailSubject,
       html: emailHtml,
       text: emailText,
