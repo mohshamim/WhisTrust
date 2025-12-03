@@ -179,6 +179,7 @@ export default function AnonymousReportPage() {
           category: formData.category,
           title: formData.title,
           description: formData.description,
+          reporterName: formData.provideIdentity && formData.name ? formData.name : null,
           reporterEmail: formData.provideIdentity && formData.email ? formData.email : null,
         }),
       });

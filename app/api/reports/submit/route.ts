@@ -33,8 +33,18 @@ export async function POST(request: NextRequest) {
       category,
       title,
       description,
+      reporterName,
       reporterEmail,
     } = body;
+
+    console.log("📝 Report submission data:", { 
+      subdomain, 
+      category, 
+      reporterName, 
+      reporterEmail,
+      hasName: !!reporterName,
+      hasEmail: !!reporterEmail 
+    });
 
     // Validate required fields
     if (!subdomain || !category || !title || !description) {
@@ -93,10 +103,11 @@ export async function POST(request: NextRequest) {
         category,
         title,
         description,
+        reporter_name: reporterName || null,
         reporter_email: reporterEmail || null,
         status: "submitted",
         priority: "medium",
-        is_anonymous: !reporterEmail, // If email provided, not fully anonymous
+        is_anonymous: !reporterEmail && !reporterName, // If email or name provided, not fully anonymous
       })
       .select()
       .single();

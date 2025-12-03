@@ -60,6 +60,7 @@ import { HelpTooltip } from "@/components/help-tooltip";
 import { DemoModeBanner } from "@/components/demo-mode-banner";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
+import { AIAttachmentAnalysis } from "@/components/ai-attachment-analysis";
 import { getAvatarUrl } from "@/lib/services/avatar";
 import {
   exportReportsPDF,
@@ -589,6 +590,7 @@ export default function ClientReportsPage() {
       const { createMultiTenantClient } = await import("@/lib/supabase/multi-tenant-client");
       const supabase = createMultiTenantClient();
 
+      // First, load attachments
       const { data, error } = await supabase
         .from("report_attachments")
         .select("*")
@@ -600,7 +602,29 @@ export default function ClientReportsPage() {
         return;
       }
 
-      setAttachments(data || []);
+      // Try to load AI summaries (if table exists)
+      if (data && data.length > 0) {
+        try {
+          const { data: aiSummaries } = await supabase
+            .from("report_attachments_ai_summary")
+            .select("*")
+            .in("attachment_id", data.map(a => a.id));
+
+          // Attach AI summaries to attachments
+          const attachmentsWithAI = data.map(attachment => ({
+            ...attachment,
+            ai_summary: aiSummaries?.find(ai => ai.attachment_id === attachment.id) || null,
+          }));
+
+          setAttachments(attachmentsWithAI);
+        } catch (aiError) {
+          // AI table might not exist yet, that's okay
+          console.log("AI summaries not available (table may not exist yet)");
+          setAttachments(data);
+        }
+      } else {
+        setAttachments(data || []);
+      }
     } catch (error) {
       console.error("Load attachments error:", error);
     } finally {
@@ -623,23 +647,35 @@ export default function ClientReportsPage() {
 
   const handleDownload = async (attachment: any) => {
     try {
-      const result = await downloadFile(attachment.file_path);
-      if (result.success && result.data) {
-        // Create download link
-        const url = window.URL.createObjectURL(result.data);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = attachment.file_name;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-      } else {
+      const response = await fetch('/api/reports/download-attachment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          filePath: attachment.file_path,
+          fileName: attachment.file_name,
+        }),
+      });
+
+      if (!response.ok) {
         throw new Error('Failed to download file');
       }
+
+      // Get the file blob
+      const blob = await response.blob();
+      
+      // Create download link
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = attachment.file_name;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast.success("File downloaded successfully!");
     } catch (error) {
       console.error("Download error:", error);
-      const { toast } = await import("sonner");
       toast.error("Failed to download file. Please try again.");
     }
   };
@@ -1421,32 +1457,43 @@ export default function ClientReportsPage() {
                         <p className="text-sm text-muted-foreground font-medium">No attachments</p>
                       </div>
                     ) : (
-                      <div className="space-y-2">
+                      <div className="space-y-4">
                         {attachments.map((attachment) => (
-                          <div
-                            key={attachment.id}
-                            className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-all hover:shadow-sm"
-                          >
-                            <div className="flex items-center gap-3 flex-1 min-w-0">
-                              <File className="w-5 h-5 flex-shrink-0 text-primary" />
-                              <div className="flex-1 min-w-0">
-                                <p className="text-sm font-semibold truncate">{attachment.file_name}</p>
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-                                  <span>{formatFileSize(attachment.file_size)}</span>
-                                  <span>•</span>
-                                  <span>{new Date(attachment.created_at).toLocaleDateString()}</span>
+                          <div key={attachment.id} className="space-y-3">
+                            {/* Attachment File Info */}
+                            <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-all hover:shadow-sm">
+                              <div className="flex items-center gap-3 flex-1 min-w-0">
+                                <File className="w-5 h-5 flex-shrink-0 text-primary" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-semibold truncate">{attachment.file_name}</p>
+                                  <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
+                                    <span>{formatFileSize(attachment.file_size)}</span>
+                                    <span>•</span>
+                                    <span>{new Date(attachment.created_at).toLocaleDateString()}</span>
+                                  </div>
                                 </div>
                               </div>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleDownload(attachment)}
+                                className="flex-shrink-0"
+                              >
+                                <Download className="w-4 h-4 mr-2" />
+                                Download
+                              </Button>
                             </div>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDownload(attachment)}
-                              className="flex-shrink-0"
-                            >
-                              <Download className="w-4 h-4 mr-2" />
-                              Download
-                            </Button>
+                            
+                            {/* AI Analysis Component */}
+                            {user && organization && (
+                              <AIAttachmentAnalysis
+                                attachmentId={attachment.id}
+                                organizationId={organization.id}
+                                userId={user.id}
+                                fileName={attachment.file_name}
+                                existingAnalysis={attachment.ai_summary || null}
+                              />
+                            )}
                           </div>
                         ))}
                       </div>

@@ -86,70 +86,248 @@ export async function POST(request: NextRequest) {
       <!DOCTYPE html>
       <html>
         <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <style>
-            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-            .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-            .header { background: #8B4513; color: white; padding: 20px; text-align: center; border-radius: 8px 8px 0 0; }
-            .content { background: #f9f9f9; padding: 30px; border: 1px solid #ddd; border-radius: 0 0 8px 8px; }
-            .field { margin-bottom: 15px; }
-            .label { font-weight: bold; color: #8B4513; }
-            .value { margin-top: 5px; padding: 10px; background: white; border-left: 3px solid #8B4513; }
-            .footer { margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #666; font-size: 12px; }
+            * { margin: 0; padding: 0; box-sizing: border-box; }
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+              line-height: 1.6; 
+              color: #1f2937;
+              background: #f3f4f6;
+              padding: 20px;
+            }
+            .email-wrapper { 
+              max-width: 600px; 
+              margin: 0 auto; 
+              background: #ffffff;
+              border-radius: 16px;
+              overflow: hidden;
+              box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+            .header { 
+              background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+              color: white; 
+              padding: 40px 30px;
+              text-align: center;
+            }
+            .header-icon {
+              width: 60px;
+              height: 60px;
+              background: rgba(255, 255, 255, 0.2);
+              border-radius: 50%;
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              margin-bottom: 16px;
+              font-size: 32px;
+            }
+            .header h1 { 
+              font-size: 24px;
+              font-weight: 700;
+              margin: 0;
+              letter-spacing: -0.5px;
+            }
+            .header p {
+              margin-top: 8px;
+              opacity: 0.95;
+              font-size: 14px;
+            }
+            .content { 
+              padding: 40px 30px;
+            }
+            .field { 
+              margin-bottom: 24px;
+              background: #f9fafb;
+              border-radius: 12px;
+              padding: 20px;
+              border: 1px solid #e5e7eb;
+              transition: all 0.2s;
+            }
+            .field:hover {
+              border-color: #8B4513;
+              box-shadow: 0 2px 4px rgba(139, 69, 19, 0.1);
+            }
+            .label { 
+              font-weight: 600;
+              color: #8B4513;
+              font-size: 12px;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+              margin-bottom: 8px;
+              display: flex;
+              align-items: center;
+              gap: 6px;
+            }
+            .label-icon {
+              display: inline-block;
+              width: 18px;
+              height: 18px;
+              background: #8B4513;
+              color: white;
+              border-radius: 50%;
+              text-align: center;
+              line-height: 18px;
+              font-size: 11px;
+            }
+            .value { 
+              color: #111827;
+              font-size: 15px;
+              font-weight: 500;
+              word-wrap: break-word;
+            }
+            .value a {
+              color: #2563eb;
+              text-decoration: none;
+              font-weight: 600;
+            }
+            .value a:hover {
+              text-decoration: underline;
+            }
+            .message-box {
+              background: #ffffff;
+              border-left: 4px solid #8B4513;
+              padding: 16px;
+              border-radius: 8px;
+              line-height: 1.8;
+            }
+            .footer { 
+              margin-top: 32px;
+              padding-top: 24px;
+              border-top: 2px solid #e5e7eb;
+              text-align: center;
+            }
+            .footer-details {
+              background: #f9fafb;
+              padding: 16px;
+              border-radius: 8px;
+              margin-bottom: 16px;
+            }
+            .footer-details p {
+              font-size: 13px;
+              color: #6b7280;
+              margin: 4px 0;
+            }
+            .footer-details .submission-id {
+              font-family: 'Courier New', monospace;
+              font-size: 11px;
+              color: #8B4513;
+              font-weight: 600;
+            }
+            .footer-brand {
+              font-size: 12px;
+              color: #9ca3af;
+              margin-top: 12px;
+            }
+            .footer-brand strong {
+              color: #8B4513;
+              font-weight: 700;
+            }
+            .priority-badge {
+              display: inline-block;
+              background: #fef3c7;
+              color: #92400e;
+              padding: 4px 12px;
+              border-radius: 20px;
+              font-size: 11px;
+              font-weight: 600;
+              text-transform: uppercase;
+              letter-spacing: 0.5px;
+            }
           </style>
         </head>
         <body>
-          <div class="container">
+          <div class="email-wrapper">
             <div class="header">
-              <h1>🔔 New Contact Form Submission</h1>
+              <div class="header-icon">📬</div>
+              <h1>New Contact Form Submission</h1>
+              <p>Someone is interested in WhisTrust</p>
             </div>
+            
             <div class="content">
               <div class="field">
-                <div class="label">📝 Type:</div>
-                <div class="value">${subjectMap[subject] || subject}</div>
+                <div class="label">
+                  <span class="label-icon">📝</span>
+                  Inquiry Type
+                </div>
+                <div class="value">
+                  <span class="priority-badge">${subjectMap[subject] || subject}</span>
+                </div>
               </div>
               
               <div class="field">
-                <div class="label">👤 Name:</div>
+                <div class="label">
+                  <span class="label-icon">👤</span>
+                  Contact Name
+                </div>
                 <div class="value">${name}</div>
               </div>
               
               <div class="field">
-                <div class="label">📧 Email:</div>
-                <div class="value"><a href="mailto:${email}">${email}</a></div>
+                <div class="label">
+                  <span class="label-icon">📧</span>
+                  Email Address
+                </div>
+                <div class="value">
+                  <a href="mailto:${email}">${email}</a>
+                </div>
               </div>
               
               ${company ? `
               <div class="field">
-                <div class="label">🏢 Company:</div>
+                <div class="label">
+                  <span class="label-icon">🏢</span>
+                  Company Name
+                </div>
                 <div class="value">${company}</div>
               </div>
               ` : ''}
               
               ${phone ? `
               <div class="field">
-                <div class="label">📞 Phone:</div>
-                <div class="value"><a href="tel:${phone}">${phone}</a></div>
+                <div class="label">
+                  <span class="label-icon">📞</span>
+                  Phone Number
+                </div>
+                <div class="value">
+                  <a href="tel:${phone}">${phone}</a>
+                </div>
               </div>
               ` : ''}
               
               ${companySize ? `
               <div class="field">
-                <div class="label">👥 Company Size:</div>
+                <div class="label">
+                  <span class="label-icon">👥</span>
+                  Company Size
+                </div>
                 <div class="value">${companySize}</div>
               </div>
               ` : ''}
               
               ${message ? `
               <div class="field">
-                <div class="label">💬 Message:</div>
-                <div class="value">${message.replace(/\n/g, '<br>')}</div>
+                <div class="label">
+                  <span class="label-icon">💬</span>
+                  Message
+                </div>
+                <div class="message-box">${message.replace(/\n/g, '<br>')}</div>
               </div>
               ` : ''}
               
               <div class="footer">
-                <p>Submission ID: ${submission.id}</p>
-                <p>Received: ${new Date().toLocaleString()}</p>
-                <p>WhisTrust Contact Management System</p>
+                <div class="footer-details">
+                  <p><strong>Submission Details</strong></p>
+                  <p class="submission-id">ID: ${submission.id}</p>
+                  <p>Received: ${new Date().toLocaleString('en-US', { 
+                    dateStyle: 'full', 
+                    timeStyle: 'short' 
+                  })}</p>
+                </div>
+                <div class="footer-brand">
+                  <strong>WhisTrust</strong> Contact Management System<br>
+                  Secure • Confidential • Professional
+                </div>
               </div>
             </div>
           </div>
