@@ -353,8 +353,8 @@ export default function AIPoweredSectionPage() {
               Have questions about AI features or want to suggest new capabilities? We'd love to hear from you!
             </p>
             <Button variant="outline" asChild>
-              <a href={`/org/${subdomain}/documentation`}>
-                View AI Documentation
+              <a href="/contact">
+                Contact WhisTrust Support
                 <ArrowRight className="h-4 w-4 ml-2" />
               </a>
             </Button>
