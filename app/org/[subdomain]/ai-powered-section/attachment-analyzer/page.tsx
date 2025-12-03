@@ -90,7 +90,7 @@ export default function AttachmentAnalyzerPage() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const { user: currentUser, organization: currentOrg } = await getCurrentClientAdmin(subdomain);
+        const { user: currentUser, organization: currentOrg } = await getCurrentClientAdmin();
         if (!currentUser || !currentOrg) {
           router.push(`/org/${subdomain}/login`);
           return;
