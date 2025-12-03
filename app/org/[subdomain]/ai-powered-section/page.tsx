@@ -321,7 +321,7 @@ export default function AIPoweredSectionPage() {
                         <Icon className="h-5 w-5 text-muted-foreground" />
                       </div>
                       <Badge variant="secondary" className="bg-yellow-100 text-yellow-800 text-xs">
-                        {feature.estimatedRelease}
+                        Planned
                       </Badge>
                     </div>
                     <CardTitle className="text-base">{feature.title}</CardTitle>
