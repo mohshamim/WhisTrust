@@ -171,7 +171,11 @@ export default function RiskPredictorPage() {
           .eq("organization_id", organization.id)
           .order("created_at", { ascending: false });
         
-        data = result.data;
+        // Add empty risk_prediction field to match expected structure
+        data = result.data?.map(item => ({
+          ...item,
+          risk_prediction: []
+        })) || null;
         error = result.error;
       }
 
