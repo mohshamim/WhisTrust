@@ -133,7 +133,7 @@ export function FloatingSmartSearch({
       >
         {/* Text Label - Auto slides in/out from top */}
         <div className={`
-          absolute bottom-full left-1/2 -translate-x-1/2 mb-3
+          absolute bottom-full right-0 mb-3
           transition-all duration-500 ease-out
           ${showLabel 
             ? "opacity-100 -translate-y-0 scale-100" 
@@ -143,21 +143,21 @@ export function FloatingSmartSearch({
           <div className="
             bg-white dark:bg-gray-900 backdrop-blur-sm
             text-foreground
-            px-4 py-2.5
-            rounded-full
+            px-5 py-3
+            rounded-xl
             shadow-[0_8px_20px_rgba(0,0,0,0.15)]
             border-2 border-primary/30
             whitespace-nowrap
-            flex items-center gap-2
+            flex items-center gap-2.5
           ">
             <Sparkles className="h-4 w-4 text-primary animate-pulse" />
             <span className="font-semibold text-sm bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
               Smart AI Search
             </span>
           </div>
-          {/* Small arrow pointing down */}
+          {/* Small arrow pointing down to button */}
           <div className="
-            absolute left-1/2 -translate-x-1/2 -bottom-1.5
+            absolute right-6 -bottom-1.5
             w-3 h-3 
             bg-white dark:bg-gray-900
             rotate-45 
