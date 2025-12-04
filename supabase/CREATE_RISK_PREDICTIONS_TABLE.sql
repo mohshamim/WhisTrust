@@ -37,16 +37,17 @@ CREATE TABLE IF NOT EXISTS case_risk_predictions (
 );
 
 -- Create indexes
-CREATE INDEX idx_risk_predictions_report ON case_risk_predictions(report_id);
-CREATE INDEX idx_risk_predictions_org ON case_risk_predictions(organization_id);
-CREATE INDEX idx_risk_predictions_risk_level ON case_risk_predictions(risk_level);
-CREATE INDEX idx_risk_predictions_score ON case_risk_predictions(overall_score DESC);
-CREATE INDEX idx_risk_predictions_created ON case_risk_predictions(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_risk_predictions_report ON case_risk_predictions(report_id);
+CREATE INDEX IF NOT EXISTS idx_risk_predictions_org ON case_risk_predictions(organization_id);
+CREATE INDEX IF NOT EXISTS idx_risk_predictions_risk_level ON case_risk_predictions(risk_level);
+CREATE INDEX IF NOT EXISTS idx_risk_predictions_score ON case_risk_predictions(overall_score DESC);
+CREATE INDEX IF NOT EXISTS idx_risk_predictions_created ON case_risk_predictions(created_at DESC);
 
 -- Enable RLS
 ALTER TABLE case_risk_predictions ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
+DROP POLICY IF EXISTS "Users can view risk predictions for their organization" ON case_risk_predictions;
 CREATE POLICY "Users can view risk predictions for their organization"
   ON case_risk_predictions
   FOR SELECT
@@ -58,6 +59,7 @@ CREATE POLICY "Users can view risk predictions for their organization"
     )
   );
 
+DROP POLICY IF EXISTS "Users can create risk predictions for their organization" ON case_risk_predictions;
 CREATE POLICY "Users can create risk predictions for their organization"
   ON case_risk_predictions
   FOR INSERT
@@ -69,6 +71,7 @@ CREATE POLICY "Users can create risk predictions for their organization"
     )
   );
 
+DROP POLICY IF EXISTS "Users can update risk predictions for their organization" ON case_risk_predictions;
 CREATE POLICY "Users can update risk predictions for their organization"
   ON case_risk_predictions
   FOR UPDATE
@@ -89,6 +92,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_risk_predictions_updated_at ON case_risk_predictions;
 CREATE TRIGGER update_risk_predictions_updated_at
   BEFORE UPDATE ON case_risk_predictions
   FOR EACH ROW
