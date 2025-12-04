@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { ClientSidebar } from "@/components/client-sidebar";
@@ -40,6 +41,7 @@ import {
   Clock,
   Target,
   Loader2,
+  X,
 } from "lucide-react";
 import { getAvatarUrl } from "@/lib/services/avatar";
 import { getCurrentClientAdmin } from "@/lib/services/client-auth";
@@ -75,11 +77,15 @@ interface CaseWithRiskPrediction {
 }
 
 export default function RiskPredictorPage() {
+  const params = useParams();
+  const subdomain = params.subdomain as string;
+  
   const [user, setUser] = useState<any>(null);
   const [organization, setOrganization] = useState<any>(null);
   const [cases, setCases] = useState<CaseWithRiskPrediction[]>([]);
   const [filteredCases, setFilteredCases] = useState<CaseWithRiskPrediction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [analyzing, setAnalyzing] = useState<string | null>(null);
   const [batchAnalyzing, setBatchAnalyzing] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("all");
@@ -99,6 +105,17 @@ export default function RiskPredictorPage() {
 
   useEffect(() => {
     loadUserAndOrganization();
+    
+    // Timeout: If loading takes more than 10 seconds, show error
+    const timeout = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        setLoadError(true);
+        toast.error("Loading timeout. Please check your connection.");
+      }
+    }, 10000);
+    
+    return () => clearTimeout(timeout);
   }, []);
 
   useEffect(() => {
@@ -114,12 +131,19 @@ export default function RiskPredictorPage() {
   async function loadUserAndOrganization() {
     try {
       const result = await getCurrentClientAdmin();
-      if (result) {
+      if (result && result.user && result.organization) {
         setUser(result.user);
         setOrganization(result.organization);
+        setLoadError(false);
+      } else {
+        setLoadError(true);
       }
     } catch (error) {
       console.error("Error loading user:", error);
+      setLoadError(true);
+      toast.error("Failed to load user data");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -326,13 +350,43 @@ export default function RiskPredictorPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground">Loading Risk Predictor...</p>
+        </div>
       </div>
     );
   }
 
-  if (!user || !organization) {
-    return null;
+  if (loadError || !user || !organization) {
+    return (
+      <div className="flex items-center justify-center h-screen p-4">
+        <Card className="max-w-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <X className="h-5 w-5" />
+              Failed to Load
+            </CardTitle>
+            <CardDescription>
+              Unable to load Risk Predictor. Please check your connection and try again.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-2">
+              <Button onClick={() => window.location.reload()} className="flex-1">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Retry
+              </Button>
+              <Button variant="outline" asChild className="flex-1">
+                <a href={`/org/${subdomain}/dashboard`}>
+                  Dashboard
+                </a>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (

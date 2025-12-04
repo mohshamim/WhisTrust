@@ -2,9 +2,15 @@ import { NextRequest, NextResponse } from "next/server";
 import { Resend } from "resend";
 import { createClient } from "@supabase/supabase-js";
 
-// Initialize Resend only if API key is available
-const resend = process.env.RESEND_API_KEY 
+// Initialize Resend instances for both email addresses
+// API key for codesquare01@gmail.com
+const resendCodeSquare = process.env.RESEND_API_KEY 
   ? new Resend(process.env.RESEND_API_KEY)
+  : null;
+
+// API key for info@aisar.sa
+const resendAisar = process.env.RESEND_API_KEY_AISAR
+  ? new Resend(process.env.RESEND_API_KEY_AISAR)
   : null;
 
 export async function POST(request: NextRequest) {
@@ -91,204 +97,162 @@ export async function POST(request: NextRequest) {
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { 
-              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+              font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
               line-height: 1.6; 
-              color: #1f2937;
-              background: #f3f4f6;
+              color: #333333;
+              background: #f5f5f5;
               padding: 20px;
             }
             .email-wrapper { 
-              max-width: 600px; 
+              max-width: 650px; 
               margin: 0 auto; 
               background: #ffffff;
-              border-radius: 16px;
-              overflow: hidden;
-              box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+              border: 1px solid #e0e0e0;
             }
             .header { 
-              background: linear-gradient(135deg, #8B4513 0%, #A0522D 100%);
+              background: #8B4513;
               color: white; 
-              padding: 40px 30px;
-              text-align: center;
-            }
-            .header-icon {
-              width: 60px;
-              height: 60px;
-              background: rgba(255, 255, 255, 0.2);
-              border-radius: 50%;
-              display: inline-flex;
-              align-items: center;
-              justify-content: center;
-              margin-bottom: 16px;
-              font-size: 32px;
+              padding: 30px 40px;
+              border-bottom: 3px solid #6d3410;
             }
             .header h1 { 
-              font-size: 24px;
-              font-weight: 700;
+              font-size: 22px;
+              font-weight: 600;
               margin: 0;
-              letter-spacing: -0.5px;
+              letter-spacing: 0.3px;
             }
             .header p {
-              margin-top: 8px;
-              opacity: 0.95;
+              margin-top: 6px;
+              opacity: 0.9;
               font-size: 14px;
+              font-weight: 400;
             }
             .content { 
-              padding: 40px 30px;
+              padding: 35px 40px;
             }
-            .field { 
-              margin-bottom: 24px;
-              background: #f9fafb;
-              border-radius: 12px;
-              padding: 20px;
-              border: 1px solid #e5e7eb;
-              transition: all 0.2s;
+            .info-row { 
+              padding: 16px 0;
+              border-bottom: 1px solid #e8e8e8;
             }
-            .field:hover {
-              border-color: #8B4513;
-              box-shadow: 0 2px 4px rgba(139, 69, 19, 0.1);
+            .info-row:last-of-type {
+              border-bottom: none;
             }
             .label { 
               font-weight: 600;
-              color: #8B4513;
-              font-size: 12px;
-              text-transform: uppercase;
-              letter-spacing: 0.5px;
-              margin-bottom: 8px;
-              display: flex;
-              align-items: center;
-              gap: 6px;
-            }
-            .label-icon {
-              display: inline-block;
-              width: 18px;
-              height: 18px;
-              background: #8B4513;
-              color: white;
-              border-radius: 50%;
-              text-align: center;
-              line-height: 18px;
+              color: #666666;
               font-size: 11px;
+              text-transform: uppercase;
+              letter-spacing: 0.8px;
+              margin-bottom: 6px;
             }
             .value { 
-              color: #111827;
+              color: #1a1a1a;
               font-size: 15px;
-              font-weight: 500;
+              font-weight: 400;
               word-wrap: break-word;
+              margin-top: 4px;
             }
             .value a {
-              color: #2563eb;
+              color: #8B4513;
               text-decoration: none;
-              font-weight: 600;
+              font-weight: 500;
             }
             .value a:hover {
               text-decoration: underline;
             }
-            .message-box {
-              background: #ffffff;
-              border-left: 4px solid #8B4513;
-              padding: 16px;
-              border-radius: 8px;
-              line-height: 1.8;
-            }
-            .footer { 
-              margin-top: 32px;
-              padding-top: 24px;
-              border-top: 2px solid #e5e7eb;
-              text-align: center;
-            }
-            .footer-details {
-              background: #f9fafb;
-              padding: 16px;
-              border-radius: 8px;
-              margin-bottom: 16px;
-            }
-            .footer-details p {
-              font-size: 13px;
-              color: #6b7280;
-              margin: 4px 0;
-            }
-            .footer-details .submission-id {
-              font-family: 'Courier New', monospace;
-              font-size: 11px;
-              color: #8B4513;
-              font-weight: 600;
-            }
-            .footer-brand {
-              font-size: 12px;
-              color: #9ca3af;
-              margin-top: 12px;
-            }
-            .footer-brand strong {
-              color: #8B4513;
-              font-weight: 700;
-            }
-            .priority-badge {
+            .inquiry-type {
               display: inline-block;
-              background: #fef3c7;
-              color: #92400e;
-              padding: 4px 12px;
-              border-radius: 20px;
-              font-size: 11px;
+              background: #8B4513;
+              color: white;
+              padding: 6px 16px;
+              border-radius: 4px;
+              font-size: 13px;
               font-weight: 600;
               text-transform: uppercase;
               letter-spacing: 0.5px;
+            }
+            .message-section {
+              background: #fafafa;
+              padding: 18px;
+              border-left: 3px solid #8B4513;
+              margin-top: 8px;
+              line-height: 1.7;
+              font-size: 14px;
+              color: #333333;
+            }
+            .footer { 
+              background: #f9f9f9;
+              padding: 25px 40px;
+              border-top: 1px solid #e0e0e0;
+            }
+            .footer-info {
+              font-size: 12px;
+              color: #777777;
+              line-height: 1.8;
+            }
+            .footer-info strong {
+              color: #333333;
+            }
+            .submission-id {
+              font-family: 'Courier New', monospace;
+              font-size: 11px;
+              color: #8B4513;
+              background: #fff;
+              padding: 4px 8px;
+              border: 1px solid #e0e0e0;
+              display: inline-block;
+              margin: 4px 0;
+            }
+            .brand {
+              margin-top: 15px;
+              padding-top: 15px;
+              border-top: 1px solid #e0e0e0;
+              font-size: 11px;
+              color: #999999;
+              text-align: center;
+            }
+            .brand strong {
+              color: #8B4513;
             }
           </style>
         </head>
         <body>
           <div class="email-wrapper">
             <div class="header">
-              <div class="header-icon">📬</div>
-              <h1>New Contact Form Submission</h1>
-              <p>Someone is interested in WhisTrust</p>
+              <h1>New Contact Inquiry</h1>
+              <p>WhisTrust Contact Management System</p>
             </div>
             
             <div class="content">
-              <div class="field">
-                <div class="label">
-                  <span class="label-icon">📝</span>
-                  Inquiry Type
-                </div>
+              <div class="info-row">
+                <div class="label">Inquiry Type</div>
                 <div class="value">
-                  <span class="priority-badge">${subjectMap[subject] || subject}</span>
+                  <span class="inquiry-type">${subjectMap[subject] || subject}</span>
                 </div>
               </div>
               
-              <div class="field">
-                <div class="label">
-                  <span class="label-icon">👤</span>
-                  Contact Name
-                </div>
+              <div class="info-row">
+                <div class="label">Contact Name</div>
                 <div class="value">${name}</div>
               </div>
               
-              <div class="field">
-                <div class="label">
-                  <span class="label-icon">📧</span>
-                  Email Address
-                </div>
+              <div class="info-row">
+                <div class="label">Email Address</div>
                 <div class="value">
                   <a href="mailto:${email}">${email}</a>
                 </div>
               </div>
               
               ${company ? `
-              <div class="field">
-                <div class="label">
-                  <span class="label-icon">🏢</span>
-                  Company Name
-                </div>
+              <div class="info-row">
+                <div class="label">Company</div>
                 <div class="value">${company}</div>
               </div>
               ` : ''}
               
               ${phone ? `
-              <div class="field">
-                <div class="label">
-                  <span class="label-icon">📞</span>
-                  Phone Number
-                </div>
+              <div class="info-row">
+                <div class="label">Phone Number</div>
                 <div class="value">
                   <a href="tel:${phone}">${phone}</a>
                 </div>
@@ -296,38 +260,31 @@ export async function POST(request: NextRequest) {
               ` : ''}
               
               ${companySize ? `
-              <div class="field">
-                <div class="label">
-                  <span class="label-icon">👥</span>
-                  Company Size
-                </div>
+              <div class="info-row">
+                <div class="label">Company Size</div>
                 <div class="value">${companySize}</div>
               </div>
               ` : ''}
               
               ${message ? `
-              <div class="field">
-                <div class="label">
-                  <span class="label-icon">💬</span>
-                  Message
-                </div>
-                <div class="message-box">${message.replace(/\n/g, '<br>')}</div>
+              <div class="info-row">
+                <div class="label">Message</div>
+                <div class="message-section">${message.replace(/\n/g, '<br>')}</div>
               </div>
               ` : ''}
-              
-              <div class="footer">
-                <div class="footer-details">
-                  <p><strong>Submission Details</strong></p>
-                  <p class="submission-id">ID: ${submission.id}</p>
-                  <p>Received: ${new Date().toLocaleString('en-US', { 
-                    dateStyle: 'full', 
-                    timeStyle: 'short' 
-                  })}</p>
-                </div>
-                <div class="footer-brand">
-                  <strong>WhisTrust</strong> Contact Management System<br>
-                  Secure • Confidential • Professional
-                </div>
+            </div>
+            
+            <div class="footer">
+              <div class="footer-info">
+                <strong>Submission Details</strong><br>
+                <span class="submission-id">${submission.id}</span><br>
+                Received: ${new Date().toLocaleString('en-US', { 
+                  dateStyle: 'medium', 
+                  timeStyle: 'short' 
+                })}
+              </div>
+              <div class="brand">
+                <strong>WhisTrust</strong> — Secure, Confidential & Professional
               </div>
             </div>
           </div>
@@ -351,50 +308,105 @@ Submission ID: ${submission.id}
 Received: ${new Date().toLocaleString()}
 `;
 
-    // Send email only if Resend is configured
-    if (!resend) {
-      console.warn("Resend not configured - email not sent");
+    // Send emails to both addresses using their respective API keys
+    const emailResults = {
+      codesquare: { success: false, id: null as string | null, error: null as string | null },
+      aisar: { success: false, id: null as string | null, error: null as string | null },
+    };
+
+    // Send to codesquare01@gmail.com
+    if (resendCodeSquare) {
+      try {
+        const { data: emailData1, error: emailError1 } = await resendCodeSquare.emails.send({
+          from: "WhisTrust Contact <onboarding@resend.dev>",
+          to: ["codesquare01@gmail.com"],
+          subject: emailSubject,
+          html: emailHtml,
+          text: emailText,
+          replyTo: email,
+        });
+
+        if (emailError1) {
+          console.error("Email error (codesquare01@gmail.com):", emailError1);
+          emailResults.codesquare.error = emailError1.message;
+        } else {
+          emailResults.codesquare.success = true;
+          emailResults.codesquare.id = emailData1?.id || null;
+        }
+      } catch (error) {
+        console.error("Exception sending to codesquare01@gmail.com:", error);
+        emailResults.codesquare.error = error instanceof Error ? error.message : "Unknown error";
+      }
+    } else {
+      console.warn("Resend not configured for codesquare01@gmail.com");
+      emailResults.codesquare.error = "API key not configured";
+    }
+
+    // Send to info@aisar.sa
+    if (resendAisar) {
+      try {
+        const { data: emailData2, error: emailError2 } = await resendAisar.emails.send({
+          from: "WhisTrust Contact <onboarding@resend.dev>",
+          to: ["info@aisar.sa"],
+          subject: emailSubject,
+          html: emailHtml,
+          text: emailText,
+          replyTo: email,
+        });
+
+        if (emailError2) {
+          console.error("Email error (info@aisar.sa):", emailError2);
+          emailResults.aisar.error = emailError2.message;
+        } else {
+          emailResults.aisar.success = true;
+          emailResults.aisar.id = emailData2?.id || null;
+        }
+      } catch (error) {
+        console.error("Exception sending to info@aisar.sa:", error);
+        emailResults.aisar.error = error instanceof Error ? error.message : "Unknown error";
+      }
+    } else {
+      console.warn("Resend not configured for info@aisar.sa");
+      emailResults.aisar.error = "API key not configured";
+    }
+
+    // Determine overall success
+    const anySuccess = emailResults.codesquare.success || emailResults.aisar.success;
+    const allSuccess = emailResults.codesquare.success && emailResults.aisar.success;
+
+    if (!anySuccess) {
+      // Both failed
       return NextResponse.json(
         {
           success: true,
-          message: "Form submitted successfully (email not configured)",
+          message: "Form submitted successfully, but all email notifications failed",
           submissionId: submission.id,
+          emailResults,
         },
         { status: 200 }
       );
     }
 
-    const { data: emailData, error: emailError } = await resend.emails.send({
-      from: "WhisTrust Contact <onboarding@resend.dev>",
-      to: ["codesquare01@gmail.com"], // Only verified email works with Resend test mode
-      // Note: To send to info@aisar.sa, verify domain at resend.com/domains
-      subject: emailSubject,
-      html: emailHtml,
-      text: emailText,
-      replyTo: email, // Reply to the submitter
-    });
-
-    if (emailError) {
-      console.error("Email error:", emailError);
-      // Don't throw - we still saved to DB
+    if (!allSuccess) {
+      // Partial success
       return NextResponse.json(
         {
           success: true,
-          message: "Form submitted successfully, but email notification failed",
+          message: "Form submitted successfully, but some email notifications failed",
           submissionId: submission.id,
-          emailError: emailError.message,
+          emailResults,
         },
         { status: 200 }
       );
     }
 
-    // Success!
+    // Full success!
     return NextResponse.json(
       {
         success: true,
         message: "Contact form submitted successfully",
         submissionId: submission.id,
-        emailId: emailData?.id,
+        emailResults,
       },
       { status: 200 }
     );

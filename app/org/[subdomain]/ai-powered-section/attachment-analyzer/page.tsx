@@ -41,6 +41,8 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
+  X,
+  Loader2,
   FileImage,
   FileCode,
   AlertTriangle,
@@ -80,6 +82,7 @@ export default function AttachmentAnalyzerPage() {
   const [user, setUser] = useState<any>(null);
   const [organization, setOrganization] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [attachments, setAttachments] = useState<AttachmentWithCase[]>([]);
   const [filteredAttachments, setFilteredAttachments] = useState<AttachmentWithCase[]>([]);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
@@ -93,21 +96,34 @@ export default function AttachmentAnalyzerPage() {
       try {
         const { user: currentUser, organization: currentOrg } = await getCurrentClientAdmin();
         if (!currentUser || !currentOrg) {
-          router.push(`/org/${subdomain}/login`);
+          toast.error("Please login to continue");
+          setTimeout(() => router.push(`/org/${subdomain}/login`), 2000);
           return;
         }
         setUser(currentUser);
         setOrganization(currentOrg);
         await loadAttachments(currentOrg.id);
       } catch (error) {
+        setLoadError(true);
         console.error("Failed to load data:", error);
-        router.push(`/org/${subdomain}/login`);
+        toast.error("Failed to load page data");
       } finally {
         setLoading(false);
       }
     };
 
     loadData();
+    
+    // Timeout: If loading takes more than 10 seconds, show error
+    const timeout = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        setLoadError(true);
+        toast.error("Loading timeout. Please check your connection.");
+      }
+    }, 10000);
+    
+    return () => clearTimeout(timeout);
   }, [subdomain, router]);
 
   const loadAttachments = async (organizationId: string) => {
@@ -312,13 +328,43 @@ export default function AttachmentAnalyzerPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground">Loading Attachment Analyzer...</p>
+        </div>
       </div>
     );
   }
 
-  if (!user || !organization) {
-    return null;
+  if (loadError || !user || !organization) {
+    return (
+      <div className="flex items-center justify-center min-h-screen p-4">
+        <Card className="max-w-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <X className="h-5 w-5" />
+              Failed to Load
+            </CardTitle>
+            <CardDescription>
+              Unable to load Attachment Analyzer. Please check your connection and try again.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex gap-2">
+              <Button onClick={() => window.location.reload()} className="flex-1">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Retry
+              </Button>
+              <Button variant="outline" asChild className="flex-1">
+                <a href={`/org/${subdomain}/dashboard`}>
+                  Dashboard
+                </a>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
   return (
