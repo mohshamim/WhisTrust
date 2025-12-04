@@ -101,6 +101,21 @@ export default function AIPoweredSectionPage() {
         "Batch analysis for multiple cases",
       ],
     },
+    {
+      id: "smart-search",
+      title: "Smart Search",
+      description: "Search cases using natural language. Ask questions like 'Find harassment cases in Q4'.",
+      icon: Search,
+      status: "active",
+      usageCount: 0,
+      href: `/org/${subdomain}/ai-powered-section/smart-search`,
+      features: [
+        "Natural language query processing",
+        "AI-powered search parsing",
+        "Export results to PDF and Excel",
+        "Filter by date, category, status, and more",
+      ],
+    },
   ];
 
   const comingSoonFeatures = [
@@ -111,14 +126,6 @@ export default function AIPoweredSectionPage() {
       icon: Brain,
       status: "coming_soon",
       estimatedRelease: "Q1 2026",
-    },
-    {
-      id: "smart-search",
-      title: "Smart Search",
-      description: "Search cases using natural language. Ask questions like 'Find harassment cases in Q4'.",
-      icon: Search,
-      status: "coming_soon",
-      estimatedRelease: "Q2 2026",
     },
     {
       id: "compliance-checker",
@@ -246,7 +253,7 @@ export default function AIPoweredSectionPage() {
             <CheckCircle2 className="h-5 w-5 text-green-600" />
             <h2 className="text-xl font-semibold">Available Now</h2>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {activeFeatures.map((feature) => {
               const Icon = feature.icon;
               return (
