@@ -136,30 +136,32 @@ export function FloatingSmartSearch({
           absolute bottom-full left-1/2 -translate-x-1/2 mb-3
           transition-all duration-500 ease-out
           ${showLabel 
-            ? "opacity-100 translate-y-0" 
-            : "opacity-0 translate-y-4 pointer-events-none"
+            ? "opacity-100 -translate-y-0 scale-100" 
+            : "opacity-0 -translate-y-2 scale-95 pointer-events-none"
           }
         `}>
           <div className="
-            bg-primary/95 backdrop-blur-sm
-            text-primary-foreground
+            bg-white dark:bg-gray-900 backdrop-blur-sm
+            text-foreground
             px-4 py-2.5
             rounded-full
-            shadow-lg
-            border border-primary/20
+            shadow-[0_8px_20px_rgba(0,0,0,0.15)]
+            border-2 border-primary/30
             whitespace-nowrap
             flex items-center gap-2
           ">
-            <Sparkles className="h-4 w-4 text-yellow-300 animate-pulse" />
-            <span className="font-semibold text-sm">Smart AI Search</span>
+            <Sparkles className="h-4 w-4 text-primary animate-pulse" />
+            <span className="font-semibold text-sm bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+              Smart AI Search
+            </span>
           </div>
           {/* Small arrow pointing down */}
           <div className="
             absolute left-1/2 -translate-x-1/2 -bottom-1.5
             w-3 h-3 
-            bg-primary/95 
+            bg-white dark:bg-gray-900
             rotate-45 
-            border-r border-b border-primary/20
+            border-r-2 border-b-2 border-primary/30
           "></div>
         </div>
 
