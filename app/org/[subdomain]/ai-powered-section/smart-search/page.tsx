@@ -171,7 +171,7 @@ export default function SmartSearchPage() {
       if (error && error.message?.includes("does not exist")) {
         console.warn("case_risk_predictions table not found, searching without risk data");
         
-        queryBuilder = supabase
+        let fallbackQuery = supabase
           .from("reports")
           .select(`
             id,
@@ -187,29 +187,29 @@ export default function SmartSearchPage() {
 
         // Reapply filters
         if (parseResult.filters.category) {
-          queryBuilder = queryBuilder.eq("category", parseResult.filters.category);
+          fallbackQuery = fallbackQuery.eq("category", parseResult.filters.category);
         }
         if (parseResult.filters.status) {
-          queryBuilder = queryBuilder.eq("status", parseResult.filters.status);
+          fallbackQuery = fallbackQuery.eq("status", parseResult.filters.status);
         }
         if (parseResult.filters.date_from) {
-          queryBuilder = queryBuilder.gte("created_at", parseResult.filters.date_from);
+          fallbackQuery = fallbackQuery.gte("created_at", parseResult.filters.date_from);
         }
         if (parseResult.filters.date_to) {
-          queryBuilder = queryBuilder.lte("created_at", parseResult.filters.date_to);
+          fallbackQuery = fallbackQuery.lte("created_at", parseResult.filters.date_to);
         }
         if (parseResult.filters.search_text) {
-          queryBuilder = queryBuilder.or(
+          fallbackQuery = fallbackQuery.or(
             `title.ilike.%${parseResult.filters.search_text}%,description.ilike.%${parseResult.filters.search_text}%`
           );
         }
 
-        queryBuilder = queryBuilder.order("created_at", { ascending: false }).limit(100);
+        fallbackQuery = fallbackQuery.order("created_at", { ascending: false }).limit(100);
 
-        const result = await queryBuilder;
+        const result = await fallbackQuery;
         
         // Add empty risk_prediction field to match expected structure
-        data = result.data?.map(item => ({
+        data = result.data?.map((item: any) => ({
           ...item,
           risk_prediction: []
         })) || null;
