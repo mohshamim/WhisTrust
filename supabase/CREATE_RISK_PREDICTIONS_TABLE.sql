@@ -53,7 +53,7 @@ CREATE POLICY "Users can view risk predictions for their organization"
   USING (
     organization_id IN (
       SELECT organization_id 
-      FROM client_admins 
+      FROM admin_profiles 
       WHERE id = auth.uid()
     )
   );
@@ -64,7 +64,7 @@ CREATE POLICY "Users can create risk predictions for their organization"
   WITH CHECK (
     organization_id IN (
       SELECT organization_id 
-      FROM client_admins 
+      FROM admin_profiles 
       WHERE id = auth.uid()
     )
   );
@@ -75,7 +75,7 @@ CREATE POLICY "Users can update risk predictions for their organization"
   USING (
     organization_id IN (
       SELECT organization_id 
-      FROM client_admins 
+      FROM admin_profiles 
       WHERE id = auth.uid()
     )
   );
