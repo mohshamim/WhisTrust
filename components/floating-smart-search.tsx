@@ -100,64 +100,59 @@ export function FloatingSmartSearch({
         onClick={() => setIsOpen(true)}
         className={`
           fixed ${positionClasses[position]}
-          w-16 h-16 md:w-18 md:h-18
+          flex items-center gap-0
+          group
+          z-50
+          ${isVisible ? "translate-y-0 opacity-100" : "translate-y-24 opacity-0 pointer-events-none"}
+        `}
+        aria-label="Open AI Smart Search"
+      >
+        {/* Text Label - Slides in from left on hover */}
+        <div className="
+          overflow-hidden
+          opacity-0 group-hover:opacity-100
+          max-w-0 group-hover:max-w-xs
+          transition-all duration-300 ease-out
+          mr-0 group-hover:mr-3
+        ">
+          <div className="
+            bg-primary/95 backdrop-blur-sm
+            text-primary-foreground
+            px-4 py-2.5
+            rounded-l-full rounded-r-lg
+            shadow-lg
+            border border-primary/20
+            whitespace-nowrap
+          ">
+            <span className="font-semibold text-sm">Smart AI Search</span>
+          </div>
+        </div>
+
+        {/* Circular Icon Button */}
+        <div className="
+          relative
+          w-14 h-14 md:w-16 md:h-16
           rounded-full
           bg-primary hover:bg-primary/90
           text-primary-foreground
           shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.2)]
           transition-all duration-300
           hover:scale-110 active:scale-95
-          z-50
           flex items-center justify-center
-          group
           border-2 border-primary/20
-          backdrop-blur-sm
-          ${isVisible ? "translate-y-0 opacity-100" : "translate-y-24 opacity-0 pointer-events-none"}
-        `}
-        aria-label="Open AI Smart Search"
-        style={{
-          boxShadow: isVisible 
-            ? "0 8px 30px rgba(0, 0, 0, 0.12), 0 2px 10px rgba(0, 0, 0, 0.08)" 
-            : "none"
-        }}
-      >
-        {/* Floating Label - Appears on Hover */}
-        <div className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 
-                        opacity-0 group-hover:opacity-100
-                        translate-y-2 group-hover:translate-y-0
-                        scale-95 group-hover:scale-100
-                        transition-all duration-300 ease-out
-                        pointer-events-none">
-          <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md 
-                          shadow-xl rounded-lg px-4 py-3 
-                          border border-primary/20">
-            <p className="font-semibold text-sm whitespace-nowrap text-foreground">
-              Smart AI Search
-            </p>
-            <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1">
-              <span>Press</span>
-              <kbd className="px-1.5 py-0.5 bg-muted border border-border rounded text-[10px] font-mono">Ctrl</kbd>
-              <span>+</span>
-              <kbd className="px-1.5 py-0.5 bg-muted border border-border rounded text-[10px] font-mono">K</kbd>
-            </p>
+        ">
+          {/* Robot Icon */}
+          <div className="relative z-10">
+            <Bot className="h-6 w-6 md:h-7 md:w-7" />
+            <Sparkles className="absolute -top-1 -right-1 h-3 w-3 md:h-3.5 md:w-3.5 text-yellow-300 animate-pulse" />
           </div>
-          {/* Arrow pointing down to button */}
-          <div className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 
-                          w-3 h-3 bg-white/95 dark:bg-gray-900/95 
-                          rotate-45 border-r border-b border-primary/20"></div>
-        </div>
 
-        {/* Robot Icon */}
-        <div className="relative z-10">
-          <Bot className="h-7 w-7 md:h-8 md:w-8" />
-          <Sparkles className="absolute -top-1 -right-1 h-3.5 w-3.5 md:h-4 md:w-4 text-yellow-300 animate-pulse" />
+          {/* Glow Effect */}
+          <div className="absolute inset-0 rounded-full bg-primary/30 blur-md -z-10 opacity-50 group-hover:opacity-70 transition-opacity duration-300"></div>
+          
+          {/* Subtle Pulse Ring */}
+          <div className="absolute inset-0 rounded-full border-2 border-primary/30 animate-ping opacity-75"></div>
         </div>
-
-        {/* Glow Effect */}
-        <div className="absolute inset-0 rounded-full bg-primary/30 blur-lg -z-10 opacity-50 group-hover:opacity-70 transition-opacity duration-300"></div>
-        
-        {/* Subtle Pulse Ring */}
-        <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping opacity-75"></div>
       </button>
 
       {/* Search Modal */}
