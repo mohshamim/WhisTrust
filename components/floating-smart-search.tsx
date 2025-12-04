@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Sparkles, X, Loader2, Bot } from "lucide-react";
+import { Search, Sparkles, X, Loader2, Bot, Filter } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -154,78 +154,79 @@ export function FloatingSmartSearch({
 
       {/* Search Modal */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent className="max-w-3xl p-0 gap-0 bg-transparent border-none shadow-none">
-          <div className="bg-background rounded-lg shadow-2xl overflow-hidden">
-            {/* Search Header */}
-            <div className="p-6 pb-4 bg-gradient-to-r from-primary/5 to-primary/10">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-primary/10 rounded-lg relative">
-                  <Bot className="h-6 w-6 text-primary" />
-                  <Sparkles className="absolute -top-0.5 -right-0.5 h-3 w-3 text-primary animate-pulse" />
-                </div>
-                <div className="flex-1">
-                  <h2 className="text-2xl font-bold">Smart AI Search</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Search cases using natural language
-                  </p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setIsOpen(false)}
-                  className="rounded-full"
-                >
-                  <X className="h-5 w-5" />
-                </Button>
+        <DialogContent className="max-w-3xl max-h-[85vh] overflow-hidden p-0 gap-0">
+          {/* Search Header */}
+          <div className="p-6 pb-4 bg-gradient-to-r from-primary/5 to-primary/10">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2.5 bg-primary/10 rounded-lg relative">
+                <Bot className="h-6 w-6 text-primary" />
+                <Sparkles className="absolute -top-0.5 -right-0.5 h-3 w-3 text-yellow-500 animate-pulse" />
               </div>
-
-              {/* Search Input */}
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-                  <Input
-                    placeholder='Try: "Find harassment cases from last month"'
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                    className="pl-10 h-12 text-base"
-                    autoFocus
-                  />
-                </div>
-                <Button
-                  onClick={handleSearch}
-                  disabled={!query.trim()}
-                  className="h-12 px-6"
-                >
-                  <Search className="h-4 w-4 mr-2" />
-                  Search
-                </Button>
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold">Smart AI Search</h2>
+                <p className="text-sm text-muted-foreground">
+                  Search cases using natural language
+                </p>
               </div>
             </div>
 
+            {/* Search Input */}
+            <div className="flex gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
+                <Input
+                  placeholder='Try: "Find harassment cases from last month"'
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                  className="pl-12 pr-4 h-12 text-base border-2 focus:border-primary"
+                  autoFocus
+                />
+              </div>
+              <Button
+                onClick={handleSearch}
+                disabled={!query.trim()}
+                className="h-12 px-6 min-w-[120px]"
+              >
+                <Search className="h-4 w-4" />
+                <span className="ml-2">Search</span>
+              </Button>
+            </div>
+          </div>
+
             {/* Search Content */}
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 overflow-y-auto max-h-[calc(85vh-200px)]">
               {/* Keyboard Shortcut Hint */}
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Badge variant="outline" className="font-mono">
-                  Ctrl + K
-                </Badge>
-                <span>to open this search anytime</span>
+              <div className="flex items-center justify-center gap-2 text-sm bg-primary/5 py-2.5 px-4 rounded-lg border border-primary/10">
+                <span className="text-muted-foreground">Press</span>
+                <kbd className="px-2 py-1 bg-background border border-border rounded text-xs font-mono font-semibold">
+                  Ctrl
+                </kbd>
+                <span className="text-muted-foreground">+</span>
+                <kbd className="px-2 py-1 bg-background border border-border rounded text-xs font-mono font-semibold">
+                  K
+                </kbd>
+                <span className="text-muted-foreground">to open this search anytime</span>
               </div>
 
               {/* Example Queries */}
               <div>
-                <p className="text-sm font-semibold mb-3">Try these examples:</p>
+                <p className="text-sm font-semibold mb-3 flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  Try these examples:
+                </p>
                 <div className="space-y-2">
                   {exampleQueries.map((example, index) => (
                     <button
                       key={index}
                       onClick={() => handleExampleClick(example)}
-                      className="w-full text-left px-4 py-3 rounded-lg border border-border hover:bg-accent hover:border-primary transition-colors group"
+                      className="w-full text-left px-4 py-3 rounded-lg border border-border hover:bg-primary/5 hover:border-primary transition-all group"
                     >
                       <div className="flex items-center gap-3">
-                        <Bot className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                        <span className="text-sm">{example}</span>
+                        <div className="p-1.5 rounded-md bg-primary/10 group-hover:bg-primary/20 transition-colors">
+                          <Bot className="h-3.5 w-3.5 text-primary" />
+                        </div>
+                        <span className="text-sm group-hover:text-primary transition-colors">{example}</span>
                       </div>
                     </button>
                   ))}
@@ -233,15 +234,36 @@ export function FloatingSmartSearch({
               </div>
 
               {/* What you can search */}
-              <div className="pt-4 border-t">
-                <p className="text-sm font-semibold mb-2">What you can search:</p>
-                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                  <div>• Category (Harassment, Fraud, etc.)</div>
-                  <div>• Status (Pending, Resolved, etc.)</div>
-                  <div>• Date ranges (Last month, Q4, etc.)</div>
-                  <div>• Risk level (Critical, High, etc.)</div>
-                  <div>• Keywords in title/description</div>
-                  <div>• Priority (Urgent, High, etc.)</div>
+              <div className="pt-4 border-t bg-muted/30 -mx-6 px-6 py-4">
+                <p className="text-sm font-semibold mb-3 flex items-center gap-2">
+                  <Filter className="h-4 w-4 text-primary" />
+                  What you can search:
+                </p>
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                    <span>Category (Harassment, Fraud, etc.)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                    <span>Status (Pending, Resolved, etc.)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                    <span>Date ranges (Last month, Q4, etc.)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                    <span>Risk level (Critical, High, etc.)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                    <span>Keywords in title/description</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
+                    <span>Priority (Urgent, High, etc.)</span>
+                  </div>
                 </div>
               </div>
             </div>
