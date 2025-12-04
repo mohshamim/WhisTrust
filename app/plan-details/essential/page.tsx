@@ -20,7 +20,8 @@ import {
 
 export const metadata = {
   title: "Essential Plan - WhisTrust",
-  description: "Compliance Foundation for small to mid-sized companies requiring core legal compliance",
+  description:
+    "Compliance Foundation for small to mid-sized companies requiring core legal compliance",
 };
 
 export default function EssentialPlanPage() {
@@ -60,7 +61,7 @@ export default function EssentialPlanPage() {
           <Card className="max-w-md mx-auto">
             <CardHeader>
               <div className="flex items-baseline justify-center gap-2">
-                <span className="text-5xl font-bold">$700</span>
+                <span className="text-5xl font-bold">$499</span>
                 <span className="text-muted-foreground">/month</span>
               </div>
               <CardDescription className="text-center mt-4 space-y-2">
@@ -72,9 +73,7 @@ export default function EssentialPlanPage() {
             </CardHeader>
             <CardContent>
               <Button className="w-full h-12" size="lg" asChild>
-                <Link href="/demo">
-                  Start Free Trial
-                </Link>
+                <Link href="/demo">Start Free Trial</Link>
               </Button>
             </CardContent>
           </Card>
@@ -188,7 +187,9 @@ export default function EssentialPlanPage() {
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                   <div>
-                    <span className="font-medium">End-to-End Encryption (E2EE)</span>
+                    <span className="font-medium">
+                      End-to-End Encryption (E2EE)
+                    </span>
                     <p className="text-sm text-muted-foreground">
                       Military-grade encryption for all communications
                     </p>
@@ -337,9 +338,7 @@ export default function EssentialPlanPage() {
         <section className="mt-16 text-center">
           <Card className="max-w-2xl mx-auto">
             <CardContent className="pt-8 pb-8">
-              <h3 className="text-2xl font-bold mb-4">
-                Ready to Get Started?
-              </h3>
+              <h3 className="text-2xl font-bold mb-4">Ready to Get Started?</h3>
               <p className="text-muted-foreground mb-6">
                 Start your 30-day free trial today. No credit card required.
               </p>
@@ -358,4 +357,3 @@ export default function EssentialPlanPage() {
     </div>
   );
 }
-

@@ -48,9 +48,7 @@ export default function ProfessionalPlanPage() {
       <div className="container mx-auto px-4 py-12 max-w-6xl">
         {/* Header */}
         <div className="text-center mb-12">
-          <Badge className="mb-4">
-            Most Popular
-          </Badge>
+          <Badge className="mb-4">Most Popular</Badge>
           <h1 className="text-4xl md:text-5xl font-bold mb-4">
             Professional Plan
           </h1>
@@ -63,7 +61,7 @@ export default function ProfessionalPlanPage() {
           <Card className="max-w-md mx-auto border-primary shadow-lg">
             <CardHeader>
               <div className="flex items-baseline justify-center gap-2">
-                <span className="text-5xl font-bold">$1,200</span>
+                <span className="text-5xl font-bold">$799</span>
                 <span className="text-muted-foreground">/month</span>
               </div>
               <CardDescription className="text-center mt-4 space-y-2">
@@ -75,9 +73,7 @@ export default function ProfessionalPlanPage() {
             </CardHeader>
             <CardContent>
               <Button className="w-full h-12 shadow-md" size="lg" asChild>
-                <Link href="/demo">
-                  Start Free Trial
-                </Link>
+                <Link href="/demo">Start Free Trial</Link>
               </Button>
             </CardContent>
           </Card>
@@ -175,9 +171,7 @@ export default function ProfessionalPlanPage() {
                 <Shield className="h-5 w-5 text-primary" />
                 Security & Reporting
               </CardTitle>
-              <CardDescription>
-                Everything in Essential, plus:
-              </CardDescription>
+              <CardDescription>Everything in Essential, plus:</CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3">
@@ -235,9 +229,7 @@ export default function ProfessionalPlanPage() {
                 <Workflow className="h-5 w-5 text-primary" />
                 Case Management
               </CardTitle>
-              <CardDescription>
-                Everything in Essential, plus:
-              </CardDescription>
+              <CardDescription>Everything in Essential, plus:</CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3">
@@ -286,9 +278,7 @@ export default function ProfessionalPlanPage() {
                 <Globe className="h-5 w-5 text-primary" />
                 Access & Usability
               </CardTitle>
-              <CardDescription>
-                Everything in Essential, plus:
-              </CardDescription>
+              <CardDescription>Everything in Essential, plus:</CardDescription>
             </CardHeader>
             <CardContent>
               <ul className="space-y-3">
@@ -307,7 +297,9 @@ export default function ProfessionalPlanPage() {
                 <li className="flex items-start gap-3">
                   <CheckCircle2 className="h-5 w-5 text-primary mt-0.5 shrink-0" />
                   <div>
-                    <span className="font-medium">Admin Training (Webinars)</span>
+                    <span className="font-medium">
+                      Admin Training (Webinars)
+                    </span>
                     <p className="text-sm text-muted-foreground">
                       Monthly training webinars and onboarding sessions for your
                       compliance team
@@ -357,4 +349,3 @@ export default function ProfessionalPlanPage() {
     </div>
   );
 }
-

@@ -28,6 +28,7 @@ import {
   Sparkles,
   Filter,
   X,
+  RefreshCw,
 } from "lucide-react";
 import { getAvatarUrl } from "@/lib/services/avatar";
 import { getCurrentClientAdmin } from "@/lib/services/client-auth";
@@ -61,6 +62,7 @@ export default function SmartSearchPage() {
   const [filters, setFilters] = useState<any>(null);
   const [showFilters, setShowFilters] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const hasAutoSearched = useRef(false);
 
   // Example queries for suggestions
@@ -74,6 +76,17 @@ export default function SmartSearchPage() {
 
   useEffect(() => {
     loadUserAndOrganization();
+    
+    // Timeout: If loading takes more than 10 seconds, show error
+    const timeout = setTimeout(() => {
+      if (loading) {
+        setLoading(false);
+        setLoadError(true);
+        toast.error("Loading timeout. Please check your connection and retry.");
+      }
+    }, 10000);
+    
+    return () => clearTimeout(timeout);
   }, []);
 
   // Auto-search when URL query parameter is present
@@ -87,12 +100,16 @@ export default function SmartSearchPage() {
   async function loadUserAndOrganization() {
     try {
       const result = await getCurrentClientAdmin();
-      if (result) {
+      if (result && result.user && result.organization) {
         setUser(result.user);
         setOrganization(result.organization);
+        setLoadError(false);
+      } else {
+        setLoadError(true);
       }
     } catch (error) {
       console.error("Error loading user:", error);
+      setLoadError(true);
       toast.error("Failed to load user data");
     } finally {
       setLoading(false);
@@ -275,10 +292,52 @@ export default function SmartSearchPage() {
     );
   }
 
-  if (loading || !user || !organization) {
+  if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <div className="text-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto" />
+          <p className="text-sm text-muted-foreground">Loading Smart Search...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadError || !user || !organization) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <Card className="max-w-md">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-destructive">
+              <X className="h-5 w-5" />
+              Failed to Load
+            </CardTitle>
+            <CardDescription>
+              Unable to load Smart Search. This could be due to a network issue or authentication problem.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              Please check:
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Your internet connection</li>
+                <li>Browser is not in offline mode</li>
+                <li>You are logged in</li>
+              </ul>
+            </div>
+            <div className="flex gap-2">
+              <Button onClick={() => window.location.reload()} className="flex-1">
+                <RefreshCw className="h-4 w-4 mr-2" />
+                Retry
+              </Button>
+              <Button variant="outline" asChild className="flex-1">
+                <a href={`/org/${subdomain}/dashboard`}>
+                  Go to Dashboard
+                </a>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }

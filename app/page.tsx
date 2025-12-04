@@ -61,47 +61,51 @@ function HomeContent() {
     const code = searchParams.get("code");
     const error = searchParams.get("error");
     const errorDescription = searchParams.get("error_description");
-    
+
     // Handle both successful OAuth (code) and failed OAuth (error)
     if (code || error) {
       setIsRedirecting(true); // Prevent page from rendering
-      
+
       // Try multiple methods to get organization subdomain
       let orgSubdomain: string | null = null;
-      
+
       // Method 1: Try to get from query parameter (we pass it in queryParams)
       if (!orgSubdomain) {
         orgSubdomain = searchParams.get("organization_subdomain");
       }
-      
+
       // Method 2: Try localStorage (set before SSO redirect)
       if (!orgSubdomain) {
         orgSubdomain = localStorage.getItem("sso_org_subdomain");
       }
-      
+
       // Method 3: Try cookie (more reliable, set before SSO redirect)
-      if (!orgSubdomain && typeof document !== 'undefined') {
-        const cookies = document.cookie.split(';');
-        const ssoCookie = cookies.find(c => c.trim().startsWith('sso_org_subdomain='));
+      if (!orgSubdomain && typeof document !== "undefined") {
+        const cookies = document.cookie.split(";");
+        const ssoCookie = cookies.find((c) =>
+          c.trim().startsWith("sso_org_subdomain=")
+        );
         if (ssoCookie) {
-          orgSubdomain = ssoCookie.split('=')[1]?.trim() || null;
+          orgSubdomain = ssoCookie.split("=")[1]?.trim() || null;
         }
       }
-      
+
       // Method 3: Try to extract from current hostname (for subdomain-based routing in production)
-      if (!orgSubdomain && typeof window !== 'undefined') {
+      if (!orgSubdomain && typeof window !== "undefined") {
         try {
           const hostname = window.location.hostname;
           // Check if we're on a subdomain (e.g., codesquare.whistrust.app)
-          const hostParts = hostname.split('.');
+          const hostParts = hostname.split(".");
           if (hostParts.length >= 3) {
             // e.g., codesquare.whistrust.app -> codesquare
             const possibleSubdomain = hostParts[0];
             // Exclude known non-tenant subdomains
-            if (possibleSubdomain && 
-                possibleSubdomain !== 'www' && 
-                possibleSubdomain !== 'demo' && 
-                possibleSubdomain !== 'superadmin') {
+            if (
+              possibleSubdomain &&
+              possibleSubdomain !== "www" &&
+              possibleSubdomain !== "demo" &&
+              possibleSubdomain !== "superadmin"
+            ) {
               orgSubdomain = possibleSubdomain;
             }
           }
@@ -109,20 +113,26 @@ function HomeContent() {
           // Ignore errors
         }
       }
-      
+
       // Method 4: Try to extract from referrer URL
-      if (!orgSubdomain && typeof document !== 'undefined' && document.referrer) {
+      if (
+        !orgSubdomain &&
+        typeof document !== "undefined" &&
+        document.referrer
+      ) {
         try {
           const referrerUrl = new URL(document.referrer);
           const referrerHostname = referrerUrl.hostname;
           // Try subdomain from referrer hostname
-          const referrerParts = referrerHostname.split('.');
+          const referrerParts = referrerHostname.split(".");
           if (referrerParts.length >= 3) {
             const possibleSubdomain = referrerParts[0];
-            if (possibleSubdomain && 
-                possibleSubdomain !== 'www' && 
-                possibleSubdomain !== 'demo' && 
-                possibleSubdomain !== 'superadmin') {
+            if (
+              possibleSubdomain &&
+              possibleSubdomain !== "www" &&
+              possibleSubdomain !== "demo" &&
+              possibleSubdomain !== "superadmin"
+            ) {
               orgSubdomain = possibleSubdomain;
             }
           }
@@ -138,66 +148,77 @@ function HomeContent() {
           // Ignore URL parsing errors
         }
       }
-      
+
       if (orgSubdomain) {
         // Clear the stored subdomain
         localStorage.removeItem("sso_org_subdomain");
-        if (typeof document !== 'undefined') {
-          document.cookie = 'sso_org_subdomain=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+        if (typeof document !== "undefined") {
+          document.cookie =
+            "sso_org_subdomain=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
         }
-        
+
         // If we have a code, redirect to callback route
         if (code) {
-          window.location.replace(`/org/${orgSubdomain}/sso/callback?code=${code}`);
+          window.location.replace(
+            `/org/${orgSubdomain}/sso/callback?code=${code}`
+          );
           return;
         }
-        
+
         // If we have an error, redirect to login page with error message
         if (error) {
-          const errorMsg = errorDescription || error || "SSO authentication failed";
-          window.location.replace(`/org/${orgSubdomain}/login?error=${encodeURIComponent(errorMsg)}`);
+          const errorMsg =
+            errorDescription || error || "SSO authentication failed";
+          window.location.replace(
+            `/org/${orgSubdomain}/login?error=${encodeURIComponent(errorMsg)}`
+          );
           return;
         }
       }
-      
+
       // If no subdomain found, try one more time to extract subdomain
       let errorOrgSubdomain: string | null = null;
-      
-      if (typeof window !== 'undefined') {
+
+      if (typeof window !== "undefined") {
         // Try hostname
         try {
           const hostname = window.location.hostname;
-          const hostParts = hostname.split('.');
+          const hostParts = hostname.split(".");
           if (hostParts.length >= 3) {
             const possibleSubdomain = hostParts[0];
-            if (possibleSubdomain && 
-                possibleSubdomain !== 'www' && 
-                possibleSubdomain !== 'demo' && 
-                possibleSubdomain !== 'superadmin') {
+            if (
+              possibleSubdomain &&
+              possibleSubdomain !== "www" &&
+              possibleSubdomain !== "demo" &&
+              possibleSubdomain !== "superadmin"
+            ) {
               errorOrgSubdomain = possibleSubdomain;
             }
           }
         } catch (e) {
           // Ignore
         }
-        
+
         // Try referrer if still not found
         if (!errorOrgSubdomain && document.referrer) {
           try {
             const referrerUrl = new URL(document.referrer);
             const referrerHostname = referrerUrl.hostname;
-            const referrerParts = referrerHostname.split('.');
+            const referrerParts = referrerHostname.split(".");
             if (referrerParts.length >= 3) {
               const possibleSubdomain = referrerParts[0];
-              if (possibleSubdomain && 
-                  possibleSubdomain !== 'www' && 
-                  possibleSubdomain !== 'demo' && 
-                  possibleSubdomain !== 'superadmin') {
+              if (
+                possibleSubdomain &&
+                possibleSubdomain !== "www" &&
+                possibleSubdomain !== "demo" &&
+                possibleSubdomain !== "superadmin"
+              ) {
                 errorOrgSubdomain = possibleSubdomain;
               }
             }
             if (!errorOrgSubdomain) {
-              const pathMatch = referrerUrl.pathname.match(/\/org\/([a-z0-9-]+)/);
+              const pathMatch =
+                referrerUrl.pathname.match(/\/org\/([a-z0-9-]+)/);
               if (pathMatch) {
                 errorOrgSubdomain = pathMatch[1];
               }
@@ -206,27 +227,37 @@ function HomeContent() {
             // Ignore
           }
         }
-        
-        console.error('[SSO Fallback] Could not determine organization subdomain', {
-          hostname: window.location.hostname,
-          referrer: document.referrer,
-          hasLocalStorage: !!localStorage.getItem("sso_org_subdomain"),
-          cookies: document.cookie,
-          extractedOrg: errorOrgSubdomain,
-          hasCode: !!code,
-          hasError: !!error,
-        });
-        
+
+        console.error(
+          "[SSO Fallback] Could not determine organization subdomain",
+          {
+            hostname: window.location.hostname,
+            referrer: document.referrer,
+            hasLocalStorage: !!localStorage.getItem("sso_org_subdomain"),
+            cookies: document.cookie,
+            extractedOrg: errorOrgSubdomain,
+            hasCode: !!code,
+            hasError: !!error,
+          }
+        );
+
         // If we found an org, redirect to login page with error
         if (errorOrgSubdomain) {
-          const errorMsg = errorDescription || error || "SSO authentication failed";
-          window.location.replace(`/org/${errorOrgSubdomain}/login?error=${encodeURIComponent(errorMsg)}`);
+          const errorMsg =
+            errorDescription || error || "SSO authentication failed";
+          window.location.replace(
+            `/org/${errorOrgSubdomain}/login?error=${encodeURIComponent(
+              errorMsg
+            )}`
+          );
           return;
         }
       }
-      
+
       // Last resort: redirect to error page
-      let errorUrl = `/error?message=${encodeURIComponent("SSO authentication failed. Please try logging in again from your organization's login page.")}`;
+      let errorUrl = `/error?message=${encodeURIComponent(
+        "SSO authentication failed. Please try logging in again from your organization's login page."
+      )}`;
       if (errorOrgSubdomain) {
         errorUrl += `&org=${errorOrgSubdomain}`;
       }
@@ -407,8 +438,6 @@ function HomeContent() {
               <Link href="/documentation">Documentation</Link>
             </Button>
           </div>
-
-          
         </div>
       </section>
 
@@ -588,7 +617,7 @@ function HomeContent() {
                 </p>
                 <div className="mt-6">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-bold">$700</span>
+                    <span className="text-5xl font-bold">$499</span>
                     <span className="text-muted-foreground">/mo</span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-2">
@@ -653,7 +682,7 @@ function HomeContent() {
                 </p>
                 <div className="mt-6">
                   <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-bold">$1,200</span>
+                    <span className="text-5xl font-bold">$799</span>
                     <span className="text-muted-foreground">/mo</span>
                   </div>
                   <p className="text-sm text-muted-foreground mt-2">
@@ -684,7 +713,9 @@ function HomeContent() {
                   </div>
                   <div className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                    <span className="text-sm">Multi-language & mobile apps</span>
+                    <span className="text-sm">
+                      Multi-language & mobile apps
+                    </span>
                   </div>
                   <div className="flex items-start gap-2">
                     <Check className="h-4 w-4 text-primary mt-0.5 shrink-0" />
@@ -959,13 +990,13 @@ function HomeContent() {
             © 2025{" "}
             <a
               href="http://aisar.sa/"
-            target="_blank"
-            rel="noopener noreferrer"
+              target="_blank"
+              rel="noopener noreferrer"
               className="hover:text-primary transition-colors underline-offset-4 hover:underline"
-          >
+            >
               Aisar Technologies
-          </a>
-            {" "}| All Rights Reserved.
+            </a>{" "}
+            | All Rights Reserved.
           </div>
         </div>
       </footer>
@@ -975,14 +1006,16 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading...</p>
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-background flex items-center justify-center">
+          <div className="text-center">
+            <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
         </div>
-      </div>
-    }>
+      }
+    >
       <HomeContent />
     </Suspense>
   );
