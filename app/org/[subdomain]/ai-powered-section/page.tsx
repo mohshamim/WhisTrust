@@ -86,6 +86,21 @@ export default function AIPoweredSectionPage() {
         "Generate summary and key findings",
       ],
     },
+    {
+      id: "risk-predictor",
+      title: "Risk Predictor",
+      description: "Predict case severity and priority using historical patterns and AI-powered analysis.",
+      icon: TrendingUp,
+      status: "active",
+      usageCount: 0,
+      href: `/org/${subdomain}/ai-powered-section/risk-predictor`,
+      features: [
+        "AI-powered risk scoring (0-100)",
+        "Automatic priority recommendations",
+        "Keyword and pattern detection",
+        "Batch analysis for multiple cases",
+      ],
+    },
   ];
 
   const comingSoonFeatures = [
@@ -96,14 +111,6 @@ export default function AIPoweredSectionPage() {
       icon: Brain,
       status: "coming_soon",
       estimatedRelease: "Q1 2026",
-    },
-    {
-      id: "risk-predictor",
-      title: "Risk Predictor",
-      description: "Predict case severity and priority using historical patterns and machine learning.",
-      icon: TrendingUp,
-      status: "coming_soon",
-      estimatedRelease: "Q2 2026",
     },
     {
       id: "smart-search",
@@ -291,7 +298,7 @@ export default function AIPoweredSectionPage() {
                         </p>
                         <Button asChild>
                           <a href={feature.href}>
-                            Use Attachment Analyzer
+                            Use {feature.title}
                             <ArrowRight className="h-4 w-4 ml-2" />
                           </a>
                         </Button>
