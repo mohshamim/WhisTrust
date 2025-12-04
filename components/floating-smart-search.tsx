@@ -142,7 +142,6 @@ export function FloatingSmartSearch({
         `}>
           <div className="
             bg-white dark:bg-gray-900 backdrop-blur-sm
-            text-foreground
             px-5 py-3
             rounded-xl
             shadow-[0_8px_20px_rgba(0,0,0,0.15)]
@@ -151,7 +150,7 @@ export function FloatingSmartSearch({
             flex items-center gap-2.5
           ">
             <Sparkles className="h-4 w-4 text-primary animate-pulse" />
-            <span className="font-semibold text-sm bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
+            <span className="font-bold text-sm text-foreground">
               Smart AI Search
             </span>
           </div>
