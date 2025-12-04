@@ -128,7 +128,8 @@ export default function RiskPredictorPage() {
       setLoading(true);
       const supabase = createClient();
 
-      const { data, error } = await supabase
+      // Try to load with risk predictions
+      let { data, error } = await supabase
         .from("reports")
         .select(`
           id,
@@ -161,10 +162,23 @@ export default function RiskPredictorPage() {
         .eq("organization_id", organization.id)
         .order("created_at", { ascending: false });
 
+      // If the risk_predictions table doesn't exist, load without it
+      if (error && error.message?.includes("does not exist")) {
+        console.warn("case_risk_predictions table not found, loading cases without predictions");
+        const result = await supabase
+          .from("reports")
+          .select("id, case_number, title, category, status, created_at")
+          .eq("organization_id", organization.id)
+          .order("created_at", { ascending: false });
+        
+        data = result.data;
+        error = result.error;
+      }
+
       if (error) throw error;
 
       // Flatten the risk_prediction array to a single object
-      const formattedData = data.map((item: any) => ({
+      const formattedData = (data || []).map((item: any) => ({
         ...item,
         risk_prediction: item.risk_prediction?.[0] || null,
       }));
@@ -172,7 +186,7 @@ export default function RiskPredictorPage() {
       setCases(formattedData);
     } catch (error) {
       console.error("Error loading cases:", error);
-      toast.error("Failed to load cases");
+      toast.error("Failed to load cases. Please refresh the page.");
     } finally {
       setLoading(false);
     }
