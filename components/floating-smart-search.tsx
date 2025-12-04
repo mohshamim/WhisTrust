@@ -25,6 +25,7 @@ export function FloatingSmartSearch({
   const [query, setQuery] = useState("");
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [showLabel, setShowLabel] = useState(false);
 
   // Example queries
   const exampleQueries = [
@@ -72,6 +73,30 @@ export function FloatingSmartSearch({
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
+  // Auto-animate label (slide in/out every few seconds)
+  useEffect(() => {
+    const animationCycle = () => {
+      // Show label
+      setShowLabel(true);
+      
+      // Hide after 3 seconds
+      setTimeout(() => {
+        setShowLabel(false);
+      }, 3000);
+    };
+
+    // Start first animation after 2 seconds
+    const initialTimeout = setTimeout(animationCycle, 2000);
+    
+    // Repeat every 8 seconds (3s visible + 5s hidden)
+    const interval = setInterval(animationCycle, 8000);
+
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
+  }, []);
+
   // Handle search submission
   const handleSearch = () => {
     if (query.trim()) {
@@ -100,32 +125,40 @@ export function FloatingSmartSearch({
         onClick={() => setIsOpen(true)}
         className={`
           fixed ${positionClasses[position]}
-          flex items-center gap-0
           group
           z-50
           ${isVisible ? "translate-y-0 opacity-100" : "translate-y-24 opacity-0 pointer-events-none"}
         `}
         aria-label="Open AI Smart Search"
       >
-        {/* Text Label - Slides in from left on hover */}
-        <div className="
-          overflow-hidden
-          opacity-0 group-hover:opacity-100
-          max-w-0 group-hover:max-w-xs
-          transition-all duration-300 ease-out
-          mr-0 group-hover:mr-3
-        ">
+        {/* Text Label - Auto slides in/out from top */}
+        <div className={`
+          absolute bottom-full left-1/2 -translate-x-1/2 mb-3
+          transition-all duration-500 ease-out
+          ${showLabel 
+            ? "opacity-100 translate-y-0" 
+            : "opacity-0 translate-y-4 pointer-events-none"
+          }
+        `}>
           <div className="
             bg-primary/95 backdrop-blur-sm
             text-primary-foreground
             px-4 py-2.5
-            rounded-l-full rounded-r-lg
+            rounded-full
             shadow-lg
             border border-primary/20
             whitespace-nowrap
           ">
             <span className="font-semibold text-sm">Smart AI Search</span>
           </div>
+          {/* Small arrow pointing down */}
+          <div className="
+            absolute left-1/2 -translate-x-1/2 -bottom-1.5
+            w-3 h-3 
+            bg-primary/95 
+            rotate-45 
+            border-r border-b border-primary/20
+          "></div>
         </div>
 
         {/* Circular Icon Button */}
