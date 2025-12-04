@@ -673,6 +673,14 @@ export default function AuditLogsPage() {
                 <CardContent>
                   <div className="flex items-center gap-3">
                     <Avatar className="h-12 w-12">
+                      <AvatarImage
+                        src={getAvatarUrl({
+                          avatar_url: selectedLog.user_avatar_url,
+                          email: selectedLog.user_email || "",
+                          avatar_style: selectedLog.user_avatar_style,
+                        })}
+                        alt={selectedLog.user_name || "User"}
+                      />
                       <AvatarFallback>
                         {selectedLog.user_name?.substring(0, 2).toUpperCase() ||
                           "SY"}
