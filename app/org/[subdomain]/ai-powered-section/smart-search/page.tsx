@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
@@ -60,6 +60,8 @@ export default function SmartSearchPage() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [filters, setFilters] = useState<any>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const hasAutoSearched = useRef(false);
 
   // Example queries for suggestions
   const exampleQueries = [
@@ -76,7 +78,8 @@ export default function SmartSearchPage() {
 
   // Auto-search when URL query parameter is present
   useEffect(() => {
-    if (urlQuery && organization && !searching && results.length === 0) {
+    if (urlQuery && organization && !searching && !hasAutoSearched.current) {
+      hasAutoSearched.current = true;
       handleSearch();
     }
   }, [urlQuery, organization]);
@@ -90,6 +93,9 @@ export default function SmartSearchPage() {
       }
     } catch (error) {
       console.error("Error loading user:", error);
+      toast.error("Failed to load user data");
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -121,6 +127,8 @@ export default function SmartSearchPage() {
 
       // Step 2: Build Supabase query
       const supabase = createClient();
+      
+      // Try to load with risk predictions
       let queryBuilder = supabase
         .from("reports")
         .select(`
@@ -157,7 +165,51 @@ export default function SmartSearchPage() {
 
       queryBuilder = queryBuilder.order("created_at", { ascending: false }).limit(100);
 
-      const { data, error } = await queryBuilder;
+      let { data, error } = await queryBuilder;
+
+      // If the risk_predictions table doesn't exist, retry without it
+      if (error && error.message?.includes("does not exist")) {
+        console.warn("case_risk_predictions table not found, searching without risk data");
+        
+        queryBuilder = supabase
+          .from("reports")
+          .select(`
+            id,
+            case_number,
+            title,
+            description,
+            category,
+            status,
+            priority,
+            created_at
+          `)
+          .eq("organization_id", organization.id);
+
+        // Reapply filters
+        if (parseResult.filters.category) {
+          queryBuilder = queryBuilder.eq("category", parseResult.filters.category);
+        }
+        if (parseResult.filters.status) {
+          queryBuilder = queryBuilder.eq("status", parseResult.filters.status);
+        }
+        if (parseResult.filters.date_from) {
+          queryBuilder = queryBuilder.gte("created_at", parseResult.filters.date_from);
+        }
+        if (parseResult.filters.date_to) {
+          queryBuilder = queryBuilder.lte("created_at", parseResult.filters.date_to);
+        }
+        if (parseResult.filters.search_text) {
+          queryBuilder = queryBuilder.or(
+            `title.ilike.%${parseResult.filters.search_text}%,description.ilike.%${parseResult.filters.search_text}%`
+          );
+        }
+
+        queryBuilder = queryBuilder.order("created_at", { ascending: false }).limit(100);
+
+        const result = await queryBuilder;
+        data = result.data;
+        error = result.error;
+      }
 
       if (error) throw error;
 
@@ -218,7 +270,7 @@ export default function SmartSearchPage() {
     );
   }
 
-  if (!user || !organization) {
+  if (loading || !user || !organization) {
     return (
       <div className="flex items-center justify-center h-screen">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
