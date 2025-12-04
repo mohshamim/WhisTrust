@@ -58,6 +58,7 @@ import {
 } from "lucide-react";
 import { HelpTooltip } from "@/components/help-tooltip";
 import { DemoModeBanner } from "@/components/demo-mode-banner";
+import { FloatingSmartSearch } from "@/components/floating-smart-search";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import { AIAttachmentAnalysis } from "@/components/ai-attachment-analysis";
@@ -1603,6 +1604,13 @@ export default function ClientReportsPage() {
         </SheetContent>
       </Sheet>
       </SidebarInset>
+      
+      {/* Floating Smart Search Button */}
+      <FloatingSmartSearch
+        subdomain={subdomain}
+        organizationId={organization?.id || ""}
+        position="bottom-right"
+      />
     </SidebarProvider>
     </TooltipProvider>
   );

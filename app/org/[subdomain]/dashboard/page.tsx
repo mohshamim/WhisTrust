@@ -36,6 +36,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { DemoModeBanner } from "@/components/demo-mode-banner";
+import { FloatingSmartSearch } from "@/components/floating-smart-search";
 import type { LucideIcon } from "lucide-react";
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip } from "recharts";
 import { getAvatarUrl } from "@/lib/services/avatar";
@@ -965,6 +966,13 @@ export default function ClientDashboardPage() {
         </div>
         </div>
       </SidebarInset>
+      
+      {/* Floating Smart Search Button */}
+      <FloatingSmartSearch
+        subdomain={subdomain}
+        organizationId={organization?.id || ""}
+        position="bottom-right"
+      />
     </SidebarProvider>
   );
 }

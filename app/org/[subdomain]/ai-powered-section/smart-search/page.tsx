@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { ClientSidebar } from "@/components/client-sidebar";
@@ -49,11 +49,13 @@ interface SearchResult {
 
 export default function SmartSearchPage() {
   const params = useParams();
+  const searchParams = useSearchParams();
   const subdomain = params.subdomain as string;
+  const urlQuery = searchParams.get("q");
   
   const [user, setUser] = useState<any>(null);
   const [organization, setOrganization] = useState<any>(null);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(urlQuery || "");
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState<SearchResult[]>([]);
   const [filters, setFilters] = useState<any>(null);
@@ -71,6 +73,13 @@ export default function SmartSearchPage() {
   useEffect(() => {
     loadUserAndOrganization();
   }, []);
+
+  // Auto-search when URL query parameter is present
+  useEffect(() => {
+    if (urlQuery && organization && !searching && results.length === 0) {
+      handleSearch();
+    }
+  }, [urlQuery, organization]);
 
   async function loadUserAndOrganization() {
     try {
