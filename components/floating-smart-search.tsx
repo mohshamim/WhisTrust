@@ -100,17 +100,17 @@ export function FloatingSmartSearch({
         onClick={() => setIsOpen(true)}
         className={`
           fixed ${positionClasses[position]}
-          px-4 py-3 md:px-5 md:py-3.5
-          rounded-xl
+          w-16 h-16 md:w-18 md:h-18
+          rounded-full
           bg-primary hover:bg-primary/90
           text-primary-foreground
           shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.2)]
           transition-all duration-300
-          hover:scale-105 hover:-translate-y-1 active:scale-95
+          hover:scale-110 active:scale-95
           z-50
-          flex items-center gap-2 md:gap-3
+          flex items-center justify-center
           group
-          border border-primary/20
+          border-2 border-primary/20
           backdrop-blur-sm
           ${isVisible ? "translate-y-0 opacity-100" : "translate-y-24 opacity-0 pointer-events-none"}
         `}
@@ -121,35 +121,43 @@ export function FloatingSmartSearch({
             : "none"
         }}
       >
-        {/* Robot Icon */}
-        <div className="relative">
-          <Bot className="h-5 w-5 md:h-6 md:w-6" />
-          <Sparkles className="absolute -top-1 -right-1 h-2.5 w-2.5 md:h-3 md:w-3 text-yellow-300 animate-pulse" />
-        </div>
-        
-        {/* Text */}
-        <span className="font-semibold text-sm md:text-base whitespace-nowrap">
-          Smart AI Search
-        </span>
-
-        {/* Tooltip */}
-        <div className="absolute bottom-full mb-2 right-0 hidden group-hover:block animate-in fade-in slide-in-from-bottom-2 duration-200">
-          <div className="bg-gray-900 text-white text-xs px-3 py-2 rounded-lg shadow-lg whitespace-nowrap">
-            <div className="font-semibold">AI Smart Search</div>
-            <div className="text-gray-300 mt-0.5">
-              Press{" "}
-              <kbd className="px-1 py-0.5 bg-gray-800 rounded">Ctrl</kbd>
-              {" + "}
-              <kbd className="px-1 py-0.5 bg-gray-800 rounded">K</kbd>
-            </div>
+        {/* Floating Label - Appears on Hover */}
+        <div className="absolute bottom-full mb-4 left-1/2 -translate-x-1/2 
+                        opacity-0 group-hover:opacity-100
+                        translate-y-2 group-hover:translate-y-0
+                        scale-95 group-hover:scale-100
+                        transition-all duration-300 ease-out
+                        pointer-events-none">
+          <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md 
+                          shadow-xl rounded-lg px-4 py-3 
+                          border border-primary/20">
+            <p className="font-semibold text-sm whitespace-nowrap text-foreground">
+              Smart AI Search
+            </p>
+            <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1">
+              <span>Press</span>
+              <kbd className="px-1.5 py-0.5 bg-muted border border-border rounded text-[10px] font-mono">Ctrl</kbd>
+              <span>+</span>
+              <kbd className="px-1.5 py-0.5 bg-muted border border-border rounded text-[10px] font-mono">K</kbd>
+            </p>
           </div>
+          {/* Arrow pointing down to button */}
+          <div className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 
+                          w-3 h-3 bg-white/95 dark:bg-gray-900/95 
+                          rotate-45 border-r border-b border-primary/20"></div>
+        </div>
+
+        {/* Robot Icon */}
+        <div className="relative z-10">
+          <Bot className="h-7 w-7 md:h-8 md:w-8" />
+          <Sparkles className="absolute -top-1 -right-1 h-3.5 w-3.5 md:h-4 md:w-4 text-yellow-300 animate-pulse" />
         </div>
 
         {/* Glow Effect */}
-        <div className="absolute inset-0 rounded-xl bg-primary/30 blur-md -z-10 opacity-50 group-hover:opacity-70 transition-opacity"></div>
+        <div className="absolute inset-0 rounded-full bg-primary/30 blur-lg -z-10 opacity-50 group-hover:opacity-70 transition-opacity duration-300"></div>
         
         {/* Subtle Pulse Ring */}
-        <div className="absolute inset-0 rounded-xl border-2 border-primary/20 animate-ping"></div>
+        <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping opacity-75"></div>
       </button>
 
       {/* Search Modal */}
@@ -267,7 +275,6 @@ export function FloatingSmartSearch({
                 </div>
               </div>
             </div>
-          </div>
         </DialogContent>
       </Dialog>
     </>
