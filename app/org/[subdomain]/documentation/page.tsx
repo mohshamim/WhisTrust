@@ -365,7 +365,7 @@ export default function DocumentationPage() {
           user={{
             name: admin.full_name || admin.name || admin.email.split("@")[0],
             email: admin.email,
-            avatar: getAvatarUrl({ avatar_url: admin.avatar_url, email: admin.email }),
+            avatar: getAvatarUrl({ avatar_url: admin.avatar_url, email: admin.email, avatar_style: admin.avatar_style }),
           }}
           organization={{
             name: organization.name,

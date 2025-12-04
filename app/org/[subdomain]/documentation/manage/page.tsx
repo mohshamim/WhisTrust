@@ -254,7 +254,7 @@ export default function ManageDocumentationPage() {
         user={{
           name: user.full_name || "User",
           email: user.email,
-          avatar: getAvatarUrl({ avatar_url: user.avatar_url, email: user.email }),
+          avatar: getAvatarUrl({ avatar_url: user.avatar_url, email: user.email, avatar_style: user.avatar_style }),
         }}
         organization={{
           name: organization.name,

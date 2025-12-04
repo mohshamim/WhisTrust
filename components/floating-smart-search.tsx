@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Sparkles, X, Loader2 } from "lucide-react";
+import { Search, Sparkles, X, Loader2, Bot } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -100,25 +100,30 @@ export function FloatingSmartSearch({
         onClick={() => setIsOpen(true)}
         className={`
           fixed ${positionClasses[position]}
-          w-14 h-14 md:w-16 md:h-16
-          rounded-full
-          bg-gradient-to-br from-blue-500 via-purple-500 to-purple-600
-          text-white
+          px-4 py-3 md:px-5 md:py-3.5
+          rounded-lg
+          bg-primary hover:bg-primary/90
+          text-primary-foreground
           shadow-lg hover:shadow-xl
           transition-all duration-300
-          hover:scale-110 active:scale-95
+          hover:scale-105 active:scale-95
           z-50
-          flex items-center justify-center
+          flex items-center gap-2 md:gap-3
           group
           ${isVisible ? "translate-y-0 opacity-100" : "translate-y-24 opacity-0 pointer-events-none"}
         `}
         aria-label="Open AI Smart Search"
       >
-        {/* Icon Stack */}
+        {/* Robot Icon */}
         <div className="relative">
-          <Search className="h-6 w-6 md:h-7 md:w-7" />
-          <Sparkles className="absolute -top-1 -right-1 h-3 w-3 md:h-4 md:w-4 text-yellow-300 animate-pulse" />
+          <Bot className="h-5 w-5 md:h-6 md:w-6" />
+          <Sparkles className="absolute -top-1 -right-1 h-2.5 w-2.5 md:h-3 md:w-3 text-yellow-300 animate-pulse" />
         </div>
+        
+        {/* Text */}
+        <span className="font-semibold text-sm md:text-base whitespace-nowrap">
+          Smart AI Search
+        </span>
 
         {/* Tooltip */}
         <div className="absolute bottom-full mb-2 right-0 hidden group-hover:block animate-in fade-in slide-in-from-bottom-2 duration-200">
@@ -133,8 +138,8 @@ export function FloatingSmartSearch({
           </div>
         </div>
 
-        {/* Pulse Ring Animation */}
-        <div className="absolute inset-0 rounded-full bg-purple-400 animate-ping opacity-20"></div>
+        {/* Pulse Effect */}
+        <div className="absolute inset-0 rounded-lg bg-primary/20 animate-ping opacity-20"></div>
       </button>
 
       {/* Search Modal */}
@@ -142,13 +147,14 @@ export function FloatingSmartSearch({
         <DialogContent className="max-w-3xl p-0 gap-0 bg-transparent border-none shadow-none">
           <div className="bg-background rounded-lg shadow-2xl overflow-hidden">
             {/* Search Header */}
-            <div className="p-6 pb-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950">
+            <div className="p-6 pb-4 bg-gradient-to-r from-primary/5 to-primary/10">
               <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-primary/10 rounded-lg">
-                  <Search className="h-6 w-6 text-primary" />
+                <div className="p-2 bg-primary/10 rounded-lg relative">
+                  <Bot className="h-6 w-6 text-primary" />
+                  <Sparkles className="absolute -top-0.5 -right-0.5 h-3 w-3 text-primary animate-pulse" />
                 </div>
                 <div className="flex-1">
-                  <h2 className="text-2xl font-bold">AI Smart Search</h2>
+                  <h2 className="text-2xl font-bold">Smart AI Search</h2>
                   <p className="text-sm text-muted-foreground">
                     Search cases using natural language
                   </p>
@@ -208,7 +214,7 @@ export function FloatingSmartSearch({
                       className="w-full text-left px-4 py-3 rounded-lg border border-border hover:bg-accent hover:border-primary transition-colors group"
                     >
                       <div className="flex items-center gap-3">
-                        <Sparkles className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                        <Bot className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
                         <span className="text-sm">{example}</span>
                       </div>
                     </button>

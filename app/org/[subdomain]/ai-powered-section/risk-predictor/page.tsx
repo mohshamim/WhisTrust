@@ -341,7 +341,7 @@ export default function RiskPredictorPage() {
         user={{
           name: user.full_name || user.email,
           email: user.email,
-          avatar: getAvatarUrl({ avatar_url: user.avatar_url, email: user.email }),
+          avatar: getAvatarUrl({ avatar_url: user.avatar_url, email: user.email, avatar_style: user.avatar_style }),
         }}
         organization={{
           name: organization.name,
