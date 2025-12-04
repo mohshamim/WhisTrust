@@ -12,10 +12,13 @@ import { getSupabaseConfig } from "@/lib/config/environment";
  */
 export function createServiceClient() {
   const config = getSupabaseConfig();
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+  
+  // Use production service role key if available, otherwise use default
+  const supabaseServiceKey = process.env.PROD_SUPABASE_SERVICE_ROLE_KEY 
+                           || process.env.SUPABASE_SERVICE_ROLE_KEY!;
   
   if (!supabaseServiceKey) {
-    throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY environment variable");
+    throw new Error("Missing SUPABASE_SERVICE_ROLE_KEY or PROD_SUPABASE_SERVICE_ROLE_KEY environment variable");
   }
   
   return createClient(config.url, supabaseServiceKey, {
