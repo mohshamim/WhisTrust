@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { 
   TrendingUp, 
   Shield, 
@@ -41,7 +41,7 @@ import {
   Target,
   Loader2,
 } from "lucide-react";
-import { getAvatarUrl } from "@/lib/utils";
+import { getAvatarUrl } from "@/lib/services/avatar";
 import { getCurrentClientAdmin } from "@/lib/services/client-auth";
 import { format } from "date-fns";
 
@@ -86,7 +86,6 @@ export default function RiskPredictorPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCase, setSelectedCase] = useState<CaseWithRiskPrediction | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const { toast } = useToast();
 
   // Stats
   const stats = {
@@ -173,11 +172,7 @@ export default function RiskPredictorPage() {
       setCases(formattedData);
     } catch (error) {
       console.error("Error loading cases:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load cases",
-        variant: "destructive",
-      });
+      toast.error("Failed to load cases");
     } finally {
       setLoading(false);
     }
@@ -225,22 +220,15 @@ export default function RiskPredictorPage() {
         throw new Error(result.error || "Analysis failed");
       }
 
-      toast({
-        title: "Success",
-        description: result.isNew 
-          ? "Risk prediction completed successfully" 
-          : "Risk prediction updated successfully",
-      });
+      toast.success(result.isNew 
+        ? "Risk prediction completed successfully" 
+        : "Risk prediction updated successfully");
 
       // Reload cases to get updated prediction
       await loadCases();
     } catch (error) {
       console.error("Error analyzing case:", error);
-      toast({
-        title: "Error",
-        description: "Failed to analyze case risk",
-        variant: "destructive",
-      });
+      toast.error("Failed to analyze case risk");
     } finally {
       setAnalyzing(null);
     }
@@ -256,10 +244,7 @@ export default function RiskPredictorPage() {
         .map(c => c.id);
 
       if (unscoredCaseIds.length === 0) {
-        toast({
-          title: "Info",
-          description: "All cases have been analyzed",
-        });
+        toast.info("All cases have been analyzed");
         return;
       }
 
@@ -275,20 +260,13 @@ export default function RiskPredictorPage() {
         throw new Error("Batch analysis failed");
       }
 
-      toast({
-        title: "Batch Analysis Complete",
-        description: `Successfully analyzed ${result.results.success} cases. ${result.results.failed} failed.`,
-      });
+      toast.success(`Batch Analysis Complete: Successfully analyzed ${result.results.success} cases. ${result.results.failed} failed.`);
 
       // Reload cases
       await loadCases();
     } catch (error) {
       console.error("Error in batch analysis:", error);
-      toast({
-        title: "Error",
-        description: "Batch analysis failed",
-        variant: "destructive",
-      });
+      toast.error("Batch analysis failed");
     } finally {
       setBatchAnalyzing(false);
     }

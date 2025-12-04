@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { predictCaseRisk } from "@/lib/services/risk-predictor";
 
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = await createServerSupabaseClient();
     
     // Get request body
     const { reportId, reportIds } = await request.json();
@@ -293,7 +293,7 @@ async function handleBatchPrediction(reportIds: string[], supabase: any) {
 // GET endpoint to retrieve existing predictions
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient();
+    const supabase = await createServerSupabaseClient();
     const searchParams = request.nextUrl.searchParams;
     const reportId = searchParams.get("reportId");
     
