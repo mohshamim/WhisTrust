@@ -148,7 +148,9 @@ export function FloatingSmartSearch({
             shadow-lg
             border border-primary/20
             whitespace-nowrap
+            flex items-center gap-2
           ">
+            <Sparkles className="h-4 w-4 text-yellow-300 animate-pulse" />
             <span className="font-semibold text-sm">Smart AI Search</span>
           </div>
           {/* Small arrow pointing down */}
@@ -177,7 +179,6 @@ export function FloatingSmartSearch({
           {/* Robot Icon */}
           <div className="relative z-10">
             <Bot className="h-6 w-6 md:h-7 md:w-7" />
-            <Sparkles className="absolute -top-1 -right-1 h-3 w-3 md:h-3.5 md:w-3.5 text-yellow-300 animate-pulse" />
           </div>
 
           {/* Glow Effect */}
