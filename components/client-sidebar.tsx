@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { useParams } from "next/navigation";
+import { formatHex, formatCss, oklch } from "culori";
 import {
   LayoutDashboard,
   FileSearch,
@@ -155,54 +156,88 @@ export function ClientSidebar({
   React.useEffect(() => {
     let cancelled = false;
 
-    const hexToHslString = (hex: string) => {
-      let c = hex.replace("#", "");
-      if (c.length === 3) {
-        c = c.split("").map((x) => x + x).join("");
-      }
-      const r = parseInt(c.substring(0, 2), 16) / 255;
-      const g = parseInt(c.substring(2, 4), 16) / 255;
-      const b = parseInt(c.substring(4, 6), 16) / 255;
-      const max = Math.max(r, g, b);
-      const min = Math.min(r, g, b);
-      let h = 0;
-      let s = 0;
-      const l = (max + min) / 2;
-      const d = max - min;
-      if (d !== 0) {
-        s = l > 0.5 ? d / (2 - max - min) : d / (max - min);
-        switch (max) {
-          case r:
-            h = (g - b) / d + (g < b ? 6 : 0);
-            break;
-          case g:
-            h = (b - r) / d + 2;
-            break;
-          case b:
-            h = (r - g) / d + 4;
-            break;
-        }
-        h /= 6;
-      }
-      return `${Math.round(h * 360)} ${Math.round(s * 100)}% ${Math.round(l * 100)}%`;
-    };
-
     const setBrandPalette = (hex: string) => {
-      const hsl = hexToHslString(hex);
-      document.documentElement.style.setProperty("--brand-primary", hex);
-      document.documentElement.style.setProperty("--ring", hsl);
-      document.documentElement.style.setProperty("--primary", hsl);
-      document.documentElement.style.setProperty("--sidebar-primary", hsl);
-      // simple chart palette based on lightness steps
-      const [hStr, sStr, lStr] = hsl.split(" ");
-      const h = hStr;
-      const s = sStr;
-      const baseL = parseInt(lStr);
-      const steps = [0, -10, 10, -20, 20];
-      steps.forEach((delta, idx) => {
-        const l = Math.max(0, Math.min(100, baseL + delta));
-        document.documentElement.style.setProperty(`--chart-${idx + 1}`, `${h} ${s} ${l}%`);
-      });
+      try {
+        console.log("Applying brand color (hex):", hex);
+        
+        // Simple approach: Just use the hex color directly
+        // Tailwind and modern CSS can handle hex in custom properties
+        document.documentElement.style.setProperty("--brand-primary-hex", hex);
+        
+        // For backward compatibility, also try OKLCH conversion
+        const color = oklch(hex);
+        if (color) {
+          const oklchValue = `${color.l.toFixed(4)} ${(color.c || 0).toFixed(4)} ${(color.h || 0).toFixed(4)}`;
+          document.documentElement.style.setProperty("--primary", oklchValue);
+          document.documentElement.style.setProperty("--sidebar-primary", oklchValue);
+          
+          // Generate chart colors
+          const steps = [0, -0.1, 0.1, -0.15, 0.15];
+          steps.forEach((delta, idx) => {
+            const l = Math.max(0, Math.min(1, color.l + delta));
+            const chartColor = `${l.toFixed(4)} ${(color.c || 0).toFixed(4)} ${(color.h || 0).toFixed(4)}`;
+            document.documentElement.style.setProperty(`--chart-${idx + 1}`, chartColor);
+          });
+        }
+        
+        // Also create a style tag with direct color overrides
+        let styleEl = document.getElementById('brand-color-override');
+        if (!styleEl) {
+          styleEl = document.createElement('style');
+          styleEl.id = 'brand-color-override';
+          document.head.appendChild(styleEl);
+        }
+        
+        // Use !important to ensure it overrides default styles
+        styleEl.textContent = `
+          :root {
+            --brand-primary-hex: ${hex};
+          }
+          
+          /* Primary background colors */
+          .bg-primary,
+          .\\!bg-primary,
+          [class~="bg-primary"],
+          [class*="!bg-primary"] {
+            background-color: ${hex} !important;
+          }
+          
+          /* Primary text colors */
+          .text-primary,
+          .\\!text-primary,
+          [class~="text-primary"],
+          [class*="!text-primary"] {
+            color: ${hex} !important;
+          }
+          
+          /* Primary border colors */
+          .border-primary,
+          .\\!border-primary,
+          [class~="border-primary"],
+          [class*="!border-primary"] {
+            border-color: ${hex} !important;
+          }
+          
+          /* Hover states */
+          .hover\\:bg-primary:hover {
+            background-color: ${hex} !important;
+            opacity: 0.9;
+          }
+          
+          /* Target ALL badges in sidebar with bg-primary */
+          nav[data-sidebar] .badge,
+          nav[data-sidebar] [class*="badge"],
+          .sidebar-menu .badge,
+          .sidebar-menu [data-slot="badge"],
+          button[data-slot="menu-button"] .badge {
+            background-color: ${hex} !important;
+          }
+        `;
+        
+        console.log("Brand color applied successfully");
+      } catch (error) {
+        console.error("Error applying brand palette:", error);
+      }
     };
 
     const apply = async () => {

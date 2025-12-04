@@ -56,7 +56,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
           borderRadius: "12px",
           fontSize: "15px",
           fontWeight: "600",
-          border: "3px solid oklch(0.6171 0.1375 39.0427)",
+          border: "3px solid oklch(var(--primary))",
           boxShadow: "0 10px 20px rgba(0,0,0,0.2), 0 4px 8px rgba(0,0,0,0.15)",
         } as React.CSSProperties,
       }}

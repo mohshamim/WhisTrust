@@ -89,7 +89,10 @@ export function NavUser({
               {role && (
                 <Badge
                   variant="default"
-                  className="text-[10px] leading-none px-2 h-5 rounded-full !bg-primary !text-primary-foreground !border-transparent"
+                  className="text-[10px] leading-none px-2 h-5 rounded-full !text-primary-foreground !border-transparent"
+                  style={{ 
+                    backgroundColor: 'var(--brand-primary-hex, hsl(var(--primary)))'
+                  }}
                 >
                   {getRoleLabel(role)}
                 </Badge>

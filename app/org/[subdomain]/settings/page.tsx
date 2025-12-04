@@ -848,7 +848,8 @@ export default function ClientSettingsPage() {
                     <div className="text-sm font-medium">Primary Color (hex)</div>
                     <div className="max-w-sm rounded-md border bg-background p-4 shadow-sm">
                       <ColorPicker
-                        defaultValue={branding.primary_color || "#0ea5e9"}
+                        key={branding.primary_color || "default"}
+                        defaultValue={branding.primary_color || "#b45309"}
                         onChange={(c) => setBranding((b) => ({ ...b, primary_color: c }))}
                       >
                         <ColorPickerSelection />
@@ -866,14 +867,10 @@ export default function ClientSettingsPage() {
                             type="button"
                             variant="outline"
                             onClick={() => {
-                              // Clear to default theme
-                              setBranding((b) => ({ ...b, primary_color: "" }));
-                              if (typeof document !== "undefined") {
-                                document.documentElement.style.removeProperty("--brand-primary");
-                                document.documentElement.style.removeProperty("--primary");
-                                document.documentElement.style.removeProperty("--ring");
-                                document.documentElement.style.removeProperty("--sidebar-primary");
-                              }
+                              // Reset to default application color
+                              // oklch(0.6171 0.1375 39.0427) ≈ #b45309 (reddish-brown)
+                              const defaultColor = "#b45309";
+                              setBranding((b) => ({ ...b, primary_color: defaultColor }));
                             }}
                           >
                             Default
@@ -904,6 +901,8 @@ export default function ClientSettingsPage() {
                 </div>
                 <div className="flex justify-end">
                   <Button
+                    variant="default"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
                     onClick={async () => {
                       // Validate before saving
                       if (!validateForm()) {
@@ -930,6 +929,7 @@ export default function ClientSettingsPage() {
                           logo_url: data.organization.logo_url,
                           branding: data.organization.branding,
                         }));
+                        
                         // Update favicon link if provided
                         if (branding.favicon_url) {
                           const link: HTMLLinkElement =
@@ -942,9 +942,16 @@ export default function ClientSettingsPage() {
                             })();
                           link.href = branding.favicon_url;
                         }
-                        toast.success("Branding updated successfully");
+                        
+                        toast.success("Branding updated successfully! Refreshing page...");
+                        
                         // Clear validation errors on successful save
                         setValidationErrors({});
+                        
+                        // Reload page after 1 second to apply new branding consistently
+                        setTimeout(() => {
+                          window.location.reload();
+                        }, 1000);
                       } catch (err) {
                         console.error(err);
                         toast.error("Something went wrong");
@@ -1464,8 +1471,9 @@ function LiveThemePreview({ primaryColor, themeMode }: { primaryColor: string; t
   }, [themeMode]);
 
   useEffect(() => {
-    if (!primaryColor) return;
-    document.documentElement.style.setProperty("--brand-primary", primaryColor);
+    // Don't apply color during preview - causes button to disappear
+    // Color will be applied after save + page reload via ClientSidebar
+    // This keeps the UI stable while user is editing
   }, [primaryColor]);
 
   return null;
