@@ -29,6 +29,7 @@ import {
   Filter,
   X,
   RefreshCw,
+  ArrowLeft,
 } from "lucide-react";
 import { getAvatarUrl } from "@/lib/services/avatar";
 import { getCurrentClientAdmin } from "@/lib/services/client-auth";
@@ -375,6 +376,14 @@ export default function SmartSearchPage() {
             <div className="flex items-center gap-2">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.location.href = `/org/${subdomain}/ai-powered-section`}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to AI Powered Section
+              </Button>
             </div>
             <NotificationsDropdown 
               userId={user?.id || ""} 
@@ -384,21 +393,18 @@ export default function SmartSearchPage() {
         </header>
 
         <div className="flex flex-1 flex-col gap-4 p-4 md:p-8">
-          <div className="container mx-auto max-w-7xl">
-            {/* Page Header */}
-            <div className="mb-6">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-3 bg-gradient-to-br from-blue-500/20 to-blue-500/5 rounded-lg">
-                  <Search className="h-8 w-8 text-blue-600" />
-                </div>
-                <div>
-                  <h1 className="text-3xl font-bold tracking-tight">Smart Search</h1>
-                  <p className="text-muted-foreground mt-1">
-                    Search cases using natural language - just ask what you're looking for
-                  </p>
-                </div>
-              </div>
+          {/* Page Header */}
+          <div className="flex items-center gap-3">
+            <div className="p-3 bg-gradient-to-br from-blue-500/20 to-blue-500/5 rounded-lg">
+              <Search className="h-8 w-8 text-blue-600" />
             </div>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Smart Search</h1>
+              <p className="text-muted-foreground mt-1">
+                Search cases using natural language - just ask what you're looking for
+              </p>
+            </div>
+          </div>
 
             {/* Search Card */}
             <Card className="mb-6">
@@ -568,7 +574,6 @@ export default function SmartSearchPage() {
                 </div>
               </CardContent>
             </Card>
-          </div>
         </div>
       </SidebarInset>
     </SidebarProvider>

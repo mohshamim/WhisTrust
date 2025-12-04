@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   CircleCheckIcon,
@@ -6,12 +6,12 @@ import {
   Loader2Icon,
   OctagonXIcon,
   TriangleAlertIcon,
-} from "lucide-react"
-import { useTheme } from "next-themes"
-import { Toaster as Sonner, type ToasterProps } from "sonner"
+} from "lucide-react";
+import { useTheme } from "next-themes";
+import { Toaster as Sonner, type ToasterProps } from "sonner";
 
 const Toaster = ({ ...props }: ToasterProps) => {
-  const { theme = "system" } = useTheme()
+  const { theme = "system" } = useTheme();
 
   return (
     <Sonner
@@ -32,30 +32,37 @@ const Toaster = ({ ...props }: ToasterProps) => {
       toastOptions={{
         unstyled: false,
         classNames: {
-          toast: 'group toast group-[.toaster]:shadow-lg',
-          title: 'text-sm font-semibold',
-          description: 'text-sm opacity-90',
-          actionButton: 'group-[.toast]:bg-white group-[.toast]:text-primary',
-          cancelButton: 'group-[.toast]:bg-white/20',
-          closeButton: 'group-[.toast]:bg-white/20 group-[.toast]:border-white/30',
-          success: 'group-[.toaster]:bg-gradient-to-r group-[.toaster]:from-emerald-500 group-[.toaster]:to-green-600 group-[.toaster]:text-white group-[.toaster]:border-white/20',
-          error: 'group-[.toaster]:bg-gradient-to-r group-[.toaster]:from-red-500 group-[.toaster]:to-rose-600 group-[.toaster]:text-white group-[.toaster]:border-white/20',
-          info: 'group-[.toaster]:bg-gradient-to-r group-[.toaster]:from-blue-500 group-[.toaster]:to-indigo-600 group-[.toaster]:text-white group-[.toaster]:border-white/20',
-          warning: 'group-[.toaster]:bg-gradient-to-r group-[.toaster]:from-orange-500 group-[.toaster]:to-amber-600 group-[.toaster]:text-white group-[.toaster]:border-white/20',
-          loading: 'group-[.toaster]:bg-gradient-to-r group-[.toaster]:from-purple-500 group-[.toaster]:to-pink-600 group-[.toaster]:text-white group-[.toaster]:border-white/20',
+          toast: "group toast group-[.toaster]:shadow-xl",
+          title: "text-sm font-bold",
+          description: "text-sm font-medium opacity-95",
+          actionButton:
+            "group-[.toast]:bg-white group-[.toast]:text-primary group-[.toast]:font-semibold",
+          cancelButton:
+            "group-[.toast]:bg-white/20 group-[.toast]:font-semibold",
+          closeButton:
+            "group-[.toast]:bg-white/20 group-[.toast]:border-white/30 group-[.toast]:hover:bg-white/30",
+          success:
+            "group-[.toaster]:bg-green-600 group-[.toaster]:text-white group-[.toaster]:shadow-green-600/20",
+          error:
+            "group-[.toaster]:bg-red-600 group-[.toaster]:text-white group-[.toaster]:shadow-red-600/20",
+          info: "group-[.toaster]:bg-blue-600 group-[.toaster]:text-white group-[.toaster]:shadow-blue-600/20",
+          warning:
+            "group-[.toaster]:bg-orange-600 group-[.toaster]:text-white group-[.toaster]:shadow-orange-600/20",
+          loading:
+            "group-[.toaster]:bg-purple-600 group-[.toaster]:text-white group-[.toaster]:shadow-purple-600/20",
         },
         style: {
-          padding: '16px 24px',
-          borderRadius: '12px',
-          fontSize: '15px',
-          fontWeight: '500',
-          border: '1px solid rgba(255,255,255,0.2)',
-          boxShadow: '0 8px 16px rgba(0,0,0,0.15), 0 2px 4px rgba(0,0,0,0.1)',
+          padding: "18px 24px",
+          borderRadius: "12px",
+          fontSize: "15px",
+          fontWeight: "600",
+          border: "3px solid oklch(0.6171 0.1375 39.0427)",
+          boxShadow: "0 10px 20px rgba(0,0,0,0.2), 0 4px 8px rgba(0,0,0,0.15)",
         } as React.CSSProperties,
       }}
       {...props}
     />
-  )
-}
+  );
+};
 
-export { Toaster }
+export { Toaster };

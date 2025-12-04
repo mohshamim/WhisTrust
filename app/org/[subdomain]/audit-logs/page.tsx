@@ -105,7 +105,14 @@ export default function AuditLogsPage() {
       loadFiltersData();
       loadAuditLogs();
     }
-  }, [organization, permissions, dateRange, actionFilter, userFilter, resourceFilter]);
+  }, [
+    organization,
+    permissions,
+    dateRange,
+    actionFilter,
+    userFilter,
+    resourceFilter,
+  ]);
 
   useEffect(() => {
     applySearch();
@@ -113,7 +120,8 @@ export default function AuditLogsPage() {
 
   const checkAuth = async () => {
     try {
-      const { user: clientUser, organization: org } = await getCurrentClientAdmin();
+      const { user: clientUser, organization: org } =
+        await getCurrentClientAdmin();
       if (!clientUser || !org) {
         router.push(`/org/${subdomain}/login`);
         return;
@@ -150,7 +158,10 @@ export default function AuditLogsPage() {
 
       const payload = await response.json();
       if (!response.ok || !payload.success) {
-        console.error("Error loading filter data:", payload.error || response.statusText);
+        console.error(
+          "Error loading filter data:",
+          payload.error || response.statusText
+        );
         setActionTypes([]);
         setUsers([]);
         return;
@@ -188,7 +199,10 @@ export default function AuditLogsPage() {
 
       const payload = await response.json();
       if (!response.ok || !payload.success) {
-        console.error("Error loading audit logs:", payload.error || response.statusText);
+        console.error(
+          "Error loading audit logs:",
+          payload.error || response.statusText
+        );
         setLogs([]);
         setFilteredLogs([]);
         return;
@@ -250,7 +264,9 @@ export default function AuditLogsPage() {
       <div className="flex h-screen items-center justify-center">
         <div className="text-center">
           <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="mt-4 text-sm text-muted-foreground">Loading audit logs...</p>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Loading audit logs...
+          </p>
         </div>
       </div>
     );
@@ -262,7 +278,11 @@ export default function AuditLogsPage() {
         user={{
           name: user.full_name || user.email,
           email: user.email,
-          avatar: getAvatarUrl({ avatar_url: user.avatar_url, email: user.email, avatar_style: user.avatar_style }),
+          avatar: getAvatarUrl({
+            avatar_url: user.avatar_url,
+            email: user.email,
+            avatar_style: user.avatar_style,
+          }),
         }}
         organization={{
           name: organization.name,
@@ -272,246 +292,308 @@ export default function AuditLogsPage() {
       />
       <SidebarInset>
         <div className="flex flex-col h-screen overflow-hidden">
-        <div className="flex flex-col flex-1 overflow-hidden">
-          {/* Header */}
-          <div className="flex items-center justify-between border-b px-6 py-4 flex-shrink-0">
-            <div className="flex items-center gap-4">
-              <SidebarTrigger />
-              <div>
-                <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
-                  <History className="h-6 w-6 text-primary" />
-                  Audit Logs
-                </h1>
-                <p className="text-sm text-muted-foreground">
-                  {filteredLogs.length} {filteredLogs.length === 1 ? "entry" : "entries"} found
-                </p>
+          <div className="flex flex-col flex-1 overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b px-6 py-4 flex-shrink-0">
+              <div className="flex items-center gap-4">
+                <SidebarTrigger />
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight flex items-center gap-2">
+                    <History className="h-6 w-6 text-primary" />
+                    Audit Logs
+                  </h1>
+                  <p className="text-sm text-muted-foreground">
+                    {filteredLogs.length}{" "}
+                    {filteredLogs.length === 1 ? "entry" : "entries"} found
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <Button
+                  onClick={handleExport}
+                  variant="outline"
+                  disabled={filteredLogs.length === 0}
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Export PDF
+                </Button>
+                <NotificationsDropdown
+                  userId={user?.id || ""}
+                  organizationId={organization?.id || ""}
+                />
               </div>
             </div>
-            <div className="flex items-center gap-4">
-              <Button onClick={handleExport} variant="outline" disabled={filteredLogs.length === 0}>
-                <Download className="h-4 w-4 mr-2" />
-                Export PDF
-              </Button>
-              <NotificationsDropdown userId={user?.id || ""} organizationId={organization?.id || ""} />
+
+            {/* Content */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-6 space-y-6">
+                {/* Info Alert */}
+                <Alert className="bg-blue-500/10 text-blue-600 border-blue-500/20">
+                  <Shield className="h-4 w-4" />
+                  <AlertDescription>
+                    Audit logs track all system activities for compliance and
+                    security purposes. All actions are recorded with timestamps
+                    and user information.
+                  </AlertDescription>
+                </Alert>
+
+                {/* Filters */}
+                <Card className="shadow-md">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <Filter className="h-5 w-5 text-primary" />
+                      Filters
+                    </CardTitle>
+                    <CardDescription>
+                      Filter audit logs by date, action, user, or resource
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
+                      {/* Search */}
+                      <div className="lg:col-span-2">
+                        <div className="relative">
+                          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                          <Input
+                            placeholder="Search logs..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="pl-10"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Date Range */}
+                      <Select value={dateRange} onValueChange={setDateRange}>
+                        <SelectTrigger>
+                          <Calendar className="h-4 w-4 mr-2" />
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="7">Last 7 Days</SelectItem>
+                          <SelectItem value="30">Last 30 Days</SelectItem>
+                          <SelectItem value="90">Last 90 Days</SelectItem>
+                          <SelectItem value="all">All Time</SelectItem>
+                        </SelectContent>
+                      </Select>
+
+                      {/* Action Type */}
+                      <Select
+                        value={actionFilter}
+                        onValueChange={setActionFilter}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="All Actions" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Actions</SelectItem>
+                          {actionTypes.map((action) => (
+                            <SelectItem key={action} value={action}>
+                              {getActionLabel(action)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
+                      {/* User Filter */}
+                      <Select value={userFilter} onValueChange={setUserFilter}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="All Users" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">All Users</SelectItem>
+                          {users.map((u) => (
+                            <SelectItem key={u.id} value={u.id}>
+                              {u.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Active Filters Summary */}
+                    {(dateRange !== "all" ||
+                      actionFilter !== "all" ||
+                      userFilter !== "all" ||
+                      searchTerm) && (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm text-muted-foreground">
+                          Active filters:
+                        </span>
+                        {dateRange !== "all" && (
+                          <Badge variant="secondary">
+                            {dateRange === "7"
+                              ? "Last 7 Days"
+                              : dateRange === "30"
+                              ? "Last 30 Days"
+                              : "Last 90 Days"}
+                          </Badge>
+                        )}
+                        {actionFilter !== "all" && (
+                          <Badge variant="secondary">
+                            {getActionLabel(actionFilter)}
+                          </Badge>
+                        )}
+                        {userFilter !== "all" && (
+                          <Badge variant="secondary">
+                            {users.find((u) => u.id === userFilter)?.name}
+                          </Badge>
+                        )}
+                        {searchTerm && (
+                          <Badge variant="secondary">
+                            Search: "{searchTerm}"
+                          </Badge>
+                        )}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+
+                {/* Audit Logs Table */}
+                <Card className="shadow-lg">
+                  <CardHeader>
+                    <CardTitle>Activity Log</CardTitle>
+                    <CardDescription>
+                      Complete history of all system activities
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {loadingLogs ? (
+                      <div className="flex items-center justify-center py-12">
+                        <div className="text-center">
+                          <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+                          <p className="mt-4 text-sm text-muted-foreground">
+                            Loading audit logs...
+                          </p>
+                        </div>
+                      </div>
+                    ) : filteredLogs.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                        <History className="h-12 w-12 mb-4 opacity-50" />
+                        <p className="text-lg font-medium">
+                          No audit logs found
+                        </p>
+                        <p className="text-sm">
+                          Try adjusting your filters or search term
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="rounded-md border">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead className="w-[180px]">
+                                Timestamp
+                              </TableHead>
+                              <TableHead className="w-[200px]">User</TableHead>
+                              <TableHead>Action</TableHead>
+                              <TableHead className="w-[120px]">
+                                Resource
+                              </TableHead>
+                              <TableHead>Details</TableHead>
+                              <TableHead className="w-[100px]"></TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {filteredLogs.map((log) => {
+                              const Icon = getActionIcon(log.action);
+                              return (
+                                <TableRow
+                                  key={log.id}
+                                  className="hover:bg-muted/50"
+                                >
+                                  <TableCell>
+                                    <div className="space-y-1">
+                                      <div className="text-sm font-medium">
+                                        {getRelativeTime(log.created_at)}
+                                      </div>
+                                      <div className="text-xs text-muted-foreground">
+                                        {new Date(
+                                          log.created_at
+                                        ).toLocaleString()}
+                                      </div>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <div className="flex items-center gap-2">
+                                      <Avatar className="h-8 w-8">
+                                        <AvatarImage
+                                          src={getAvatarUrl({
+                                            avatar_url: log.user_avatar_url,
+                                            email: log.user_email || "",
+                                            avatar_style: log.user_avatar_style,
+                                          })}
+                                          alt={log.user_name || "User"}
+                                        />
+                                        <AvatarFallback className="text-xs">
+                                          {log.user_name
+                                            ?.substring(0, 2)
+                                            .toUpperCase() || "SY"}
+                                        </AvatarFallback>
+                                      </Avatar>
+                                      <div className="space-y-1">
+                                        <div className="text-sm font-medium">
+                                          {log.user_name || "System"}
+                                        </div>
+                                        {log.user_email && (
+                                          <div className="text-xs text-muted-foreground">
+                                            {log.user_email}
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Badge
+                                      variant={getActionColor(log.action)}
+                                      className="gap-1"
+                                    >
+                                      <Icon className="h-3 w-3" />
+                                      {getActionLabel(log.action)}
+                                    </Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                    <span className="text-sm text-muted-foreground">
+                                      {getResourceTypeLabel(log.resource_type)}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell>
+                                    <div className="text-sm text-muted-foreground truncate max-w-[300px]">
+                                      {formatAuditDetails(log.details)}
+                                    </div>
+                                  </TableCell>
+                                  <TableCell>
+                                    <Button
+                                      variant="ghost"
+                                      size="sm"
+                                      onClick={() => handleViewDetails(log)}
+                                    >
+                                      <ChevronRight className="h-4 w-4" />
+                                      Details
+                                    </Button>
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
-
-          {/* Content */}
-          <div className="flex-1 overflow-y-auto">
-          <div className="p-6 space-y-6">
-            {/* Info Alert */}
-            <Alert className="bg-blue-500/10 text-blue-600 border-blue-500/20">
-              <Shield className="h-4 w-4" />
-              <AlertDescription>
-                Audit logs track all system activities for compliance and security purposes. All actions
-                are recorded with timestamps and user information.
-              </AlertDescription>
-            </Alert>
-
-            {/* Filters */}
-            <Card className="shadow-md">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Filter className="h-5 w-5 text-primary" />
-                  Filters
-                </CardTitle>
-                <CardDescription>Filter audit logs by date, action, user, or resource</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
-                  {/* Search */}
-                  <div className="lg:col-span-2">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search logs..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Date Range */}
-                  <Select value={dateRange} onValueChange={setDateRange}>
-                    <SelectTrigger>
-                      <Calendar className="h-4 w-4 mr-2" />
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="7">Last 7 Days</SelectItem>
-                      <SelectItem value="30">Last 30 Days</SelectItem>
-                      <SelectItem value="90">Last 90 Days</SelectItem>
-                      <SelectItem value="all">All Time</SelectItem>
-                    </SelectContent>
-                  </Select>
-
-                  {/* Action Type */}
-                  <Select value={actionFilter} onValueChange={setActionFilter}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="All Actions" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Actions</SelectItem>
-                      {actionTypes.map((action) => (
-                        <SelectItem key={action} value={action}>
-                          {getActionLabel(action)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  {/* User Filter */}
-                  <Select value={userFilter} onValueChange={setUserFilter}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="All Users" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Users</SelectItem>
-                      {users.map((u) => (
-                        <SelectItem key={u.id} value={u.id}>
-                          {u.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Active Filters Summary */}
-                {(dateRange !== "all" || actionFilter !== "all" || userFilter !== "all" || searchTerm) && (
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm text-muted-foreground">Active filters:</span>
-                    {dateRange !== "all" && (
-                      <Badge variant="secondary">
-                        {dateRange === "7" ? "Last 7 Days" : dateRange === "30" ? "Last 30 Days" : "Last 90 Days"}
-                      </Badge>
-                    )}
-                    {actionFilter !== "all" && (
-                      <Badge variant="secondary">{getActionLabel(actionFilter)}</Badge>
-                    )}
-                    {userFilter !== "all" && (
-                      <Badge variant="secondary">
-                        {users.find((u) => u.id === userFilter)?.name}
-                      </Badge>
-                    )}
-                    {searchTerm && <Badge variant="secondary">Search: "{searchTerm}"</Badge>}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Audit Logs Table */}
-            <Card className="shadow-lg">
-              <CardHeader>
-                <CardTitle>Activity Log</CardTitle>
-                <CardDescription>Complete history of all system activities</CardDescription>
-              </CardHeader>
-              <CardContent>
-                {loadingLogs ? (
-                  <div className="flex items-center justify-center py-12">
-                    <div className="text-center">
-                      <div className="h-12 w-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-                      <p className="mt-4 text-sm text-muted-foreground">Loading audit logs...</p>
-                    </div>
-                  </div>
-                ) : filteredLogs.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                    <History className="h-12 w-12 mb-4 opacity-50" />
-                    <p className="text-lg font-medium">No audit logs found</p>
-                    <p className="text-sm">Try adjusting your filters or search term</p>
-                  </div>
-                ) : (
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="w-[180px]">Timestamp</TableHead>
-                          <TableHead className="w-[200px]">User</TableHead>
-                          <TableHead>Action</TableHead>
-                          <TableHead className="w-[120px]">Resource</TableHead>
-                          <TableHead>Details</TableHead>
-                          <TableHead className="w-[100px]"></TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {filteredLogs.map((log) => {
-                          const Icon = getActionIcon(log.action);
-                          return (
-                            <TableRow key={log.id} className="hover:bg-muted/50">
-                              <TableCell>
-                                <div className="space-y-1">
-                                  <div className="text-sm font-medium">
-                                    {getRelativeTime(log.created_at)}
-                                  </div>
-                                  <div className="text-xs text-muted-foreground">
-                                    {new Date(log.created_at).toLocaleString()}
-                                  </div>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex items-center gap-2">
-                                  <Avatar className="h-8 w-8">
-                                    <AvatarImage 
-                                      src={getAvatarUrl({ avatar_url: log.user_avatar_url, email: log.user_email || '', avatar_style: log.user_avatar_style })} 
-                                      alt={log.user_name || 'User'} 
-                                    />
-                                    <AvatarFallback className="text-xs">
-                                      {log.user_name?.substring(0, 2).toUpperCase() || "SY"}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <div className="space-y-1">
-                                    <div className="text-sm font-medium">{log.user_name || "System"}</div>
-                                    {log.user_email && (
-                                      <div className="text-xs text-muted-foreground">{log.user_email}</div>
-                                    )}
-                                  </div>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant={getActionColor(log.action)} className="gap-1">
-                                  <Icon className="h-3 w-3" />
-                                  {getActionLabel(log.action)}
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <span className="text-sm text-muted-foreground">
-                                  {getResourceTypeLabel(log.resource_type)}
-                                </span>
-                              </TableCell>
-                              <TableCell>
-                                <div className="text-sm text-muted-foreground truncate max-w-[300px]">
-                                  {formatAuditDetails(log.details)}
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleViewDetails(log)}
-                                >
-                                  <ChevronRight className="h-4 w-4" />
-                                  Details
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
-          </div>
-        </div>
         </div>
       </SidebarInset>
 
       {/* Details Drawer */}
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto bg-background">
-          <SheetHeader className="border-b pb-4">
+        <SheetContent
+          side="right"
+          className="w-full sm:max-w-2xl overflow-y-auto bg-background"
+        >
+          <SheetHeader className="border-b pb-4 px-6">
             <SheetTitle className="flex items-center gap-2 text-2xl">
               <History className="h-5 w-5 text-primary" />
               Audit Log Details
@@ -522,7 +604,7 @@ export default function AuditLogsPage() {
           </SheetHeader>
 
           {selectedLog && (
-            <div className="space-y-6 mt-6">
+            <div className="space-y-6 mt-6 px-6">
               {/* Action Info */}
               <Card className="shadow-sm border-border/60">
                 <CardHeader>
@@ -537,15 +619,24 @@ export default function AuditLogsPage() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <div className="text-sm font-medium text-muted-foreground">Action Type</div>
-                      <Badge variant={getActionColor(selectedLog.action)} className="mt-2 px-3 py-1 rounded-full">
+                      <div className="text-sm font-medium text-muted-foreground">
+                        Action Type
+                      </div>
+                      <Badge
+                        variant={getActionColor(selectedLog.action)}
+                        className="mt-2 px-3 py-1 rounded-full"
+                      >
                         {getActionLabel(selectedLog.action)}
                       </Badge>
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-muted-foreground">Timestamp</div>
+                      <div className="text-sm font-medium text-muted-foreground">
+                        Timestamp
+                      </div>
                       <div className="text-sm mt-2 space-y-1">
-                        <div>{new Date(selectedLog.created_at).toLocaleString()}</div>
+                        <div>
+                          {new Date(selectedLog.created_at).toLocaleString()}
+                        </div>
                         <div className="text-xs text-muted-foreground">
                           {getRelativeTime(selectedLog.created_at)}
                         </div>
@@ -555,13 +646,17 @@ export default function AuditLogsPage() {
 
                   <div className="grid grid-cols-2 gap-6">
                     <div>
-                      <div className="text-sm font-medium text-muted-foreground">Resource Type</div>
+                      <div className="text-sm font-medium text-muted-foreground">
+                        Resource Type
+                      </div>
                       <div className="text-sm mt-2 capitalize">
                         {getResourceTypeLabel(selectedLog.resource_type)}
                       </div>
                     </div>
                     <div>
-                      <div className="text-sm font-medium text-muted-foreground">Resource ID</div>
+                      <div className="text-sm font-medium text-muted-foreground">
+                        Resource ID
+                      </div>
                       <div className="mt-2 inline-flex items-center rounded-md bg-muted px-2 py-1 font-mono text-xs text-foreground/80">
                         {selectedLog.resource_id || "N/A"}
                       </div>
@@ -579,7 +674,8 @@ export default function AuditLogsPage() {
                   <div className="flex items-center gap-3">
                     <Avatar className="h-12 w-12">
                       <AvatarFallback>
-                        {selectedLog.user_name?.substring(0, 2).toUpperCase() || "SY"}
+                        {selectedLog.user_name?.substring(0, 2).toUpperCase() ||
+                          "SY"}
                       </AvatarFallback>
                     </Avatar>
                     <div className="space-y-1">
@@ -592,7 +688,9 @@ export default function AuditLogsPage() {
                         )}
                       </div>
                       {selectedLog.user_email && (
-                        <div className="text-sm text-muted-foreground">{selectedLog.user_email}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {selectedLog.user_email}
+                        </div>
                       )}
                       <div className="text-xs text-muted-foreground mt-1">
                         User ID: {selectedLog.user_id?.substring(0, 8) || "N/A"}
@@ -603,52 +701,67 @@ export default function AuditLogsPage() {
               </Card>
 
               {/* Details */}
-              {selectedLog.details && Object.keys(selectedLog.details).length > 0 && (
-                <Card className="shadow-sm border-border/60">
-                  <CardHeader>
-                    <CardTitle className="text-base">Additional Details</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      {Object.entries(selectedLog.details).map(([key, value]) => (
-                        <div
-                          key={key}
-                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 py-2 border-b last:border-0"
-                        >
-                          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                            {key.replace(/_/g, " ")}
-                          </span>
-                          <span className="text-sm font-mono bg-muted px-2 py-1 rounded-md w-full sm:w-auto break-all">
-                            {typeof value === "object" ? JSON.stringify(value) : String(value)}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
+              {selectedLog.details &&
+                Object.keys(selectedLog.details).length > 0 && (
+                  <Card className="shadow-sm border-border/60">
+                    <CardHeader>
+                      <CardTitle className="text-base">
+                        Additional Details
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        {Object.entries(selectedLog.details).map(
+                          ([key, value]) => (
+                            <div
+                              key={key}
+                              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 py-2 border-b last:border-0"
+                            >
+                              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                                {key.replace(/_/g, " ")}
+                              </span>
+                              <span className="text-sm font-mono bg-muted px-2 py-1 rounded-md w-full sm:w-auto break-all">
+                                {typeof value === "object"
+                                  ? JSON.stringify(value)
+                                  : String(value)}
+                              </span>
+                            </div>
+                          )
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
 
               {/* Technical Info */}
               <Card className="shadow-sm border-border/60">
                 <CardHeader>
-                  <CardTitle className="text-base">Technical Information</CardTitle>
+                  <CardTitle className="text-base">
+                    Technical Information
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div>
-                    <div className="text-sm font-medium text-muted-foreground">Log ID</div>
+                    <div className="text-sm font-medium text-muted-foreground">
+                      Log ID
+                    </div>
                     <div className="text-xs font-mono mt-1 bg-muted px-2 py-1 rounded-md break-all">
                       {selectedLog.id}
                     </div>
                   </div>
                   <div>
-                    <div className="text-sm font-medium text-muted-foreground">Organization ID</div>
+                    <div className="text-sm font-medium text-muted-foreground">
+                      Organization ID
+                    </div>
                     <div className="text-xs font-mono mt-1 bg-muted px-2 py-1 rounded-md break-all">
                       {selectedLog.organization_id}
                     </div>
                   </div>
                   {selectedLog.ip_address && (
                     <div>
-                      <div className="text-sm font-medium text-muted-foreground">IP Address</div>
+                      <div className="text-sm font-medium text-muted-foreground">
+                        IP Address
+                      </div>
                       <div className="text-xs font-mono mt-1 bg-muted px-2 py-1 rounded-md break-all">
                         {selectedLog.ip_address}
                       </div>
@@ -656,7 +769,9 @@ export default function AuditLogsPage() {
                   )}
                   {selectedLog.user_agent && (
                     <div>
-                      <div className="text-sm font-medium text-muted-foreground">User Agent</div>
+                      <div className="text-sm font-medium text-muted-foreground">
+                        User Agent
+                      </div>
                       <div className="text-[11px] font-mono mt-1 bg-muted px-2 py-1 rounded-md break-all">
                         {selectedLog.user_agent}
                       </div>
@@ -671,4 +786,3 @@ export default function AuditLogsPage() {
     </SidebarProvider>
   );
 }
-

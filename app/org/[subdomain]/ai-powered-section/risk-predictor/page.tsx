@@ -42,6 +42,7 @@ import {
   Target,
   Loader2,
   X,
+  ArrowLeft,
 } from "lucide-react";
 import { getAvatarUrl } from "@/lib/services/avatar";
 import { getCurrentClientAdmin } from "@/lib/services/client-auth";
@@ -422,6 +423,14 @@ export default function RiskPredictorPage() {
             <div className="flex items-center gap-2">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="mr-2 h-4" />
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => window.location.href = `/org/${subdomain}/ai-powered-section`}
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back to AI Powered Section
+              </Button>
             </div>
             <NotificationsDropdown 
               userId={user?.id || ""} 
@@ -431,9 +440,8 @@ export default function RiskPredictorPage() {
         </header>
 
         <div className="flex flex-1 flex-col gap-4 p-4 md:p-8">
-          <div className="container mx-auto max-w-7xl">
-            {/* Page Header */}
-            <div className="mb-6">
+          {/* Page Header */}
+          <div className="mb-6">
               <div className="flex items-center gap-3 mb-2">
                 <div className="p-3 bg-gradient-to-br from-orange-500/20 to-orange-500/5 rounded-lg">
                   <TrendingUp className="h-8 w-8 text-orange-600" />
@@ -656,7 +664,6 @@ export default function RiskPredictorPage() {
                 </div>
               </CardContent>
             </Card>
-          </div>
         </div>
       </SidebarInset>
 
