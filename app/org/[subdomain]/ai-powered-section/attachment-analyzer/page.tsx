@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ClientSidebar } from "@/components/client-sidebar";
 import { NotificationsDropdown } from "@/components/notifications-dropdown";
@@ -83,6 +83,7 @@ export default function AttachmentAnalyzerPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [attachments, setAttachments] = useState<AttachmentWithCase[]>([]);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [filteredAttachments, setFilteredAttachments] = useState<AttachmentWithCase[]>([]);
   const [filterStatus, setFilterStatus] = useState<FilterStatus>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -102,27 +103,39 @@ export default function AttachmentAnalyzerPage() {
         setUser(currentUser);
         setOrganization(currentOrg);
         await loadAttachments(currentOrg.id);
+        // Clear timeout on success
+        if (loadingTimeoutRef.current) {
+          clearTimeout(loadingTimeoutRef.current);
+          loadingTimeoutRef.current = null;
+        }
       } catch (error) {
         setLoadError(true);
         console.error("Failed to load data:", error);
         toast.error("Failed to load page data");
       } finally {
         setLoading(false);
+        // Clear timeout when loading ends
+        if (loadingTimeoutRef.current) {
+          clearTimeout(loadingTimeoutRef.current);
+          loadingTimeoutRef.current = null;
+        }
       }
     };
 
+    // Set timeout BEFORE starting load
+    loadingTimeoutRef.current = setTimeout(() => {
+      setLoading(false);
+      setLoadError(true);
+      toast.error("Loading timeout. Please check your connection.");
+    }, 15000);
+    
     loadData();
     
-    // Timeout: If loading takes more than 10 seconds, show error
-    const timeout = setTimeout(() => {
-      if (loading) {
-        setLoading(false);
-        setLoadError(true);
-        toast.error("Loading timeout. Please check your connection.");
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
       }
-    }, 10000);
-    
-    return () => clearTimeout(timeout);
+    };
   }, [subdomain, router]);
 
   const loadAttachments = async (organizationId: string) => {

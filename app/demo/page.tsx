@@ -154,16 +154,30 @@ export default function DemoPage() {
                 </div>
               </div>
 
-              <Button
-                asChild
-                size="lg"
-                className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90"
-              >
-                <Link href="/org/demo/report">
-                  Start Report Demo
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Link>
-              </Button>
+              <div className="flex flex-col gap-3">
+                <Button
+                  asChild
+                  size="lg"
+                  className="w-full h-12 bg-primary text-primary-foreground hover:bg-primary/90"
+                >
+                  <Link href="/org/demo/report">
+                    Start Report Demo
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+
+                <Button
+                  asChild
+                  variant="outline"
+                  size="lg"
+                  className="w-full h-12"
+                >
+                  <Link href="/org/demo/track">
+                    Track Report Status
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+              </div>
             </CardContent>
           </Card>
 

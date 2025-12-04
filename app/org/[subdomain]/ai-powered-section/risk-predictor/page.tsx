@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
@@ -87,6 +87,7 @@ export default function RiskPredictorPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const [analyzing, setAnalyzing] = useState<string | null>(null);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [batchAnalyzing, setBatchAnalyzing] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -104,18 +105,20 @@ export default function RiskPredictorPage() {
   };
 
   useEffect(() => {
+    // Set timeout BEFORE starting load
+    loadingTimeoutRef.current = setTimeout(() => {
+      setLoading(false);
+      setLoadError(true);
+      toast.error("Loading timeout. Please check your connection.");
+    }, 15000);
+    
     loadUserAndOrganization();
     
-    // Timeout: If loading takes more than 10 seconds, show error
-    const timeout = setTimeout(() => {
-      if (loading) {
-        setLoading(false);
-        setLoadError(true);
-        toast.error("Loading timeout. Please check your connection.");
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
       }
-    }, 10000);
-    
-    return () => clearTimeout(timeout);
+    };
   }, []);
 
   useEffect(() => {
@@ -135,6 +138,11 @@ export default function RiskPredictorPage() {
         setUser(result.user);
         setOrganization(result.organization);
         setLoadError(false);
+        // Clear timeout on success
+        if (loadingTimeoutRef.current) {
+          clearTimeout(loadingTimeoutRef.current);
+          loadingTimeoutRef.current = null;
+        }
       } else {
         setLoadError(true);
       }
@@ -144,6 +152,11 @@ export default function RiskPredictorPage() {
       toast.error("Failed to load user data");
     } finally {
       setLoading(false);
+      // Clear timeout when loading ends
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
+      }
     }
   }
 

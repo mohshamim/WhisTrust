@@ -64,6 +64,7 @@ export default function SmartSearchPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
   const hasAutoSearched = useRef(false);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Example queries for suggestions
   const exampleQueries = [
@@ -75,18 +76,20 @@ export default function SmartSearchPage() {
   ];
 
   useEffect(() => {
+    // Set timeout for loading
+    loadingTimeoutRef.current = setTimeout(() => {
+      setLoading(false);
+      setLoadError(true);
+      toast.error("Loading timeout. Please check your connection and retry.");
+    }, 15000); // 15 seconds
+    
     loadUserAndOrganization();
     
-    // Timeout: If loading takes more than 10 seconds, show error
-    const timeout = setTimeout(() => {
-      if (loading) {
-        setLoading(false);
-        setLoadError(true);
-        toast.error("Loading timeout. Please check your connection and retry.");
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
       }
-    }, 10000);
-    
-    return () => clearTimeout(timeout);
+    };
   }, []);
 
   // Auto-search when URL query parameter is present
@@ -104,6 +107,11 @@ export default function SmartSearchPage() {
         setUser(result.user);
         setOrganization(result.organization);
         setLoadError(false);
+        // Clear timeout on success
+        if (loadingTimeoutRef.current) {
+          clearTimeout(loadingTimeoutRef.current);
+          loadingTimeoutRef.current = null;
+        }
       } else {
         setLoadError(true);
       }
@@ -113,6 +121,11 @@ export default function SmartSearchPage() {
       toast.error("Failed to load user data");
     } finally {
       setLoading(false);
+      // Clear timeout when loading ends (success or error)
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+        loadingTimeoutRef.current = null;
+      }
     }
   }
 
