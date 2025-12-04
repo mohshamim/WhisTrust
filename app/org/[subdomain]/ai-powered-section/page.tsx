@@ -253,7 +253,7 @@ export default function AIPoweredSectionPage() {
             <CheckCircle2 className="h-5 w-5 text-green-600" />
             <h2 className="text-xl font-semibold">Available Now</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {activeFeatures.map((feature) => {
               const Icon = feature.icon;
               return (
