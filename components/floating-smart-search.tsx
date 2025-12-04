@@ -101,18 +101,25 @@ export function FloatingSmartSearch({
         className={`
           fixed ${positionClasses[position]}
           px-4 py-3 md:px-5 md:py-3.5
-          rounded-lg
+          rounded-xl
           bg-primary hover:bg-primary/90
           text-primary-foreground
-          shadow-lg hover:shadow-xl
+          shadow-[0_8px_30px_rgb(0,0,0,0.12)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.2)]
           transition-all duration-300
-          hover:scale-105 active:scale-95
+          hover:scale-105 hover:-translate-y-1 active:scale-95
           z-50
           flex items-center gap-2 md:gap-3
           group
+          border border-primary/20
+          backdrop-blur-sm
           ${isVisible ? "translate-y-0 opacity-100" : "translate-y-24 opacity-0 pointer-events-none"}
         `}
         aria-label="Open AI Smart Search"
+        style={{
+          boxShadow: isVisible 
+            ? "0 8px 30px rgba(0, 0, 0, 0.12), 0 2px 10px rgba(0, 0, 0, 0.08)" 
+            : "none"
+        }}
       >
         {/* Robot Icon */}
         <div className="relative">
@@ -138,8 +145,11 @@ export function FloatingSmartSearch({
           </div>
         </div>
 
-        {/* Pulse Effect */}
-        <div className="absolute inset-0 rounded-lg bg-primary/20 animate-ping opacity-20"></div>
+        {/* Glow Effect */}
+        <div className="absolute inset-0 rounded-xl bg-primary/30 blur-md -z-10 opacity-50 group-hover:opacity-70 transition-opacity"></div>
+        
+        {/* Subtle Pulse Ring */}
+        <div className="absolute inset-0 rounded-xl border-2 border-primary/20 animate-ping"></div>
       </button>
 
       {/* Search Modal */}
