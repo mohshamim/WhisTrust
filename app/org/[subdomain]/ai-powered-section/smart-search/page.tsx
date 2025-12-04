@@ -207,7 +207,12 @@ export default function SmartSearchPage() {
         queryBuilder = queryBuilder.order("created_at", { ascending: false }).limit(100);
 
         const result = await queryBuilder;
-        data = result.data;
+        
+        // Add empty risk_prediction field to match expected structure
+        data = result.data?.map(item => ({
+          ...item,
+          risk_prediction: []
+        })) || null;
         error = result.error;
       }
 

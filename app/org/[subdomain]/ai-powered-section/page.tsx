@@ -17,6 +17,8 @@ import {
   ArrowRight,
   Clock,
   CheckCircle2,
+  MessageSquarePlus,
+  Mail,
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { ClientSidebar } from "@/components/client-sidebar";
@@ -193,8 +195,7 @@ export default function AIPoweredSectionPage() {
           </div>
         </header>
 
-        <div className="flex flex-1 flex-col gap-4 p-4 md:p-8">
-          <div className="container mx-auto max-w-7xl">
+        <div className="flex flex-1 flex-col gap-4 p-6">
         {/* Page Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -351,6 +352,32 @@ export default function AIPoweredSectionPage() {
                 </Card>
               );
             })}
+            
+            {/* Request Feature Card */}
+            <Card className="relative overflow-hidden border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-purple-50 hover:shadow-lg transition-all">
+              <CardHeader>
+                <div className="flex items-start justify-between mb-2">
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <MessageSquarePlus className="h-5 w-5 text-primary" />
+                  </div>
+                  <Badge variant="secondary" className="bg-blue-100 text-blue-800 text-xs">
+                    Your Ideas
+                  </Badge>
+                </div>
+                <CardTitle className="text-base">Request AI Feature</CardTitle>
+                <CardDescription className="text-sm">
+                  Have an idea for an AI feature? We'd love to hear from you! Contact our team to discuss custom AI solutions.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button asChild className="w-full">
+                  <a href="/contact">
+                    <Mail className="h-4 w-4 mr-2" />
+                    Contact WhisTrust
+                  </a>
+                </Button>
+              </CardContent>
+            </Card>
           </div>
         </div>
 
@@ -374,7 +401,6 @@ export default function AIPoweredSectionPage() {
             </Button>
           </CardContent>
         </Card>
-          </div>
         </div>
       </SidebarInset>
     </SidebarProvider>
