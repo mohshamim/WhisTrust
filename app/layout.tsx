@@ -32,7 +32,7 @@ export const metadata: Metadata = {
     "confidential reporting system",
     "compliance hotline software",
     "encrypted reporting platform",
-    
+
     // Secondary Keywords (Medium Volume, Low Competition)
     "whistleblowing platform",
     "anonymous reporting",
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     "corporate compliance",
     "fraud reporting",
     "harassment reporting",
-    
+
     // Long-tail Keywords (Low Competition, High Intent)
     "best anonymous reporting system",
     "secure whistleblower platform",
@@ -53,13 +53,13 @@ export const metadata: Metadata = {
     "SOX compliance reporting software",
     "HIPAA compliant anonymous reporting",
     "end-to-end encrypted reporting",
-    
+
     // Industry-Specific (Low Competition)
     "healthcare compliance reporting",
     "financial services whistleblowing",
     "education sector anonymous reporting",
     "manufacturing ethics hotline",
-    
+
     // Feature-Focused (Very Low Competition)
     "RBAC compliance platform",
     "audit logging software",
@@ -116,10 +116,11 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
       { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
     ],
     apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+    shortcut: [{ url: "/icon.svg", type: "image/svg+xml" }],
   },
 };
 
