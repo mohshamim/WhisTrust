@@ -567,7 +567,7 @@ export default function RiskPredictorPage() {
                       />
                     </div>
                     <div className="flex items-center gap-2">
-                      {subdomain === 'demo' && usage && (
+                      {subdomain === 'demo' && usage ? (
                         <span className="text-sm text-muted-foreground whitespace-nowrap">
                           {usage.remaining > 0 ? (
                             <span className="text-primary font-medium">{usage.remaining}/3 left today</span>
@@ -575,7 +575,7 @@ export default function RiskPredictorPage() {
                             <span className="text-destructive font-medium">0/3 left - Limit reached</span>
                           )}
                         </span>
-                      )}
+                      ) : null}
                       <Button
                         onClick={batchAnalyze}
                         disabled={batchAnalyzing || stats.unscored === 0 || (subdomain === 'demo' && usage && usage.remaining <= 0)}
