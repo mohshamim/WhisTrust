@@ -116,10 +116,11 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/icon.svg", type: "image/svg+xml" },
-      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.svg", type: "image/svg+xml", sizes: "any" },
+      { url: "/icon.svg", sizes: "32x32", type: "image/svg+xml" },
+      { url: "/icon.svg", sizes: "16x16", type: "image/svg+xml" },
     ],
-    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
+    apple: [{ url: "/icon.svg", sizes: "180x180", type: "image/svg+xml" }],
     shortcut: [{ url: "/icon.svg", type: "image/svg+xml" }],
   },
 };
