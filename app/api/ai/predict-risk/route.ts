@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createServiceClient } from "@/lib/supabase/service-client";
 import { predictCaseRisk } from "@/lib/services/risk-predictor";
+import { checkAIUsageLimit, incrementAIUsage } from "@/lib/services/ai-limits";
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,6 +45,37 @@ export async function POST(request: NextRequest) {
         { error: "Report not found" },
         { status: 404 }
       );
+    }
+
+    // Get organization subdomain for usage limit check
+    const serviceSupabase = createServiceClient();
+    const { data: org } = await serviceSupabase
+      .from("organizations")
+      .select("subdomain")
+      .eq("id", report.organization_id)
+      .single();
+
+    const subdomain = org?.subdomain || '';
+
+    // Check AI usage limit BEFORE processing (only for demo)
+    if (subdomain) {
+      const usageCheck = await checkAIUsageLimit(subdomain, 'risk_predictor');
+      
+      if (!usageCheck.allowed) {
+        return NextResponse.json(
+          { 
+            success: false,
+            error: usageCheck.message || "AI usage limit reached",
+            usage: {
+              used: usageCheck.used,
+              limit: usageCheck.limit,
+              remaining: usageCheck.remaining,
+              resetAt: usageCheck.resetAt
+            }
+          },
+          { status: 429 }
+        );
+      }
     }
     
     // Get attachments count
@@ -114,6 +147,11 @@ export async function POST(request: NextRequest) {
         );
       }
       
+      // Increment usage AFTER successful API call (only for demo)
+      if (subdomain) {
+        await incrementAIUsage(subdomain, 'risk_predictor');
+      }
+
       return NextResponse.json({
         success: true,
         prediction: updatedPrediction,
@@ -153,6 +191,11 @@ export async function POST(request: NextRequest) {
         );
       }
       
+      // Increment usage AFTER successful API call (only for demo)
+      if (subdomain) {
+        await incrementAIUsage(subdomain, 'risk_predictor');
+      }
+
       return NextResponse.json({
         success: true,
         prediction: newPrediction,

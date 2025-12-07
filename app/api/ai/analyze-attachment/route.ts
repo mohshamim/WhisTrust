@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServiceClient } from "@/lib/supabase/service-client";
 import { analyzeFileWithVision } from "@/lib/services/ai-analyzer";
 import { checkRateLimit, getClientIp } from "@/lib/rate-limit";
+import { checkAIUsageLimit, incrementAIUsage } from "@/lib/services/ai-limits";
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,6 +37,36 @@ export async function POST(request: NextRequest) {
     }
 
     const supabase = createServiceClient();
+
+    // Get organization subdomain for usage limit check
+    const { data: org } = await supabase
+      .from("organizations")
+      .select("subdomain")
+      .eq("id", organizationId)
+      .single();
+
+    const subdomain = org?.subdomain || '';
+    console.log("🔍 Attachment Analyzer - Organization subdomain:", subdomain);
+
+    // Check AI usage limit BEFORE processing (only for demo)
+    if (subdomain) {
+      const usageCheck = await checkAIUsageLimit(subdomain, 'attachment_analyzer');
+      
+      if (!usageCheck.allowed) {
+        return NextResponse.json(
+          { 
+            error: usageCheck.message || "AI usage limit reached",
+            usage: {
+              used: usageCheck.used,
+              limit: usageCheck.limit,
+              remaining: usageCheck.remaining,
+              resetAt: usageCheck.resetAt
+            }
+          },
+          { status: 429 }
+        );
+      }
+    }
 
     // Get attachment details with report info to verify organization
     const { data: attachment, error: attachmentError } = await supabase
@@ -157,7 +188,7 @@ export async function POST(request: NextRequest) {
         suggested_category: analysis.suggestedCategory,
         risk_level: analysis.riskLevel,
         findings: analysis.findings,
-        model_used: "gemini-2.0-flash",
+        model_used: "gemini-2.5-flash",
         confidence_score: analysis.confidenceScore,
         processing_time_ms: processingTime,
         status: "completed",
@@ -175,6 +206,18 @@ export async function POST(request: NextRequest) {
         { error: "Analysis completed but failed to save" },
         { status: 500 }
       );
+    }
+
+    // Increment usage AFTER successful API call (only for demo)
+    if (subdomain) {
+      try {
+        console.log("📊 Incrementing AI usage for:", subdomain, 'attachment_analyzer');
+        await incrementAIUsage(subdomain, 'attachment_analyzer');
+        console.log("✅ AI usage incremented successfully");
+      } catch (error) {
+        console.error("❌ Failed to increment AI usage:", error);
+        // Don't fail the request if usage increment fails
+      }
     }
 
     // Log audit event

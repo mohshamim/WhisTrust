@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/sidebar";
 import { getCurrentClientAdmin } from "@/lib/services/client-auth";
 import { getAvatarUrl } from "@/lib/services/avatar";
+import { AIUsageBadge } from "@/components/ai-usage-badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -90,6 +91,7 @@ export default function AttachmentAnalyzerPage() {
   const [analyzingIds, setAnalyzingIds] = useState<Set<string>>(new Set());
   const [selectedAttachment, setSelectedAttachment] = useState<AttachmentWithCase | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [usage, setUsage] = useState<{ used: number; limit: number; remaining: number } | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -103,6 +105,7 @@ export default function AttachmentAnalyzerPage() {
         setUser(currentUser);
         setOrganization(currentOrg);
         await loadAttachments(currentOrg.id);
+        await loadUsage();
         // Clear timeout on success
         if (loadingTimeoutRef.current) {
           clearTimeout(loadingTimeoutRef.current);
@@ -137,6 +140,25 @@ export default function AttachmentAnalyzerPage() {
       }
     };
   }, [subdomain, router]);
+
+  // Load usage for demo organization
+  async function loadUsage() {
+    if (subdomain !== 'demo') return;
+    
+    try {
+      console.log("🔄 Loading usage for:", subdomain, 'attachment_analyzer');
+      const response = await fetch(`/api/ai/usage?subdomain=${subdomain}&feature=attachment_analyzer`);
+      const data = await response.json();
+      console.log("📊 Usage data received:", data);
+      setUsage({
+        used: data.used,
+        limit: data.limit,
+        remaining: data.remaining
+      });
+    } catch (error) {
+      console.error("❌ Error loading usage:", error);
+    }
+  }
 
   const loadAttachments = async (organizationId: string) => {
     try {
@@ -233,6 +255,13 @@ export default function AttachmentAnalyzerPage() {
       const data = await response.json();
 
       if (!response.ok) {
+        // Check if it's a usage limit error (429 status)
+        if (response.status === 429) {
+          const errorMsg = data.usage 
+            ? `AI usage limit reached. You've used ${data.usage.used} of ${data.usage.limit} requests today. Limit resets tomorrow.`
+            : data.error || "AI usage limit reached for demo organization.";
+          throw new Error(errorMsg);
+        }
         throw new Error(data.error || "Analysis failed");
       }
 
@@ -240,6 +269,8 @@ export default function AttachmentAnalyzerPage() {
       
       // Reload attachments to get updated status
       await loadAttachments(organization.id);
+      // Reload usage after successful analysis
+      await loadUsage();
     } catch (error: any) {
       console.error("Analysis error:", error);
       toast.error(error.message || "Failed to analyze attachment");
@@ -429,6 +460,9 @@ export default function AttachmentAnalyzerPage() {
             </div>
           </div>
 
+          {/* AI Usage Badge (Demo only) */}
+          <AIUsageBadge subdomain={subdomain} featureType="attachment_analyzer" />
+
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <Card>
@@ -525,16 +559,29 @@ export default function AttachmentAnalyzerPage() {
                       className="pl-8"
                     />
                   </div>
-                  {pendingCount > 0 && (
-                    <Button
-                      onClick={handleBatchAnalyze}
-                      variant="outline"
-                      className="gap-2"
-                    >
-                      <Sparkles className="h-4 w-4" />
-                      Analyze All Pending ({pendingCount})
-                    </Button>
-                  )}
+                  <div className="flex items-center gap-2">
+                    {subdomain === 'demo' && usage && (
+                      <span className="text-sm text-muted-foreground whitespace-nowrap">
+                        {usage.remaining > 0 ? (
+                          <span className="text-primary font-medium">{usage.remaining}/3 left today</span>
+                        ) : (
+                          <span className="text-destructive font-medium">0/3 left - Limit reached</span>
+                        )}
+                      </span>
+                    )}
+                    {pendingCount > 0 && (
+                      <Button
+                        onClick={handleBatchAnalyze}
+                        variant="outline"
+                        className="gap-2"
+                        disabled={subdomain === 'demo' && usage && usage.remaining <= 0}
+                        title={subdomain === 'demo' && usage && usage.remaining <= 0 ? "Daily limit reached (3/3 used)" : undefined}
+                      >
+                        <Sparkles className="h-4 w-4" />
+                        Analyze All Pending ({pendingCount})
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             </CardHeader>
@@ -624,8 +671,8 @@ export default function AttachmentAnalyzerPage() {
                                   size="sm"
                                   variant="ghost"
                                   onClick={() => handleAnalyze(attachment)}
-                                  disabled={analyzingIds.has(attachment.id)}
-                                  title="Re-analyze this attachment with AI"
+                                  disabled={analyzingIds.has(attachment.id) || (subdomain === 'demo' && usage && usage.remaining <= 0)}
+                                  title={subdomain === 'demo' && usage && usage.remaining <= 0 ? "Daily limit reached (3/3 used)" : "Re-analyze this attachment with AI"}
                                 >
                                   <RefreshCw
                                     className={`h-3 w-3 ${
@@ -638,7 +685,8 @@ export default function AttachmentAnalyzerPage() {
                               <Button
                                 size="sm"
                                 onClick={() => handleAnalyze(attachment)}
-                                disabled={analyzingIds.has(attachment.id)}
+                                disabled={analyzingIds.has(attachment.id) || (subdomain === 'demo' && usage && usage.remaining <= 0)}
+                                title={subdomain === 'demo' && usage && usage.remaining <= 0 ? "Daily limit reached (3/3 used)" : undefined}
                               >
                                 {analyzingIds.has(attachment.id) ? (
                                   <>

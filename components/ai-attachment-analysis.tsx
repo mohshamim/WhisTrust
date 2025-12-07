@@ -79,6 +79,13 @@ export function AIAttachmentAnalysis({
       const data = await response.json();
 
       if (!response.ok) {
+        // Check if it's a usage limit error (429 status)
+        if (response.status === 429) {
+          const errorMsg = data.usage 
+            ? `AI usage limit reached. You've used ${data.usage.used} of ${data.usage.limit} requests today. Limit resets tomorrow.`
+            : data.error || "AI usage limit reached for demo organization.";
+          throw new Error(errorMsg);
+        }
         throw new Error(data.error || "Analysis failed");
       }
 

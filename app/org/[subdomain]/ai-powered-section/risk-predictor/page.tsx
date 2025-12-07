@@ -46,6 +46,7 @@ import {
 } from "lucide-react";
 import { getAvatarUrl } from "@/lib/services/avatar";
 import { getCurrentClientAdmin } from "@/lib/services/client-auth";
+import { AIUsageBadge } from "@/components/ai-usage-badge";
 import { format } from "date-fns";
 
 interface CaseWithRiskPrediction {
@@ -86,6 +87,7 @@ export default function RiskPredictorPage() {
   const [cases, setCases] = useState<CaseWithRiskPrediction[]>([]);
   const [filteredCases, setFilteredCases] = useState<CaseWithRiskPrediction[]>([]);
   const [loading, setLoading] = useState(true);
+  const [usage, setUsage] = useState<{ used: number; limit: number; remaining: number } | null>(null);
   const [loadError, setLoadError] = useState(false);
   const [analyzing, setAnalyzing] = useState<string | null>(null);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -125,8 +127,26 @@ export default function RiskPredictorPage() {
   useEffect(() => {
     if (organization) {
       loadCases();
+      loadUsage();
     }
   }, [organization]);
+
+  // Load usage for demo organization
+  async function loadUsage() {
+    if (subdomain !== 'demo') return;
+    
+    try {
+      const response = await fetch(`/api/ai/usage?subdomain=${subdomain}&feature=risk_predictor`);
+      const data = await response.json();
+      setUsage({
+        used: data.used,
+        limit: data.limit,
+        remaining: data.remaining
+      });
+    } catch (error) {
+      console.error("Error loading usage:", error);
+    }
+  }
 
   useEffect(() => {
     filterCases();
@@ -273,6 +293,13 @@ export default function RiskPredictorPage() {
       const result = await response.json();
 
       if (!result.success) {
+        // Check if it's a usage limit error (429 status)
+        if (response.status === 429) {
+          const errorMsg = result.usage 
+            ? `AI usage limit reached. You've used ${result.usage.used} of ${result.usage.limit} requests today. Limit resets tomorrow.`
+            : result.error || "AI usage limit reached for demo organization.";
+          throw new Error(errorMsg);
+        }
         throw new Error(result.error || "Analysis failed");
       }
 
@@ -282,6 +309,8 @@ export default function RiskPredictorPage() {
 
       // Reload cases to get updated prediction
       await loadCases();
+      // Reload usage after successful analysis
+      await loadUsage();
     } catch (error) {
       console.error("Error analyzing case:", error);
       toast.error("Failed to analyze case risk");
@@ -453,7 +482,10 @@ export default function RiskPredictorPage() {
                   </p>
                 </div>
               </div>
-            </div>
+          </div>
+
+          {/* AI Usage Badge (Demo only) */}
+          <AIUsageBadge subdomain={subdomain} featureType="risk_predictor" />
 
             {/* Stats Dashboard */}
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
@@ -524,7 +556,7 @@ export default function RiskPredictorPage() {
                   </Tabs>
 
                   {/* Search and Batch Actions */}
-                  <div className="flex gap-2 w-full md:w-auto">
+                  <div className="flex flex-col md:flex-row gap-2 w-full md:w-auto">
                     <div className="relative flex-1 md:w-64">
                       <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
@@ -534,11 +566,22 @@ export default function RiskPredictorPage() {
                         className="pl-9"
                       />
                     </div>
-                    <Button
-                      onClick={batchAnalyze}
-                      disabled={batchAnalyzing || stats.unscored === 0}
-                      className="whitespace-nowrap"
-                    >
+                    <div className="flex items-center gap-2">
+                      {subdomain === 'demo' && usage && (
+                        <span className="text-sm text-muted-foreground whitespace-nowrap">
+                          {usage.remaining > 0 ? (
+                            <span className="text-primary font-medium">{usage.remaining}/3 left today</span>
+                          ) : (
+                            <span className="text-destructive font-medium">0/3 left - Limit reached</span>
+                          )}
+                        </span>
+                      )}
+                      <Button
+                        onClick={batchAnalyze}
+                        disabled={batchAnalyzing || stats.unscored === 0 || (subdomain === 'demo' && usage && usage.remaining <= 0)}
+                        className="whitespace-nowrap"
+                        title={subdomain === 'demo' && usage && usage.remaining <= 0 ? "Daily limit reached (3/3 used)" : undefined}
+                      >
                       {batchAnalyzing ? (
                         <>
                           <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -635,7 +678,8 @@ export default function RiskPredictorPage() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => analyzeCase(caseItem.id)}
-                                  disabled={analyzing === caseItem.id}
+                                  disabled={analyzing === caseItem.id || (subdomain === 'demo' && usage && usage.remaining <= 0)}
+                                  title={subdomain === 'demo' && usage && usage.remaining <= 0 ? "Daily limit reached (3/3 used)" : undefined}
                                 >
                                   {analyzing === caseItem.id ? (
                                     <Loader2 className="h-4 w-4 animate-spin" />

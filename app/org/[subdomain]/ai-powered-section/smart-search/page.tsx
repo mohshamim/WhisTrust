@@ -34,6 +34,7 @@ import {
 import { getAvatarUrl } from "@/lib/services/avatar";
 import { getCurrentClientAdmin } from "@/lib/services/client-auth";
 import { exportToPDF, exportToExcel } from "@/lib/services/smart-search-export";
+import { AIUsageBadge } from "@/components/ai-usage-badge";
 
 interface SearchResult {
   id: string;
@@ -66,6 +67,7 @@ export default function SmartSearchPage() {
   const [loadError, setLoadError] = useState(false);
   const hasAutoSearched = useRef(false);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [usage, setUsage] = useState<{ used: number; limit: number; remaining: number } | null>(null);
 
   // Example queries for suggestions
   const exampleQueries = [
@@ -101,6 +103,25 @@ export default function SmartSearchPage() {
     }
   }, [urlQuery, organization]);
 
+  // Load usage for demo organization
+  async function loadUsage() {
+    if (subdomain !== 'demo') return;
+    
+    try {
+      console.log("🔄 Loading usage for:", subdomain, 'smart_search');
+      const response = await fetch(`/api/ai/usage?subdomain=${subdomain}&feature=smart_search`);
+      const data = await response.json();
+      console.log("📊 Usage data received:", data);
+      setUsage({
+        used: data.used,
+        limit: data.limit,
+        remaining: data.remaining
+      });
+    } catch (error) {
+      console.error("❌ Error loading usage:", error);
+    }
+  }
+
   async function loadUserAndOrganization() {
     try {
       const result = await getCurrentClientAdmin();
@@ -112,6 +133,10 @@ export default function SmartSearchPage() {
         if (loadingTimeoutRef.current) {
           clearTimeout(loadingTimeoutRef.current);
           loadingTimeoutRef.current = null;
+        }
+        // Load usage after organization is loaded
+        if (subdomain === 'demo') {
+          await loadUsage();
         }
       } else {
         setLoadError(true);
@@ -144,12 +169,23 @@ export default function SmartSearchPage() {
       const parseResponse = await fetch("/api/ai/smart-search", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ query }),
+        body: JSON.stringify({ query, subdomain }),
       });
 
       const parseResult = await parseResponse.json();
       
       if (!parseResult.success) {
+        // Check if it's a usage limit error (429 status)
+        if (parseResponse.status === 429) {
+          const errorMsg = parseResult.usage 
+            ? `AI usage limit reached. You've used ${parseResult.usage.used} of ${parseResult.usage.limit} requests today. Limit resets tomorrow.`
+            : parseResult.error || "AI usage limit reached for demo organization.";
+          throw new Error(errorMsg);
+        }
+        // Check if it's a quota error
+        if (parseResult.quotaError) {
+          throw new Error("API quota exceeded. Please wait a few minutes and try again, or check your Gemini API key quota.");
+        }
         throw new Error(parseResult.error || "Could not understand query");
       }
 
@@ -251,9 +287,20 @@ export default function SmartSearchPage() {
 
       setResults(data || []);
       toast.success(`Found ${data?.length || 0} cases`);
+      // Reload usage after successful search
+      await loadUsage();
     } catch (error: any) {
       console.error("Search error:", error);
-      toast.error(error.message || "Search failed. Please try again.");
+      
+      // Check if it's a quota error from the API response
+      if (error.message?.includes("quota") || error.message?.includes("429")) {
+        toast.error("API quota exceeded. Please wait a few minutes and try again, or check your Gemini API key quota.", {
+          duration: 8000,
+        });
+      } else {
+        toast.error(error.message || "Search failed. Please try again.");
+      }
+      
       setResults([]);
     } finally {
       setSearching(false);
@@ -406,6 +453,9 @@ export default function SmartSearchPage() {
             </div>
           </div>
 
+          {/* AI Usage Badge (Demo only) */}
+          <AIUsageBadge subdomain={subdomain} featureType="smart_search" />
+
             {/* Search Card */}
             <Card className="mb-6">
               <CardHeader>
@@ -419,18 +469,23 @@ export default function SmartSearchPage() {
               </CardHeader>
               <CardContent>
                 {/* Search Input */}
-                <div className="flex gap-2 mb-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      placeholder='Example: "Find harassment cases from last month"'
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-                      className="pl-9"
-                    />
-                  </div>
-                  <Button onClick={handleSearch} disabled={searching}>
+                <div className="space-y-2 mb-4">
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        placeholder='Example: "Find harassment cases from last month"'
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                        className="pl-9"
+                      />
+                    </div>
+                    <Button 
+                      onClick={handleSearch} 
+                      disabled={searching || (subdomain === 'demo' && usage && usage.remaining <= 0)}
+                      title={subdomain === 'demo' && usage && usage.remaining <= 0 ? "Daily limit reached (3/3 used)" : undefined}
+                    >
                     {searching ? (
                       <>
                         <Loader2 className="h-4 w-4 mr-2 animate-spin" />
@@ -448,6 +503,18 @@ export default function SmartSearchPage() {
                       <X className="h-4 w-4 mr-2" />
                       Clear
                     </Button>
+                  )}
+                  </div>
+                  {subdomain === 'demo' && usage && (
+                    <div className="flex items-center justify-end">
+                      <span className="text-sm text-muted-foreground">
+                        {usage.remaining > 0 ? (
+                          <span className="text-primary font-medium">{usage.remaining}/3 left today</span>
+                        ) : (
+                          <span className="text-destructive font-medium">0/3 left - Limit reached</span>
+                        )}
+                      </span>
+                    </div>
                   )}
                 </div>
 

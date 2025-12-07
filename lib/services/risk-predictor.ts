@@ -165,7 +165,8 @@ async function analyzeWithGemini(description: string, category: string): Promise
   riskFactors: string[];
 }> {
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    // Updated to gemini-2.5-flash which has available quota in free tier
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
     
     const prompt = `You are an expert risk analyst for workplace incident reports. Analyze the following case and provide a structured assessment.
 

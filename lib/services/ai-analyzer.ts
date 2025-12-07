@@ -32,8 +32,8 @@ export async function analyzeAttachment(
   const startTime = Date.now();
 
   try {
-    // Use gemini-2.0-flash for free tier API keys (NOT the -exp version)
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    // Updated to gemini-2.5-flash which has available quota in free tier
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `You are an AI compliance analyst for a whistleblowing platform. Analyze this document attachment.
 
@@ -133,8 +133,8 @@ export async function analyzeFileWithVision(
   mimeType: string
 ): Promise<AnalysisResult> {
   try {
-    // Use gemini-2.0-flash for free tier API keys (supports vision)
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    // Updated to gemini-2.5-flash which has available quota in free tier (supports vision)
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `You are an AI compliance analyst. Analyze this document/image for a whistleblowing case.
 
