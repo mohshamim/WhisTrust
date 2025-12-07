@@ -433,7 +433,7 @@ export default function RiskPredictorPage() {
   }
 
   // Calculate button state variables
-  const isDemoLimitReached = subdomain === 'demo' && usage && usage.remaining <= 0;
+  const isDemoLimitReached = subdomain === 'demo' && usage ? usage.remaining <= 0 : false;
   const isButtonDisabled = batchAnalyzing || stats.unscored === 0 || isDemoLimitReached;
   const buttonTitle = isDemoLimitReached ? "Daily limit reached (3/3 used)" : undefined;
   
