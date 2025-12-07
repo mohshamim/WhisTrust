@@ -546,12 +546,12 @@ export default function RiskPredictorPage() {
                   {/* Filter Tabs */}
                   <Tabs value={selectedFilter} onValueChange={setSelectedFilter}>
                     <TabsList>
-                      <TabsTrigger value="all">All ({stats.total})</TabsTrigger>
-                      <TabsTrigger value="critical">Critical ({stats.critical})</TabsTrigger>
-                      <TabsTrigger value="high">High ({stats.high})</TabsTrigger>
-                      <TabsTrigger value="medium">Medium ({stats.medium})</TabsTrigger>
-                      <TabsTrigger value="low">Low ({stats.low})</TabsTrigger>
-                      <TabsTrigger value="unscored">Unscored ({stats.unscored})</TabsTrigger>
+                      <TabsTrigger value="all">All {stats.total}</TabsTrigger>
+                      <TabsTrigger value="critical">Critical {stats.critical}</TabsTrigger>
+                      <TabsTrigger value="high">High {stats.high}</TabsTrigger>
+                      <TabsTrigger value="medium">Medium {stats.medium}</TabsTrigger>
+                      <TabsTrigger value="low">Low {stats.low}</TabsTrigger>
+                      <TabsTrigger value="unscored">Unscored {stats.unscored}</TabsTrigger>
                     </TabsList>
                   </Tabs>
 
