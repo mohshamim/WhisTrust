@@ -574,7 +574,7 @@ export default function AttachmentAnalyzerPage() {
                         onClick={handleBatchAnalyze}
                         variant="outline"
                         className="gap-2"
-                        disabled={subdomain === 'demo' && usage && usage.remaining <= 0}
+                        disabled={subdomain === 'demo' && usage ? usage.remaining <= 0 : false}
                         title={subdomain === 'demo' && usage && usage.remaining <= 0 ? "Daily limit reached (3/3 used)" : undefined}
                       >
                         <Sparkles className="h-4 w-4" />
