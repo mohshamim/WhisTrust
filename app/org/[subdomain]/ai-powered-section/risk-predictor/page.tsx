@@ -432,6 +432,11 @@ export default function RiskPredictorPage() {
     );
   }
 
+  // Calculate button state variables
+  const isDemoLimitReached = subdomain === 'demo' && usage && usage.remaining <= 0;
+  const isButtonDisabled = batchAnalyzing || stats.unscored === 0 || isDemoLimitReached;
+  const buttonTitle = isDemoLimitReached ? "Daily limit reached (3/3 used)" : undefined;
+
   return (
     <SidebarProvider>
       <ClientSidebar
@@ -576,31 +581,24 @@ export default function RiskPredictorPage() {
                           )}
                         </span>
                       ) : null}
-                      {(() => {
-                        const isDemoLimitReached = subdomain === 'demo' && usage && usage.remaining <= 0;
-                        const isButtonDisabled = batchAnalyzing || stats.unscored === 0 || isDemoLimitReached;
-                        const buttonTitle = isDemoLimitReached ? "Daily limit reached (3/3 used)" : undefined;
-                        return (
-                          <Button
-                            onClick={batchAnalyze}
-                            disabled={isButtonDisabled}
-                            className="whitespace-nowrap"
-                            title={buttonTitle}
-                          >
-                            {batchAnalyzing ? (
-                              <>
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                Analyzing...
-                              </>
-                            ) : (
-                              <>
-                                <Sparkles className="h-4 w-4 mr-2" />
-                                Analyze All Unscored
-                              </>
-                            )}
-                          </Button>
-                        );
-                      })()}
+                      <Button
+                        onClick={batchAnalyze}
+                        disabled={isButtonDisabled}
+                        className="whitespace-nowrap"
+                        title={buttonTitle}
+                      >
+                        {batchAnalyzing ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Analyzing...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Analyze All Unscored
+                          </>
+                        )}
+                      </Button>
                     </div>
                   </div>
               </CardContent>
