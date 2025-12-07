@@ -576,26 +576,33 @@ export default function RiskPredictorPage() {
                           )}
                         </span>
                       ) : null}
-                      <Button
-                        onClick={batchAnalyze}
-                        disabled={batchAnalyzing || stats.unscored === 0 || (subdomain === 'demo' && usage && usage.remaining <= 0)}
-                        className="whitespace-nowrap"
-                        title={subdomain === 'demo' && usage && usage.remaining <= 0 ? "Daily limit reached (3/3 used)" : undefined}
-                      >
-                        {batchAnalyzing ? (
-                          <>
-                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                            Analyzing...
-                          </>
-                        ) : (
-                          <>
-                            <Sparkles className="h-4 w-4 mr-2" />
-                            Analyze All Unscored
-                          </>
-                        )}
-                      </Button>
+                      {(() => {
+                        const isDemoLimitReached = subdomain === 'demo' && usage && usage.remaining <= 0;
+                        const isButtonDisabled = batchAnalyzing || stats.unscored === 0 || isDemoLimitReached;
+                        const buttonTitle = isDemoLimitReached ? "Daily limit reached (3/3 used)" : undefined;
+                        return (
+                          <Button
+                            onClick={batchAnalyze}
+                            disabled={isButtonDisabled}
+                            className="whitespace-nowrap"
+                            title={buttonTitle}
+                          >
+                            {batchAnalyzing ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Analyzing...
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="h-4 w-4 mr-2" />
+                                Analyze All Unscored
+                              </>
+                            )}
+                          </Button>
+                        );
+                      })()}
+                    </div>
                   </div>
-                </div>
               </CardContent>
             </Card>
 
