@@ -582,18 +582,18 @@ export default function RiskPredictorPage() {
                         className="whitespace-nowrap"
                         title={subdomain === 'demo' && usage && usage.remaining <= 0 ? "Daily limit reached (3/3 used)" : undefined}
                       >
-                      {batchAnalyzing ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Analyzing...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Analyze All Unscored
-                        </>
-                      )}
-                    </Button>
+                        {batchAnalyzing ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Analyzing...
+                          </>
+                        ) : (
+                          <>
+                            <Sparkles className="h-4 w-4 mr-2" />
+                            Analyze All Unscored
+                          </>
+                        )}
+                      </Button>
                   </div>
                 </div>
               </CardContent>
