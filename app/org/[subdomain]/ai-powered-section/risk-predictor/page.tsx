@@ -436,6 +436,17 @@ export default function RiskPredictorPage() {
   const isDemoLimitReached = subdomain === 'demo' && usage && usage.remaining <= 0;
   const isButtonDisabled = batchAnalyzing || stats.unscored === 0 || isDemoLimitReached;
   const buttonTitle = isDemoLimitReached ? "Daily limit reached (3/3 used)" : undefined;
+  
+  // Usage display component
+  const usageDisplay = subdomain === 'demo' && usage ? (
+    <span className="text-sm text-muted-foreground whitespace-nowrap">
+      {usage.remaining > 0 ? (
+        <span className="text-primary font-medium">{usage.remaining}/3 left today</span>
+      ) : (
+        <span className="text-destructive font-medium">0/3 left - Limit reached</span>
+      )}
+    </span>
+  ) : null;
 
   return (
     <SidebarProvider>
@@ -572,15 +583,7 @@ export default function RiskPredictorPage() {
                       />
                     </div>
                     <div className="flex items-center gap-2">
-                      {subdomain === 'demo' && usage ? (
-                        <span className="text-sm text-muted-foreground whitespace-nowrap">
-                          {usage.remaining > 0 ? (
-                            <span className="text-primary font-medium">{usage.remaining}/3 left today</span>
-                          ) : (
-                            <span className="text-destructive font-medium">0/3 left - Limit reached</span>
-                          )}
-                        </span>
-                      ) : null}
+                      {usageDisplay}
                       <Button
                         onClick={batchAnalyze}
                         disabled={isButtonDisabled}
