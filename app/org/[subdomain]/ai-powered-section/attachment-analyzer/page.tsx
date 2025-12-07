@@ -671,7 +671,7 @@ export default function AttachmentAnalyzerPage() {
                                   size="sm"
                                   variant="ghost"
                                   onClick={() => handleAnalyze(attachment)}
-                                  disabled={analyzingIds.has(attachment.id) || (subdomain === 'demo' && usage && usage.remaining <= 0)}
+                                  disabled={analyzingIds.has(attachment.id) || (subdomain === 'demo' && usage ? usage.remaining <= 0 : false)}
                                   title={subdomain === 'demo' && usage && usage.remaining <= 0 ? "Daily limit reached (3/3 used)" : "Re-analyze this attachment with AI"}
                                 >
                                   <RefreshCw

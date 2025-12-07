@@ -687,7 +687,7 @@ export default function RiskPredictorPage() {
                                   size="sm"
                                   variant="outline"
                                   onClick={() => analyzeCase(caseItem.id)}
-                                  disabled={analyzing === caseItem.id || (subdomain === 'demo' && usage && usage.remaining <= 0)}
+                                  disabled={analyzing === caseItem.id || (subdomain === 'demo' && usage ? usage.remaining <= 0 : false)}
                                   title={subdomain === 'demo' && usage && usage.remaining <= 0 ? "Daily limit reached (3/3 used)" : undefined}
                                 >
                                   {analyzing === caseItem.id ? (

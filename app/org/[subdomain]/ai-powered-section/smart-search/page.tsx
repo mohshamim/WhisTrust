@@ -483,7 +483,7 @@ export default function SmartSearchPage() {
                     </div>
                     <Button 
                       onClick={handleSearch} 
-                      disabled={searching || (subdomain === 'demo' && usage && usage.remaining <= 0)}
+                      disabled={searching || (subdomain === 'demo' && usage ? usage.remaining <= 0 : false)}
                       title={subdomain === 'demo' && usage && usage.remaining <= 0 ? "Daily limit reached (3/3 used)" : undefined}
                     >
                     {searching ? (
