@@ -14,6 +14,10 @@ Allow: /privacy-policy
 Allow: /terms-of-service
 Allow: /report
 Allow: /track
+Allow: /anonymous-reporting-system
+Allow: /ethics-hotline-software
+Allow: /employee-reporting-software
+Allow: /secure-whistleblowing-platform
 
 # Sitemap location
 Sitemap: https://whistrust.com/sitemap.xml

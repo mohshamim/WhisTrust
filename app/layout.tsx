@@ -22,8 +22,18 @@ export const metadata: Metadata = {
     template: "%s | WhisTrust",
   },
   description:
-    "WhisTrust enables secure, anonymous whistleblowing and ethics reporting for organizations. Enterprise-grade security, RBAC, end-to-end encryption, and compliance-ready data handling.",
+    "WhisTrust is a secure anonymous reporting system and ethics hotline software for organizations. Enterprise-grade whistleblowing platform with end-to-end encryption, GDPR/SOX compliance, and RBAC. Trusted by companies worldwide for confidential employee reporting.",
   keywords: [
+    // Primary Low-Competition Keywords (High Volume)
+    "anonymous reporting system",
+    "ethics hotline software",
+    "secure whistleblowing platform",
+    "employee reporting software",
+    "confidential reporting system",
+    "compliance hotline software",
+    "encrypted reporting platform",
+    
+    // Secondary Keywords (Medium Volume, Low Competition)
     "whistleblowing platform",
     "anonymous reporting",
     "ethics reporting",
@@ -33,10 +43,28 @@ export const metadata: Metadata = {
     "corporate compliance",
     "fraud reporting",
     "harassment reporting",
-    "confidential reporting",
-    "RBAC",
-    "audit logging",
-    "encrypted messaging",
+    
+    // Long-tail Keywords (Low Competition, High Intent)
+    "best anonymous reporting system",
+    "secure whistleblower platform",
+    "encrypted compliance reporting",
+    "multi-tenant whistleblowing",
+    "GDPR compliant reporting system",
+    "SOX compliance reporting software",
+    "HIPAA compliant anonymous reporting",
+    "end-to-end encrypted reporting",
+    
+    // Industry-Specific (Low Competition)
+    "healthcare compliance reporting",
+    "financial services whistleblowing",
+    "education sector anonymous reporting",
+    "manufacturing ethics hotline",
+    
+    // Feature-Focused (Very Low Competition)
+    "RBAC compliance platform",
+    "audit logging software",
+    "real-time reporting system",
+    "metadata stripping reporting",
   ],
   authors: [{ name: "WhisTrust" }],
   creator: "WhisTrust",
@@ -52,7 +80,7 @@ export const metadata: Metadata = {
     url: "/",
     title: "WhisTrust - Secure Anonymous Reporting Platform",
     description:
-      "Enterprise-grade anonymous whistleblowing platform with end-to-end encryption, RBAC, and compliance-ready features. Enable secure, confidential reporting in your organization.",
+      "Secure anonymous reporting system and ethics hotline software. Enterprise-grade whistleblowing platform with end-to-end encryption, GDPR/SOX compliance, and confidential employee reporting.",
     siteName: "WhisTrust",
     images: [
       {
@@ -67,7 +95,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "WhisTrust - Secure Anonymous Reporting Platform",
     description:
-      "Enterprise-grade anonymous whistleblowing platform with end-to-end encryption and RBAC",
+      "Secure anonymous reporting system and ethics hotline software. Enterprise whistleblowing platform with encryption, GDPR/SOX compliance, and confidential reporting.",
     images: ["/twitter-image.png"],
     creator: "@whistrust",
   },
@@ -91,9 +119,7 @@ export const metadata: Metadata = {
       { url: "/favicon.ico", sizes: "any" },
       { url: "/icon.svg", type: "image/svg+xml" },
     ],
-    apple: [
-      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
-    ],
+    apple: [{ url: "/apple-icon.png", sizes: "180x180", type: "image/png" }],
   },
 };
 
