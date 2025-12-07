@@ -604,6 +604,7 @@ export default function RiskPredictorPage() {
                       </Button>
                     </div>
                   </div>
+                </div>
               </CardContent>
             </Card>
 
