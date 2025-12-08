@@ -29,6 +29,8 @@ import {
   ChevronDown,
   Menu,
 } from "lucide-react";
+import { getFeaturesByIds } from "@/lib/data/features";
+import { selectedPowerfulFeatures } from "@/lib/config/feature-selection";
 import {
   Accordion,
   AccordionContent,
@@ -455,81 +457,33 @@ function HomeContent() {
           </div>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <Card className="border-2 hover:border-primary/50 transition-colors">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                  <Lock className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle>100% Anonymous</CardTitle>
-                <CardDescription>
-                  Military-grade encryption ensures your identity stays
-                  protected.
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            {getFeaturesByIds(selectedPowerfulFeatures).map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <Card
+                  key={feature.id}
+                  className="border-2 hover:border-primary/50 transition-all hover:shadow-lg group"
+                >
+                  <CardHeader>
+                    <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4 group-hover:bg-primary/20 transition-colors">
+                      <Icon className="h-6 w-6 text-primary" />
+                    </div>
+                    <CardTitle>{feature.title}</CardTitle>
+                    <CardDescription>{feature.description}</CardDescription>
+                  </CardHeader>
+                </Card>
+              );
+            })}
+          </div>
 
-            <Card className="border-2 hover:border-primary/50 transition-colors">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                  <MessageSquare className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle>Real-time Tracking</CardTitle>
-                <CardDescription>
-                  Monitor your case status and communicate securely with
-                  compliance teams.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="border-2 hover:border-primary/50 transition-colors">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                  <FileCheck className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle>Professional Review</CardTitle>
-                <CardDescription>
-                  All reports reviewed by certified compliance professionals
-                  within 24 hours.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="border-2 hover:border-primary/50 transition-colors">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                  <Eye className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle>Dashboard Analytics</CardTitle>
-                <CardDescription>
-                  Comprehensive insights and reporting for compliance managers.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="border-2 hover:border-primary/50 transition-colors">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                  <Clock className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle>24/7 Availability</CardTitle>
-                <CardDescription>
-                  Submit reports anytime, anywhere with our cloud-based
-                  platform.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="border-2 hover:border-primary/50 transition-colors">
-              <CardHeader>
-                <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
-                  <Globe className="h-6 w-6 text-primary" />
-                </div>
-                <CardTitle>Multi-language Support</CardTitle>
-                <CardDescription>
-                  Available in multiple languages for global organizations.
-                </CardDescription>
-              </CardHeader>
-            </Card>
+          {/* All Features Button */}
+          <div className="text-center mt-12">
+            <Button asChild size="lg" variant="outline" className="h-12 px-8">
+              <Link href="/features">
+                View All Features
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
           </div>
         </div>
       </section>

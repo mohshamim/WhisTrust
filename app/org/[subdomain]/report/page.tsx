@@ -15,11 +15,15 @@ import { Shield, ArrowRight, Lock, Check, Copy, AlertCircle, FileUp, Mail, User,
 import { getOrganizationBySubdomain } from "@/lib/services/client-auth";
 import type { ClientOrganization } from "@/lib/services/client-auth";
 import { toast } from "sonner";
+import { MobileFileUpload } from "@/components/mobile-file-upload";
+import { MobileCategorySelector } from "@/components/mobile-category-selector";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export default function AnonymousReportPage() {
   const router = useRouter();
   const params = useParams();
   const subdomain = params.subdomain as string;
+  const isMobile = useIsMobile();
   
   const [organization, setOrganization] = useState<ClientOrganization | null>(null);
   const [loading, setLoading] = useState(true);
@@ -257,6 +261,22 @@ export default function AnonymousReportPage() {
     }
   };
 
+  const handleFileSelect = (file: File | null) => {
+    setFormData({ ...formData, file: file || null });
+  };
+
+  const categories = [
+    { value: "fraud", label: "Fraud & Financial Misconduct" },
+    { value: "harassment", label: "Harassment & Discrimination" },
+    { value: "safety", label: "Safety & Health Violations" },
+    { value: "ethical", label: "Ethical Violations" },
+    { value: "data_breach", label: "Data Privacy & Security" },
+    { value: "theft", label: "Theft / Misappropriation" },
+    { value: "corruption", label: "Corruption / Bribery" },
+    { value: "conflict", label: "Conflict of Interest" },
+    { value: "other", label: "Other" },
+  ];
+
   if (loading) {
     return (
       <div className="min-h-screen bg-muted/50 flex items-center justify-center p-4">
@@ -479,26 +499,32 @@ export default function AnonymousReportPage() {
                 <Label htmlFor="category" className="text-sm font-semibold">
                   Category <span className="text-destructive">*</span>
                 </Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={(value) => setFormData({ ...formData, category: value })}
-                  required
-                >
-                  <SelectTrigger id="category" className="h-12 w-full">
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="fraud">Fraud & Financial Misconduct</SelectItem>
-                    <SelectItem value="harassment">Harassment & Discrimination</SelectItem>
-                    <SelectItem value="safety">Safety & Health Violations</SelectItem>
-                    <SelectItem value="ethical">Ethical Violations</SelectItem>
-                    <SelectItem value="data_breach">Data Privacy & Security</SelectItem>
-                    <SelectItem value="theft">Theft / Misappropriation</SelectItem>
-                    <SelectItem value="corruption">Corruption / Bribery</SelectItem>
-                    <SelectItem value="conflict">Conflict of Interest</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                  </SelectContent>
-                </Select>
+                {isMobile ? (
+                  <MobileCategorySelector
+                    value={formData.category}
+                    onValueChange={(value) => setFormData({ ...formData, category: value })}
+                    categories={categories}
+                    placeholder="Select a category"
+                    isMobile={true}
+                  />
+                ) : (
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) => setFormData({ ...formData, category: value })}
+                    required
+                  >
+                    <SelectTrigger id="category" className="h-12 w-full">
+                      <SelectValue placeholder="Select a category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.value} value={cat.value}>
+                          {cat.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
               </div>
 
               {/* Title */}
@@ -514,7 +540,7 @@ export default function AnonymousReportPage() {
                   required
                   disabled={submitting}
                   maxLength={200}
-                  className="h-12"
+                  className={isMobile ? "h-14 text-base" : "h-12"}
                 />
               </div>
 
@@ -526,7 +552,7 @@ export default function AnonymousReportPage() {
                 <Textarea
                   id="description"
                   placeholder="Please provide a detailed description of the incident, including when and where it occurred..."
-                  className="min-h-[180px] sm:min-h-[220px] resize-y"
+                  className={isMobile ? "min-h-[200px] text-base resize-y" : "min-h-[180px] sm:min-h-[220px] resize-y"}
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   required
@@ -549,37 +575,12 @@ export default function AnonymousReportPage() {
               {/* Attachments */}
               <div className="space-y-2">
                 <Label className="text-sm font-semibold">Attachments</Label>
-                <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary/50 transition-colors cursor-pointer group">
-                  <input
-                    type="file"
-                    id="attachment"
-                    className="hidden"
-                    onChange={handleFileChange}
-                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                  />
-                  <label htmlFor="attachment" className="cursor-pointer">
-                    <FileUp className="h-10 w-10 mx-auto mb-2 text-muted-foreground group-hover:text-primary" />
-                    {formData.file ? (
-                      <>
-                        <p className="text-sm font-medium">
-                          {formData.file.name}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {(formData.file.size / 1024 / 1024).toFixed(2)} MB
-                        </p>
-                      </>
-                    ) : (
-                      <>
-                        <p className="text-sm font-medium mb-1">
-                          Click to upload or drag and drop
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          PDF, DOC, DOCX, JPG, PNG (max 10MB)
-                        </p>
-                      </>
-                    )}
-                  </label>
-                </div>
+                <MobileFileUpload
+                  onFileSelect={handleFileSelect}
+                  currentFile={formData.file}
+                  maxSizeMB={10}
+                  accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
+                />
               </div>
 
               <Separator />
@@ -612,6 +613,7 @@ export default function AnonymousReportPage() {
                         placeholder="Your name"
                         value={formData.name}
                         onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        className={isMobile ? "h-14 text-base" : ""}
                       />
                     </div>
                     <div className="space-y-2">
@@ -625,6 +627,7 @@ export default function AnonymousReportPage() {
                         placeholder="your.email@example.com"
                         value={formData.email}
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className={isMobile ? "h-14 text-base" : ""}
                       />
                     </div>
                   </div>
@@ -635,7 +638,7 @@ export default function AnonymousReportPage() {
               <div className="pt-4 space-y-4">
                 <Button
                   type="submit"
-                  className="w-full h-12 text-base font-semibold shadow-sm hover:shadow-md transition-shadow"
+                  className={isMobile ? "w-full h-14 text-base font-semibold shadow-sm hover:shadow-md transition-shadow" : "w-full h-12 text-base font-semibold shadow-sm hover:shadow-md transition-shadow"}
                   disabled={submitting || !isFormValid() || !features.anonymous_reporting || atMonthlyLimit}
                 >
                   {submitting ? (
