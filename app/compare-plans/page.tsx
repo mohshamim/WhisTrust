@@ -307,7 +307,7 @@ export default function ComparePlansPage() {
                                 planIndex === 1 ? "bg-primary/5" : ""
                               }`}
                             >
-                              {plan.features[feature] ? (
+                              {plan.features[feature as keyof typeof plan.features] ? (
                                 <Check className="h-5 w-5 text-green-600 mx-auto" />
                               ) : (
                                 <X className="h-5 w-5 text-muted-foreground/50 mx-auto" />
