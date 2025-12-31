@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -283,8 +283,8 @@ export default function ComparePlansPage() {
                 </thead>
                 <tbody>
                   {featureCategories.map((category, categoryIndex) => (
-                    <>
-                      <tr key={category.title} className="bg-muted/30">
+                    <React.Fragment key={category.title}>
+                      <tr className="bg-muted/30">
                         <td
                           colSpan={4}
                           className="py-3 px-4 font-semibold text-primary"
@@ -316,7 +316,7 @@ export default function ComparePlansPage() {
                           ))}
                         </tr>
                       ))}
-                    </>
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>
