@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Search, Sparkles, X, Loader2, Bot, Filter } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -201,7 +201,7 @@ export function FloatingSmartSearch({
                 <Sparkles className="absolute -top-0.5 -right-0.5 h-3 w-3 text-yellow-500 animate-pulse" />
               </div>
               <div className="flex-1">
-                <h2 className="text-2xl font-bold">Smart AI Search</h2>
+                <DialogTitle className="text-2xl font-bold">Smart AI Search</DialogTitle>
                 <p className="text-sm text-muted-foreground">
                   Search cases using natural language
                 </p>
