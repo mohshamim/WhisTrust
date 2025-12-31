@@ -52,11 +52,13 @@ import {
   FAQSchema,
   WebSiteSchema,
 } from "@/components/structured-data";
+import { CustomQuoteModal } from "@/components/custom-quote-modal";
 
 function HomeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [isRedirecting, setIsRedirecting] = useState(false);
+  const [isQuoteModalOpen, setIsQuoteModalOpen] = useState(false);
 
   // Handle OAuth callback that lands on homepage (fallback)
   useEffect(() => {
@@ -570,14 +572,12 @@ function HomeContent() {
                   Small/Mid-sized companies requiring core legal compliance
                 </p>
                 <div className="mt-6">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-bold">$499</span>
-                    <span className="text-muted-foreground">/mo</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    <Users className="h-3 w-3 inline mr-1" />
-                    Up to 500 employees
-                  </p>
+                  <Button
+                    className="w-full h-12 text-lg font-semibold"
+                    onClick={() => setIsQuoteModalOpen(true)}
+                  >
+                    Get Custom Quote
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent className="flex-grow flex flex-col gap-4">
@@ -608,12 +608,10 @@ function HomeContent() {
                 <Button
                   variant="outline"
                   className="w-full mt-auto h-11"
-                  asChild
+                  onClick={() => setIsQuoteModalOpen(true)}
                 >
-                  <Link href="/plan-details/essential">
-                    See Details
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
+                  Get Custom Quote
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </CardContent>
             </Card>
@@ -635,14 +633,12 @@ function HomeContent() {
                   tools
                 </p>
                 <div className="mt-6">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-bold">$799</span>
-                    <span className="text-muted-foreground">/mo</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    <Users className="h-3 w-3 inline mr-1" />
-                    501 – 2,500 employees
-                  </p>
+                  <Button
+                    className="w-full h-12 text-lg font-semibold"
+                    onClick={() => setIsQuoteModalOpen(true)}
+                  >
+                    Get Custom Quote
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent className="flex-grow flex flex-col gap-4">
@@ -678,11 +674,9 @@ function HomeContent() {
                     </span>
                   </div>
                 </div>
-                <Button className="w-full mt-auto h-11 shadow-md" asChild>
-                  <Link href="/plan-details/professional">
-                    See Details
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
+                <Button className="w-full mt-auto h-11 shadow-md" onClick={() => setIsQuoteModalOpen(true)}>
+                  Get Custom Quote
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </CardContent>
             </Card>
@@ -698,13 +692,12 @@ function HomeContent() {
                   Large international organizations needing full compliance
                 </p>
                 <div className="mt-6">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-4xl font-bold">Custom Quote</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    <Users className="h-3 w-3 inline mr-1" />
-                    2,500+ employees
-                  </p>
+                  <Button
+                    className="w-full h-12 text-lg font-semibold"
+                    onClick={() => setIsQuoteModalOpen(true)}
+                  >
+                    Get Custom Quote
+                  </Button>
                 </div>
               </CardHeader>
               <CardContent className="flex-grow flex flex-col gap-4">
@@ -741,12 +734,10 @@ function HomeContent() {
                 <Button
                   variant="outline"
                   className="w-full mt-auto h-11"
-                  asChild
+                  onClick={() => setIsQuoteModalOpen(true)}
                 >
-                  <Link href="/plan-details/enterprise">
-                    See Details
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
+                  Get Custom Quote
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </CardContent>
             </Card>
@@ -954,6 +945,12 @@ function HomeContent() {
           </div>
         </div>
       </footer>
+
+      {/* Custom Quote Modal */}
+      <CustomQuoteModal
+        isOpen={isQuoteModalOpen}
+        onClose={() => setIsQuoteModalOpen(false)}
+      />
     </div>
   );
 }
