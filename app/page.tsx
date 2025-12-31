@@ -568,17 +568,14 @@ function HomeContent() {
                 <CardDescription className="text-sm mt-2">
                   Compliance Foundation
                 </CardDescription>
-                <p className="text-xs text-muted-foreground mt-2">
+                <div className="flex items-center gap-2 mt-3">
+                  <Badge variant="outline" className="text-xs">
+                    Custom Pricing
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
                   Small/Mid-sized companies requiring core legal compliance
                 </p>
-                <div className="mt-6">
-                  <Button
-                    className="w-full h-12 text-lg font-semibold"
-                    onClick={() => setIsQuoteModalOpen(true)}
-                  >
-                    Get Custom Quote
-                  </Button>
-                </div>
               </CardHeader>
               <CardContent className="flex-grow flex flex-col gap-4">
                 <div className="space-y-3">
@@ -628,18 +625,15 @@ function HomeContent() {
                 <CardDescription className="text-sm mt-2">
                   Advanced Investigation
                 </CardDescription>
-                <p className="text-xs text-muted-foreground mt-2">
+                <div className="flex items-center gap-2 mt-3">
+                  <Badge variant="outline" className="text-xs">
+                    Custom Pricing
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
                   Mid-to-Large organizations needing advanced investigation
                   tools
                 </p>
-                <div className="mt-6">
-                  <Button
-                    className="w-full h-12 text-lg font-semibold"
-                    onClick={() => setIsQuoteModalOpen(true)}
-                  >
-                    Get Custom Quote
-                  </Button>
-                </div>
               </CardHeader>
               <CardContent className="flex-grow flex flex-col gap-4">
                 <div className="space-y-3">
@@ -688,17 +682,14 @@ function HomeContent() {
                 <CardDescription className="text-sm mt-2">
                   Ultimate Security & Customization
                 </CardDescription>
-                <p className="text-xs text-muted-foreground mt-2">
+                <div className="flex items-center gap-2 mt-3">
+                  <Badge variant="outline" className="text-xs">
+                    Custom Pricing
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground mt-3">
                   Large international organizations needing full compliance
                 </p>
-                <div className="mt-6">
-                  <Button
-                    className="w-full h-12 text-lg font-semibold"
-                    onClick={() => setIsQuoteModalOpen(true)}
-                  >
-                    Get Custom Quote
-                  </Button>
-                </div>
               </CardHeader>
               <CardContent className="flex-grow flex flex-col gap-4">
                 <div className="space-y-3">
@@ -741,6 +732,16 @@ function HomeContent() {
                 </Button>
               </CardContent>
             </Card>
+          </div>
+
+          {/* Compare Plans Section */}
+          <div className="text-center mt-6 mb-8">
+            <Button asChild size="lg" variant="outline" className="h-12 px-8">
+              <Link href="/compare-plans">
+                Compare All Plans
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Link>
+            </Button>
           </div>
 
           {/* Included in all plans */}
