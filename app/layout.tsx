@@ -154,7 +154,7 @@ export default function RootLayout({
         {children}
         <Toaster />
         <ServiceWorkerRegistration />
-        <PWAInstallPrompt />
+        {/* <PWAInstallPrompt /> */}
       </body>
     </html>
   );
