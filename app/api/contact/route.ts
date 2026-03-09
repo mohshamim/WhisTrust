@@ -36,10 +36,20 @@ export async function POST(request: NextRequest) {
     }
 
     // 1. Save to Supabase database
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_PROD_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabaseUrl =
+      process.env.NEXT_PUBLIC_PROD_SUPABASE_URL ||
+      process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey =
+      process.env.NEXT_PUBLIC_PROD_SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (!supabaseUrl || !supabaseAnonKey) {
+      throw new Error(
+        "Missing Supabase environment variables for contact form. Please set NEXT_PUBLIC_PROD_SUPABASE_URL and NEXT_PUBLIC_PROD_SUPABASE_ANON_KEY (or their fallback variants)."
+      );
+    }
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey);
     const { data: submission, error: dbError } = await supabase
       .from("contact_submissions")
       .insert({
