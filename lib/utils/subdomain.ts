@@ -17,38 +17,28 @@ export interface SubdomainInfo {
   isClientTenant: boolean;
 }
 
+const ROOT_DOMAINS = ['whistrust.com', 'whistrust.app'];
+
+function normalizeHostname(hostname: string): string {
+  return hostname.toLowerCase().replace(/:\d+$/, '').replace(/\.$/, '');
+}
+
+function findRootDomain(hostname: string): string | undefined {
+  return ROOT_DOMAINS.find(
+    (domain) => hostname === domain || hostname.endsWith(`.${domain}`)
+  );
+}
+
 /**
  * Extract subdomain from hostname
  */
 export function extractSubdomain(hostname: string): string | null {
-  // Remove port if present
-  const host = hostname.split(':')[0];
-  
-  // Main domains (no subdomain)
-  const mainDomains = [
-    'whistrust.com',
-    'www.whistrust.com',
-    'whistrust.app',
-    'www.whistrust.app',
-    'localhost',
-  ];
-  
-  if (mainDomains.includes(host)) {
-    return null;
-  }
-  
-  // Extract subdomain
-  // Examples:
-  //   acme.whistrust.app → acme
-  //   demo.whistrust.com → demo
-  //   superadmin.whistrust.app → superadmin
-  const parts = host.split('.');
-  
-  if (parts.length >= 2) {
-    return parts[0];
-  }
-  
-  return null;
+  const host = normalizeHostname(hostname);
+  const domain = findRootDomain(host);
+  if (!domain || host === domain) return null;
+
+  const subdomain = host.slice(0, -(domain.length + 1));
+  return subdomain !== 'www' && isValidSubdomain(subdomain) ? subdomain : null;
 }
 
 /**
@@ -64,6 +54,35 @@ export function getSubdomainInfo(hostname: string): SubdomainInfo {
     isSuperAdmin: subdomain === 'superadmin',
     isClientTenant: subdomain !== null && subdomain !== 'demo' && subdomain !== 'superadmin',
   };
+}
+
+export function getSubdomainRewrite(url: URL, hostname: string): URL | null {
+  const { pathname } = url;
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/api') ||
+    pathname.startsWith('/static') ||
+    pathname.includes('.') ||
+    pathname === '/org' ||
+    pathname.startsWith('/org/')
+  ) {
+    return null;
+  }
+
+  const { subdomain, isDemo, isSuperAdmin } = getSubdomainInfo(hostname);
+  if (!subdomain) return null;
+
+  const prefix = isDemo || isSuperAdmin ? `/${subdomain}` : `/org/${subdomain}`;
+  if (
+    (isDemo || isSuperAdmin) &&
+    (pathname === prefix || pathname.startsWith(`${prefix}/`))
+  ) {
+    return null;
+  }
+
+  const destination = new URL(url);
+  destination.pathname = pathname === '/' ? prefix : `${prefix}${pathname}`;
+  return destination;
 }
 
 /**
@@ -83,14 +102,8 @@ export function isValidSubdomain(subdomain: string): boolean {
  */
 export function getRootDomain(): string {
   if (typeof window !== 'undefined') {
-    const hostname = window.location.hostname;
-    
-    if (hostname.includes('whistrust.app')) {
-      return 'whistrust.app';
-    }
-    if (hostname.includes('whistrust.com')) {
-      return 'whistrust.com';
-    }
+    const domain = findRootDomain(normalizeHostname(window.location.hostname));
+    if (domain) return domain;
   }
   
   // Default for localhost/development
