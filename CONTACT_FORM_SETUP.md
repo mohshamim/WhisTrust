@@ -36,7 +36,7 @@ Your contact form now has **real email functionality** with database backup!
 2. Add new environment variable:
 
    - **Name:** `RESEND_API_KEY`
-   - **Value:** `re_dMQzp6wC_JRQYuWvL6WpwAKVSbaqTaeka`
+   - **Value:** `<RESEND_API_KEY>`
    - **Environment:** Check all (Production, Preview, Development)
 
 3. Click **Save**

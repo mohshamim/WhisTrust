@@ -27,7 +27,7 @@ This guide will help you:
 ### 2. **Demo Page Updated**
 
 - `/demo` now points to `/org/demo/*` (multi-tenant)
-- Updated credentials: `admin@demo.com / Demo@2024`
+- Updated credentials: `admin@demo.com / <WHISTRUST_TEST_PASSWORD>`
 - Reporter demo → `/org/demo/report`
 - Manager login → `/org/demo/login`
 
@@ -70,19 +70,19 @@ Created 10 sample reports for demo organization
 **User 1 - Admin:**
 
 - Email: `admin@demo.com`
-- Password: `Demo@2024`
+- Password: `<WHISTRUST_TEST_PASSWORD>`
 - Email Confirm: ✅ (auto-confirm)
 
 **User 2 - Manager:**
 
 - Email: `manager@demo.com`
-- Password: `Demo@2024`
+- Password: `<WHISTRUST_TEST_PASSWORD>`
 - Email Confirm: ✅
 
 **User 3 - Investigator:**
 
 - Email: `investigator@demo.com`
-- Password: `Demo@2024`
+- Password: `<WHISTRUST_TEST_PASSWORD>`
 - Email Confirm: ✅
 
 3. **Copy each user's UUID** (you'll need these for next step)
@@ -104,9 +104,9 @@ Created 10 sample reports for demo organization
 
 ```
 ✅ Demo users linked successfully!
-Admin: admin@demo.com / Demo@2024
-Manager: manager@demo.com / Demo@2024
-Investigator: investigator@demo.com / Demo@2024
+Admin: admin@demo.com / <WHISTRUST_TEST_PASSWORD>
+Manager: manager@demo.com / <WHISTRUST_TEST_PASSWORD>
+Investigator: investigator@demo.com / <WHISTRUST_TEST_PASSWORD>
 Login at: /org/demo/login
 ```
 
@@ -124,7 +124,7 @@ Login at: /org/demo/login
 #### **B. Test Admin Login**
 
 1. Visit: `http://localhost:3000/org/demo/login`
-2. Login with: `admin@demo.com / Demo@2024`
+2. Login with: `admin@demo.com / <WHISTRUST_TEST_PASSWORD>`
 3. Should redirect to: `/org/demo/dashboard`
 4. **Verify**: Demo mode banner appears at top
 5. Check stats show ~10 reports
@@ -134,17 +134,17 @@ Login at: /org/demo/login
 1. Visit: `http://localhost:3000/demo`
 2. Click **"Login to Dashboard"**
 3. Should redirect to: `/org/demo/login`
-4. Verify credentials shown: `admin@demo.com / Demo@2024`
+4. Verify credentials shown: `admin@demo.com / <WHISTRUST_TEST_PASSWORD>`
 
 #### **D. Test Manager Role**
 
-1. Login as: `manager@demo.com / Demo@2024`
+1. Login as: `manager@demo.com / <WHISTRUST_TEST_PASSWORD>`
 2. Verify: Can see analytics, can assign cases
 3. Verify: Cannot see Users or Audit Logs pages
 
 #### **E. Test Investigator Role**
 
-1. Login as: `investigator@demo.com / Demo@2024`
+1. Login as: `investigator@demo.com / <WHISTRUST_TEST_PASSWORD>`
 2. Verify: Only sees assigned reports (3-4 reports)
 3. Verify: Can update status, cannot assign cases
 
@@ -251,7 +251,7 @@ http://localhost:3000/demo
 
 ```
 https://your-domain.com/org/demo/login
-Credentials: admin@demo.com / Demo@2024
+Credentials: admin@demo.com / <WHISTRUST_TEST_PASSWORD>
 ```
 
 ### **Anonymous Reporting:**
@@ -273,7 +273,7 @@ https://your-domain.com/org/demo/report
 
 ### **Demo Credentials:**
 
-- Use simple, memorable passwords: `Demo@2024`
+- Use simple, memorable passwords: `<WHISTRUST_TEST_PASSWORD>`
 - Not connected to real email accounts
 - Can be shared publicly (it's demo data)
 
@@ -335,7 +335,7 @@ http://localhost:3000/demo
 
 # 2. Click "Login to Dashboard" → Should redirect to /org/demo/login
 
-# 3. Login with admin@demo.com / Demo@2024
+# 3. Login with admin@demo.com / <WHISTRUST_TEST_PASSWORD>
 
 # 4. Should see:
 #    - Dashboard with ~10 reports

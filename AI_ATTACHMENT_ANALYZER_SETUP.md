@@ -46,7 +46,7 @@ GEMINI_API_KEY=gen-lang-client-0973186684
 1. Go to: https://vercel.com/mohshamim/whistrust/settings/environment-variables
 2. Add new variable:
    - **Name:** `GEMINI_API_KEY`
-   - **Value:** `AIzaSyDfgUVu4mVVTNO7VWAh_mldQcTQmq1L5CM`
+   - **Value:** `<GEMINI_API_KEY>`
    - **Environments:** Check all (Production, Preview, Development)
 3. Click **Save**
 4. **Redeploy** the application

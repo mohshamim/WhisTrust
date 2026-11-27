@@ -43,7 +43,7 @@ This guide covers the complete onboarding process for new WhisTrust clients:
 - ✅ Access to Super Admin portal: `https://www.whistrust.com/superadmin/login`
 - ✅ Super Admin credentials:
   - Email: `sup-adm@whistrust.com`
-  - Password: `sup-pass-adm!1@3#5`
+  - Password: `<WHISTRUST_TEST_PASSWORD>`
 - ✅ Client information ready:
   - Company name
   - Desired subdomain (e.g., `companyname`)
@@ -68,7 +68,7 @@ This guide covers the complete onboarding process for new WhisTrust clients:
 1. Navigate to: `https://www.whistrust.com/superadmin/login`
 2. **Enter Super Admin Credentials:**
    - Email: `sup-adm@whistrust.com`
-   - Password: `sup-pass-adm!1@3#5`
+   - Password: `<WHISTRUST_TEST_PASSWORD>`
 3. Click **"Sign In"**
 4. Verify redirect to Super Admin Dashboard
 

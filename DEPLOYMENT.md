@@ -46,7 +46,7 @@ npm run start
 
 1. **Create Production Supabase Project**
    - Go to [Supabase Dashboard](https://supabase.com/dashboard)
-   - Create new project (choose appropriate region)
+   - Create new project <WHISTRUST_ADMIN_PASSWORD> appropriate region)
    - Save credentials securely
 
 2. **Apply Migrations**

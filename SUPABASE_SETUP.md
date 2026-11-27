@@ -69,7 +69,7 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key-here
 2. Click **"Add user"** → **"Create new user"**
 3. Enter:
    - **Email**: your-admin-email@example.com (e.g., `admin@whistrust.com`)
-   - **Password**: (choose a secure password - you'll need this to log in)
+   - **Password**: <WHISTRUST_ADMIN_PASSWORD> a secure password - you'll need this to log in)
 4. Click **"Create user"**
 5. **Copy the UUID** that appears - it looks like `a1b2c3d4-e5f6-7890-abcd-ef1234567890`
 

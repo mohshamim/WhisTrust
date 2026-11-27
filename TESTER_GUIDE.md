@@ -50,7 +50,7 @@ WhisTrust is a multi-tenant whistleblowing platform with:
 
 **Credentials:**
 - **Email:** `sup-adm@whistrust.com`
-- **Password:** `sup-pass-adm!1@3#5`
+- **Password:** `<WHISTRUST_TEST_PASSWORD>`
 
 **Access Level:**
 - View all organizations

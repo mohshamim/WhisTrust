@@ -39,7 +39,7 @@ npm run dev
 
 1. Go to **Authentication** → **Users** → **Add User**
 2. Enter email (e.g., `admin@whistrust.com`)
-3. Enter password (e.g., `Test123456`)
+3. Enter password (e.g., `<WHISTRUST_TEST_PASSWORD>`)
 4. Click **Create User**
 5. Copy the **User UUID** (you'll need this)
 6. Go to **SQL Editor** and run:
@@ -75,7 +75,7 @@ npm run dev
 1. Open browser → `http://localhost:3000/admin/login`
 2. Enter credentials:
    - **Email**: `admin@whistrust.com`
-   - **Password**: `Test123456`
+   - **Password**: `<WHISTRUST_TEST_PASSWORD>`
 3. Click **Sign In**
 4. **✅ Success**: You should be redirected to the dashboard
 

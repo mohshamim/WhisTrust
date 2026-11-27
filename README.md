@@ -81,7 +81,7 @@ npm install
 4. **Configure environment variables**
 
 ```bash
-cp .env.local.example .env.local
+cp ENV_TEMPLATE.txt .env.local
 # Edit .env.local with your Supabase credentials:
 # - NEXT_PUBLIC_SUPABASE_URL
 # - NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -279,7 +279,7 @@ npm run start
 - [Deployment Guide](./DEPLOYMENT.md) - Production deployment instructions
 - [Admin Guide](./ADMIN_GUIDE.md) - Administrator documentation
 - [Database Migrations](./supabase/migrations/) - SQL schema migrations
-- [Environment Variables](./.env.local.example) - Configuration reference
+- [Environment Variables](./ENV_TEMPLATE.txt) - Configuration reference
 
 ## 🎨 Customization
 
